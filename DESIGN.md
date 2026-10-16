@@ -548,6 +548,7 @@ Touch targets ≥44px on touch devices. The page never scrolls sideways; wide ta
 - Focus is always visible (lime-soft ring + ink border).
 - Status never by colour alone.
 - Blur effects have a solid fallback when `backdrop-filter` is unsupported (use `{colors.surface}` at 92% opacity).
+- Text on lime (the lime button, the "Today" pill on the Deadline Rail and Day Timetable) is always the near-black light value of `{colors.surface-dark}`, in both themes: `{colors.ink}` turns light in the dark theme and would vanish on lime (v2.2).
 
 ## Iteration guide (for Claude Code)
 1. Generate CSS variables (or your styling system's theme) from the front matter for light and dark, including the six aura palettes and the aura recipe as a reusable utility.

@@ -8,7 +8,7 @@ const VARIANTS: Record<Variant, string> = {
   primary: "bg-surface-dark text-on-dark py-2.5 pr-1.5 pl-4.5",
   secondary: "bg-canvas-2 text-ink px-4 py-2.5",
   ghost: "bg-transparent text-ink-2 px-3 py-2 hover:underline underline-offset-4",
-  lime: "bg-lime text-ink px-4.5 py-2.5", // at most one per screen
+  lime: "bg-lime text-surface-dark-fixed px-4.5 py-2.5", // at most one per screen; text on lime is always near-black
 };
 
 type ButtonProps = ComponentProps<"button"> & {

@@ -53,10 +53,10 @@ export default function PrimitivesPage() {
         <div className="grid gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
           {MARKS.map((mark) => (
             <div key={mark} data-mark={mark} className="aura rounded-xl p-6">
-              <GlassPanel className="p-4">
-                <p className="type-eyebrow text-ink-2">{mark}</p>
+              <GlassPanel className="p-4 text-ink">
+                <p className="type-eyebrow">{mark}</p>
                 <p className="type-number-lg">
-                  77.2<span className="type-body-sm text-ink-3-small"> kg</span>
+                  77.2<span className="type-body-sm"> kg</span>
                 </p>
               </GlassPanel>
             </div>

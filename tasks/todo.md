@@ -368,9 +368,9 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 **Estimated scope:** M
 
-### Checkpoint CP-D
-- [ ] Primitives page reviewed in light and dark at 1440px and 400px; no console errors
-- [ ] `antislop-ui` pass on the primitives; fixes made against DESIGN.md
+### Checkpoint CP-D (waiting for the owner)
+- [x] Primitives page reviewed in light and dark at 1440px and 400px (screenshots); no console errors (e2e)
+- [x] `antislop-ui` pass on the primitives; fixes made against DESIGN.md (lime text in dark, segmented width, glass text)
 
 ---
 

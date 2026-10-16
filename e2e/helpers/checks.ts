@@ -16,11 +16,17 @@ export async function expectNoSeriousA11yViolations(page: Page, view = "") {
   const { violations } = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
     .analyze();
-  const serious = violations.filter((v) => v.impact === "critical" || v.impact === "serious");
+  const contrast = await new AxeBuilder({ page }).withRules(["color-contrast"]).analyze();
+  // axe files some failures as "incomplete" (e.g. "a 1:1 contrast ratio", which it suspects is hidden
+  // text). Where it did compute a ratio, treat it as a failure; gradients and glass stay excluded.
+  const unsure = contrast.incomplete
+    .map((v) => ({ ...v, nodes: v.nodes.filter((n) => n.any.some((a) => /contrast ratio/.test(a.message))) }))
+    .filter((v) => v.nodes.length > 0);
+  const serious = [...violations.filter((v) => v.impact === "critical" || v.impact === "serious"), ...unsure];
   // Each finding names the view, the element and the reason, so a failure is actionable.
   const findings = serious.flatMap((v) =>
     v.nodes.slice(0, 5).map((n) => {
-      const why = (n.failureSummary ?? "").split(/\r?\n/).slice(1).join(" ").trim();
+      const why = n.failureSummary?.split(/\r?\n/).slice(1).join(" ").trim() || n.any.map((a) => a.message).join(" ");
       return `[${view}] ${v.id}: ${n.target.join(" ")}: ${why}`;
     }),
   );

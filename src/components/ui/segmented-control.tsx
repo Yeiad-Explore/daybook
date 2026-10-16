@@ -34,7 +34,7 @@ export function SegmentedControl<T extends string>({
   }
 
   return (
-    <div role="radiogroup" aria-label={label} className={cx("inline-flex gap-0.5 rounded-pill bg-canvas-2 p-0.5", className)}>
+    <div role="radiogroup" aria-label={label} className={cx("inline-flex w-fit gap-0.5 rounded-pill bg-canvas-2 p-0.5", className)}>
       {options.map((option, i) => {
         const checked = option.value === value;
         return (
