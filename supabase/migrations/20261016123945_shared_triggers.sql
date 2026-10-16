@@ -165,10 +165,12 @@ begin
 end;
 $$;
 
-create trigger cascade_space_id after update of space_id on public.pages
+-- No column list: a block's space_id changes through its guard when the client moves it to another
+-- page, and a column-list trigger only fires for columns named in the statement's SET.
+create trigger cascade_space_id after update on public.pages
   for each row when (new.space_id is distinct from old.space_id)
   execute function private.cascade_space_id('blocks', 'page_id');
-create trigger cascade_space_id after update of space_id on public.blocks
+create trigger cascade_space_id after update on public.blocks
   for each row when (new.space_id is distinct from old.space_id)
   execute function private.cascade_space_id('tasks', 'block_id', 'time_blocks', 'block_id');
 

@@ -1,6 +1,6 @@
 -- Shared triggers: C-TRG-01, C-TRG-02, C-TRG-03, C-TRG-13, C-SCH-01, C-RLS-08, C-DB-02.
 begin;
-select plan(45);
+select plan(46);
 
 select tests.create_user('owner@test.local');
 select tests.create_user('other@test.local');
@@ -71,6 +71,14 @@ select is(
   (select space_id from public.time_blocks where title = 'Morning run'),
   tests.row_id('spaces', 'owner@test.local', 'name = ''AI Agency'''),
   'C-TRG-02: moving a page moves its time slots to the new space'
+);
+
+update public.blocks set page_id = tests.row_id('pages', 'owner@test.local', 'title = ''Ledger''')
+where id = tests.row_id('blocks', 'owner@test.local', 'title = ''Workout slots''');
+select is(
+  (select space_id from public.time_blocks where title = 'Morning run'),
+  tests.row_id('spaces', 'owner@test.local', 'name = ''Finance'''),
+  'C-TRG-02: moving a block to another page moves its items to that page''s space (BLK-4)'
 );
 
 ------------------------------------------------------------------------------------------------

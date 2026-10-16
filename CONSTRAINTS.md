@@ -89,11 +89,11 @@ Every rule is enforced in Postgres (constraint, trigger, RLS policy or RPC) and 
 | C-TRG-01 | `set_updated_at` | Every editable table sets `updated_at = now()` before update. | `040_triggers` |
 | C-TRG-02 | `sync_space_id` | `blocks`, `tasks`, `time_blocks` copy `space_id` from their page or block on insert and update; cross-owner parents are rejected. | `040_triggers` |
 | C-TRG-03 | `block_type_guard` | `tasks` only in `todo`/`roadmap` blocks; `tracker_fields` only in `tracker`; `table_columns`/`table_rows` only in `table`; `time_blocks` only in `timeblock`; `routine_steps` only in `routine`; `notes` only in `notes`. | `040_triggers` |
-| C-TRG-04 | `task_tree_guard` | `parent_id` only in roadmap blocks; parent in the same block; no cycles; depth ≤ 3 (4 levels). | `040_triggers` |
+| C-TRG-04 | `task_tree_guard` | `parent_id` only in roadmap blocks; parent in the same block; no cycles; depth ≤ 3 (4 levels). | `041_task_tree` |
 | C-TRG-05 | `task_deadline_guard` | C-DL-02, C-DL-04, C-DL-05, C-DL-06. | `030_deadline_engine` |
 | C-TRG-06 | `task_due_change_guard` | C-DL-10. | `030_deadline_engine` |
-| C-TRG-07 | `task_parent_done` | After insert, update or delete, `done`/`completed_at` are recomputed up the parent chain (parent done ⇔ all live children done). | `040_triggers` |
-| C-TRG-08 | `task_completed_at` | `completed_at = now()` when `done` becomes true; cleared when false. | `040_triggers` |
+| C-TRG-07 | `task_parent_done` | After insert, update or delete, `done`/`completed_at` are recomputed up the parent chain (parent done ⇔ all live children done). | `041_task_tree` |
+| C-TRG-08 | `task_completed_at` | `completed_at = now()` when `done` becomes true; cleared when false. | `041_task_tree` |
 | C-TRG-09 | `space_deadline_guard` | C-DL-07, C-DL-08, C-DL-11. | `030_deadline_engine` |
 | C-TRG-10 | `table_cells_validate` | Each cell matches its column kind (text string; number/money number; date `YYYY-MM-DD`; select a valid option id; checkbox boolean; url http/https string); unknown column ids rejected. | `040_triggers` |
 | C-TRG-11 | `time_block_sync_flag` | When title or times change, or the slot is soft-deleted, and Calendar is connected: `sync_status` = `pending` (or `delete_pending`) and attempts reset. | `040_triggers` |
