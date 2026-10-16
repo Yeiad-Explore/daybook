@@ -121,11 +121,12 @@ Every rule is enforced in Postgres (constraint, trigger, RLS policy or RPC) and 
 |---|---|---|---|
 | C-AUTH-01 | Only the owner's email can create a user: a server-side allowlist rejects every other email before the user record exists. | Supabase Auth "Before User Created" hook (Postgres function) | `050_auth` |
 | C-AUTH-02 | New sign-ups are disabled once the owner's account exists. | Supabase Auth setting (production) | manual check, recorded in the Phase 0 summary |
-| C-AUTH-03 | TEST-1: email sign-in is enabled only in the local/test config; production is Google-only. | `[auth.email]` in `supabase/config.toml` vs production settings | `pnpm check:auth-config` (reads the production config via the Supabase CLI once linked) |
+| C-AUTH-03 | TEST-1: email sign-in is enabled only in the local/test config; production is Google-only. | `[auth.email]` in `supabase/config.toml` vs production settings | Checked against the cloud project's auth settings at deployment (T23, deferred); listed in `docs/launch-checklist.md` |
 | C-DEV-01 | DEV-1: `/dev/primitives` does not exist in production builds. | build-time guard | e2e against `next build && next start` |
 
 ## Exceptions
 
 | ID | Rule waived | Path | Reason | Owner | Expires |
 |---|---|---|---|---|---|
+| E2 | "No empty catch" | `src/lib/supabase/server.ts` `setAll` | Supabase's documented pattern: Server Components cannot set cookies, and `proxy.ts` refreshes the session on every request. | Owner | Permanent while the pattern is documented |
 | E1 | "No unimplemented stubs" | RPC functions from PRD §10.7 in `supabase/migrations` | Phase 0 creates their signatures, grants and security settings so later phases never reshape the schema. Each stub raises a clear "not available until Phase N" error and is replaced in its phase. | Owner | When the phase that implements each RPC ends (Phase 4 at the latest) |

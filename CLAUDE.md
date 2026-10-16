@@ -38,7 +38,7 @@ Decided 2026-10-16, rationale in `docs/adr/0001-stack.md`. Check current docs (`
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Dev server (Turbopack) |
+| `pnpm dev` | Dev server (Turbopack). Needs `.env.local` (copy `.env.example`; local values from `pnpm exec supabase status`) |
 | `pnpm build` | Production build |
 | `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
 | `pnpm lint` | ESLint (Next.js config) |

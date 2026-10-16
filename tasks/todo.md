@@ -250,14 +250,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T13: Supabase clients and route protection
+## T13: ✅ Supabase clients and route protection
 
 **Description:** `source-driven-development` (Supabase SSR for Next.js). `src/lib/supabase/client.ts` (browser), `server.ts` (per-request server client), `proxy.ts` session refresh with `getClaims()`, following the documented cookie and caching warnings. Signed-out requests to any route except `/login` (and the auth callback) redirect to `/login`; `/` redirects to `/today` or `/login`.
 
 **Acceptance criteria:**
-- [ ] AUTH-3 AC2: e2e test, signed out, every §5.1 route redirects to `/login`
-- [ ] `/` redirects to `/login` when signed out
-- [ ] No server code reads `getSession()` for authorisation
+- [x] AUTH-3 AC2: e2e test, signed out, every §5.1 route redirects to `/login`
+- [x] `/` redirects to `/login` when signed out
+- [x] No server code reads `getSession()` for authorisation
 
 **Verification:** `pnpm typecheck && pnpm test:e2e`
 
@@ -275,9 +275,9 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 **Acceptance criteria:**
 - [ ] AUTH-1 AC1: manual check at CP-C, owner signs in with Google and lands on `/today`
-- [ ] AUTH-1 AC2: unit test on the sign-in options (scope, `access_type`, `prompt`)
-- [ ] AUTH-2 AC1: e2e test, the hook's rejection shows "This Daybook is private." and no user record exists
-- [ ] AUTH-3 AC1: session survives a browser restart (Playwright persistent context)
+- [x] AUTH-1 AC2: unit test on the sign-in options, plus e2e on the real /authorize request
+- [x] AUTH-2 AC1: e2e test, the rejection shows "This Daybook is private."; no user record exists (verified through the local Auth API in T12)
+- [x] AUTH-3 AC1: session survives a browser restart (persistent cookies; new browser context)
 
 **Verification:** `pnpm test && pnpm test:e2e`, plus the manual Google sign-in
 

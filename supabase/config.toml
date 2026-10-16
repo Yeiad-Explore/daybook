@@ -321,6 +321,18 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+# AUTH-1: Google is the only production sign-in. Client ID/secret come from the root .env (gitignored).
+# Calendar scope, offline access and consent are requested by the app (src/lib/auth/sign-in-options.ts).
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+redirect_uri = ""
+url = ""
+# Local stack only (see the comment on the Apple provider below).
+skip_nonce_check = true
+email_optional = false
+
 [auth.external.apple]
 enabled = false
 client_id = ""
