@@ -329,8 +329,8 @@ client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 redirect_uri = ""
 url = ""
-# Local stack only (see the comment on the Apple provider below).
-skip_nonce_check = true
+# Supabase guide: keep false unless the client library cannot verify nonces (ours can).
+skip_nonce_check = false
 email_optional = false
 
 [auth.external.apple]
