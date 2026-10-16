@@ -23,6 +23,10 @@ supabase/.temp
 .env*
 !.env.example
 
+# local notes and agent config stay off the remote
+*.md
+.claude/
+
 # misc
 .DS_Store
 *.pem
