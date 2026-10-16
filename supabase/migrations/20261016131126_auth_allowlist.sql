@@ -9,8 +9,8 @@ create table private.signup_allowlist (
   email text primary key check (email = lower(email))
 );
 
--- The owner (PRD header). The only account that may ever be created.
-insert into private.signup_allowlist (email) values ('kabid.snit@gmail.com');
+-- The owner's Google account (PRD header). The only account that may ever be created.
+insert into private.signup_allowlist (email) values ('ourcoc4@gmail.com');
 
 create function private.before_user_created(event jsonb)
 returns jsonb

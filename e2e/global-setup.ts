@@ -8,7 +8,7 @@ import { createClient } from "@supabase/supabase-js";
 // TEST-1: signed-in e2e tests use email sign-in, which exists only in the LOCAL Supabase config.
 // The owner is created (or updated) in the local database with a fresh random password each run,
 // then signed in through @supabase/ssr so the cookies are exactly what the app writes.
-export const OWNER_EMAIL = "kabid.snit@gmail.com";
+export const OWNER_EMAIL = "ourcoc4@gmail.com";
 export const OWNER_STATE = "e2e/.auth/owner.json";
 
 function localStack() {

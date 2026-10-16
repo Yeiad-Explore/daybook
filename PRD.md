@@ -4,7 +4,7 @@
 |---|---|
 | **Product** | Daybook (working name — replace everywhere once the final name is chosen) |
 | **Type** | Private, single-user web app: a personal life operating system |
-| **Owner / only user** | Kabid (kabid.snit@gmail.com) |
+| **Owner / only user** | Kabid. Signs in with the Google account ourcoc4@gmail.com (the only allowed account; changed from kabid.snit@gmail.com on 16 Oct 2026) |
 | **Version** | 1.0 (complete specification) |
 | **Date** | 16 Oct 2026 |
 | **Database & backend services** | Supabase (Postgres, Auth, Row Level Security, Edge Functions, Cron, Vault, Storage) |

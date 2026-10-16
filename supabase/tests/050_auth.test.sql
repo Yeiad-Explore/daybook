@@ -13,11 +13,11 @@ select function_privs_are('private', 'before_user_created', array['jsonb'], 'ano
 
 -- postgres may not SET ROLE supabase_auth_admin locally; who may call it is checked above.
 select is(
-  private.before_user_created('{"user": {"email": "kabid.snit@gmail.com"}}'),
+  private.before_user_created('{"user": {"email": "ourcoc4@gmail.com"}}'),
   '{}'::jsonb, 'C-AUTH-01: the owner''s email may sign up'
 );
 select is(
-  private.before_user_created('{"user": {"email": "Kabid.Snit@Gmail.com"}}'),
+  private.before_user_created('{"user": {"email": "OurCoc4@Gmail.com"}}'),
   '{}'::jsonb, 'C-AUTH-01: email case does not matter'
 );
 select is(
