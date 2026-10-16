@@ -6,6 +6,7 @@ select plan(24);
 select tests.create_user('owner@test.local');
 select tests.seed(tests.uid('owner@test.local'));
 select tests.authenticate_as('owner@test.local');
+select set_config('app.today', '2026-10-16', true);  -- p_today, so "late" never depends on the wall clock
 
 ------------------------------------------------------------------------------------------------
 -- C-TRG-04: tree shape.

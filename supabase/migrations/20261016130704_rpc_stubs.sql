@@ -141,7 +141,9 @@ as $$ select private.set_calendar_prefs(auth.uid(), p_push_deadlines, p_auto_syn
 -- Grants: nothing in public is callable by anon; clients get exactly the §10.7 RPCs.
 ------------------------------------------------------------------------------------------------
 -- Supabase's default privileges grant new public functions to anon and authenticated explicitly,
--- so revoking from PUBLIC alone is not enough.
+-- so revoking from PUBLIC alone is not enough. The default-privileges line covers Supabase's
+-- explicit grants only: it cannot remove the global EXECUTE-to-PUBLIC default, so every later
+-- migration that adds a public function must revoke it from public and anon itself.
 revoke execute on all functions in schema public from public, anon, authenticated;
 alter default privileges in schema public revoke execute on functions from public, anon, authenticated;
 

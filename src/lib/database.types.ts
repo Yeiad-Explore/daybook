@@ -412,6 +412,9 @@ isOneToOne: false
 "tracker_series":
 { Args: { "p_days": number,"p_field_id": string }; Returns: Json
                            },
+"trash_item":
+{ Args: { "p_id": string,"p_reason"?: string,"p_table": string }; Returns: Json
+                           },
 "week_review":
 { Args: { "p_week_start": string }; Returns: Json
                            }

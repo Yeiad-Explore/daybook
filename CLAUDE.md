@@ -57,6 +57,7 @@ Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pas
 
 - Never bypass the database rules in PRD §10.6. Rule-heavy changes go through the RPCs in §10.7.
 - Schema changes only through versioned migrations (NFR-10).
+- Every new function in `public` gets `revoke execute ... from public, anon` and an explicit `grant ... to authenticated` (default privileges cannot remove the global EXECUTE-to-PUBLIC). `security definer` functions live in `private`, never in `public`.
 - Reference requirement IDs in every commit message (e.g. `AUTH-2: ...`).
 - Secrets (Google client secret, service role key) live only in Supabase / Edge Function env vars. Never in the client, never committed.
 - No analytics or third-party trackers (NFR-4).

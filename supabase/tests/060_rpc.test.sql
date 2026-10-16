@@ -22,7 +22,7 @@ create function pg_temp.rpcs() returns table (name text, args text[], phase int)
     ('search_all', array['text', 'integer'], 4)
 $$;
 
-select plan(16 * 4 + 9);
+select plan(16 * 4 + 10);
 
 -- Signature, grants and stub error for every client-facing RPC.
 select has_function('public', name, args, name || ' exists with the §10.7 signature') from pg_temp.rpcs();
@@ -45,6 +45,13 @@ select tests.create_user('owner@test.local');
 select tests.authenticate_as('owner@test.local');
 select * from pg_temp.stub_errors();
 reset role;
+
+-- Catalog-wide: anon can execute nothing in public (catches a future migration that forgets to revoke).
+select is_empty(
+  $$ select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+     where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'EXECUTE') $$,
+  'anon can execute no function in public'
+);
 
 -- purge_trash is for the scheduled job only.
 select has_function('public', 'purge_trash', array[]::text[], 'purge_trash exists');

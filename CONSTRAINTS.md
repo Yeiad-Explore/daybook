@@ -62,6 +62,7 @@ Every rule is enforced in Postgres (constraint, trigger, RLS policy or RPC) and 
 | C-DL-21 | Trash first: clients hard-delete spaces, pages, blocks, tasks, table rows and time slots only when already in Trash (SET-3). Closes erasing late tasks through foreign-key cascades. | §2.3 p5, DL-12 | `trash_first` | `030_deadline_engine` |
 | C-DL-22 | Nothing live inside Trash: no row is created in, moved into or restored into a parent that is in Trash; trashing a roadmap step trashes its sub-steps. | DL-12, SET-3 | `require_live_parent`, `soft_delete_cascade` on tasks | `030_deadline_engine` |
 | C-DL-23 | Once a space has a deadline it changes only through `reschedule_space`, whatever its kind; goal → area keeps the dates hidden so switching kinds cannot swap a deadline. | DL-6, §5.5 | `space_deadline_guard` | `030_deadline_engine` |
+| C-DL-24 | DL-14: a client cannot move to Trash a space, page, block or roadmap step containing late tasks directly; `trash_item` lists them, requires a reason (≥ 3 chars), writes one `deleted_while_late` per late task, then trashes. Restoring keeps the records and re-checks DL-13. | §7.4 | `trash_late_guard`, `trash_item` | `031_trash_late` |
 | C-DL-18 | `deadline_changes` targets exactly one thing: a task (`task_id` set) or the goal itself (`task_id` null). `new_due` is null only for `deleted_while_late`. `was_late` = old date before today at change time. | §10.3 | check constraints | `030_deadline_engine` |
 
 ### Spaces and maintained columns (SPC-9, DB-1, DB-2)

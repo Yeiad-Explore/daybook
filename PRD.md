@@ -475,6 +475,9 @@ The owner said strict deadlines are what make him finish things. These rules are
 - **DL-11** Deleting a late task requires confirmation and is recorded in `deadline_changes` with kind `deleted_while_late`.
 - **DL-12** (added 16 Oct 2026) A late task cannot be soft-deleted by setting `deleted_at` directly; it must go through `delete_task`, so DL-11 cannot be bypassed. Enforced in the database.
 - **DL-13** (added 16 Oct 2026) Soft-deleted tasks are ignored by the containment rules DL-1 to DL-4. Restoring a task from Trash re-checks those rules; if the restored task would break one, the restore is refused, the message names the rule, and the owner is asked to reschedule first.
+- **DL-14** (added 16 Oct 2026) Moving a block, page, space or roadmap step to Trash when it contains late tasks (not done, due before today, leaf) shows the list of those late tasks and asks for one reason (required, at least 3 characters, like a reschedule reason). One `deleted_while_late` record is written per late task with that reason. Restoring later keeps those records (the log is append-only) and re-checks the deadline rules as in DL-13. Enforced in the database: a direct move to Trash of something containing late tasks is rejected; it goes through `trash_item`.
+  - AC1: Trashing the "Marketing" block that holds "Send proposal follow-up to Bayside Café" (1d late) without a reason returns that task in a list and trashes nothing.
+  - AC2: With the reason "Dropping this channel", the block goes to Trash and `/history` shows one entry for that task with that reason and "deleted while late".
 - AC1: Given task "Buy running shoes" due 14 Oct, today 16 Oct, when the owner reschedules it to 18 Oct with reason "Shop closed", then the task leaves Overdue, shows "in 2d · moved 1×", and `/history` lists the change with "was late: yes".
 - AC2: Attempting to update `due_date` directly through the database API (not via the reschedule function) on an existing goal task is rejected.
 
@@ -930,6 +933,7 @@ policy "owner can delete"  for delete using (owner_id = auth.uid());
 | `tracker_series(p_field_id uuid, p_days int)` | Entries for charts plus average/target comparison. |
 | `week_review(p_week_start date)` | Computes §5.6 stats (used live and for the saved snapshot). |
 | `restore_item(p_table text, p_id uuid)` / `purge_trash()` | Trash operations; `purge_trash` is called by cron. |
+| `trash_item(p_table text, p_id uuid, p_reason text default null)` | DL-14 (added 16 Oct 2026). Moves a space, page, block or task to Trash. If it contains late tasks and no reason is given, returns `{status: "needs_reason", late_tasks: [...]}` and trashes nothing; with a reason, logs one `deleted_while_late` per late task and trashes it. |
 | `get_calendar_status()` / `set_calendar_prefs(p_push_deadlines boolean, p_auto_sync boolean, p_calendar_id text)` | Safe access to `google_connections`. |
 | `search_all(p_query text, p_limit int default 30)` | Palette search across spaces, pages, tasks, notes, table rows. |
 
