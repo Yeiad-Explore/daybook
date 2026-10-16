@@ -65,7 +65,7 @@ Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pas
 - Step 1 (this file), Step 2 (ADRs 0001, 0002) and Step 3 (`CONSTRAINTS.md`, `tasks/plan.md`, `tasks/todo.md`): done.
 - Phase 0 plan: approved 2026-10-16 with the owner's answers (recorded in `tasks/plan.md`). Building; progress is ticked in `tasks/todo.md`.
 - Git: commit locally after each task. Do NOT push and do not add a GitHub remote until the owner says so.
-- Supabase: develop against the local stack. The cloud project `daybook` is linked but migrations are NOT pushed until the owner says so.
+- Supabase: develop against the local stack. The cloud project `daybook` (ref `jymwmgyjgluwfvjesjbn`, ap-southeast-1 / Singapore) is linked but migrations are NOT pushed until the owner says so: never run `supabase db push`, `db reset --linked` or any `--linked` command without the owner's OK. Cloud keys live only in `.env.local` as `SUPABASE_CLOUD_*`.
 
 ## WORKING RULES (every session)
 
@@ -77,6 +77,7 @@ Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pas
 - If something fails twice, stop retrying and use `debugging-and-error-recovery`.
 - If a requirement is unclear, use `interview-me` and ask me instead of guessing.
 - Never reuse the reference site's name, logo, copy or photos.
+- Never run broad or name-based kill commands. Stop processes only by the PID listening on the port. Ask before any destructive command (deleting files, resetting the cloud database, force operations).
 
 ## SKILL MAP (which skill, when)
 

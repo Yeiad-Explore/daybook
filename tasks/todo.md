@@ -13,7 +13,7 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 - [x] Docker Desktop installed and running
 - [ ] Private GitHub repo (deferred; no remote, no push)
 - [ ] Google Cloud OAuth client (walkthrough at T14; Phase 0 uses TEST-1 email sign-in locally)
-- [ ] Supabase cloud project "daybook" (Singapore, free) created and linked, no migrations pushed (needs owner's `supabase login`)
+- [x] Supabase cloud project "daybook" (ref `jymwmgyjgluwfvjesjbn`, ap-southeast-1) created and linked; no migrations pushed
 - [ ] Vercel account (deferred with T23)
 
 ---
