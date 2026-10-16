@@ -1,3 +1,28 @@
+# dependencies
+/node_modules
+.pnpm-debug.log*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# testing
+/coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
+
+# supabase local state
+supabase/.branches
+supabase/.temp
+
+# env files: secrets live only in .env.local; .env.example is the committed template
 .env*
 !.env.example
-node_modules/
+
+# misc
+.DS_Store
+*.pem
+.vercel

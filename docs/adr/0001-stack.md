@@ -80,6 +80,7 @@ Versions are checked against the npm registry and official docs when each packag
 - Vercel preview deployments must be protected (owner-only) because they connect to real data.
 - Google OAuth with the Calendar scope is a "sensitive" scope. If the Google Cloud consent screen stays in "Testing" status, Google issues refresh tokens that expire in 7 days (developers.google.com/identity/protocols/oauth2#expiration), which would break Calendar sync weekly (Phase 3).
 - Secrets (Google client secret, Supabase service-role key) live only in Supabase and Vercel environment variables.
+- `create-next-app` 16.4 turns on `cacheComponents` and `partialPrefetching` by default. Both are off: every screen depends on the signed-in owner's cookies, so caching gains little and adds Suspense rules around the auth code. Revisit if a phase needs cached shared data.
 
 ## Sources (checked 2026-10-16)
 

@@ -32,7 +32,16 @@ Decided 2026-10-16, rationale in `docs/adr/0001-stack.md`. Check current docs (`
 - **Tests:** Vitest (unit), pgTAP via `supabase test db` (triggers, RLS, RPCs), Playwright (end-to-end flows and AC checks).
 - **Database workflow:** Supabase CLI migrations; regenerate TypeScript types from the schema after every migration.
 - **Backend: Supabase only.** Postgres, Auth (Google), Row Level Security, Edge Functions, Cron, Vault, Storage, exactly as PRD §9–10. Do not add another backend, database, auth provider, queue, cron service or file storage.
-- **Commands:** added here when the Phase 0 scaffold task creates them (see `tasks/plan.md`).
+- **Next.js specifics:** read `AGENTS.md` (Next.js writes it); the docs for the installed version are in `node_modules/next/dist/docs/`. Cache Components is off (ADR 0001).
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `pnpm dev` | Dev server (Turbopack) |
+| `pnpm build` | Production build |
+| `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
+| `pnpm lint` | ESLint (Next.js config) |
 
 Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pass.
 
