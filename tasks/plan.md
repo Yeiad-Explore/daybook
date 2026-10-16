@@ -95,3 +95,11 @@ T0 status:
 - GitHub repo and Vercel: **deferred**. T22 still creates the CI workflow file and a local script (`pnpm check:all`) running the same checks; running it on GitHub is deferred. **T23 (deployment) is deferred.**
 - Supabase: Phase 0 develops against the **local** stack. Cloud project "daybook" (free plan, Southeast Asia / Singapore) is created and linked; keys only in `.env.local`; **migrations are not pushed** until the owner says so. Needs `supabase login` by the owner (browser approval).
 - Google OAuth client: not created yet. Phase 0 signs in locally with TEST-1 email sign-in; Google sign-in is wired to need only the client ID and secret. At T14 the owner is walked through creating the OAuth client.
+
+## Phase 1 obligations from the T9 adversarial review (2026-10-16)
+
+- `reschedule_task` must accept tasks in Trash, so a restore refused by DL-13 can be fixed ("Reschedule it first").
+- `reschedule_task(..., p_cascade_children)` and the DL-4 "move them together" path must update in a safe order: children first when moving earlier, parent first when moving later (checks are per row).
+- `reschedule_space` must take `FOR UPDATE` on the space before touching its tasks (task writes take `FOR SHARE` on the space; the other order can deadlock two tabs).
+- `app.today` is set only from trusted input. RPCs may use a client's `p_today` for computed views, never to set `app.today` before writes (it decides "late" for DL-12).
+- Open question for the owner (review finding #2a): trashing a block, page, space or parent step that still contains late tasks moves those tasks to Trash without a `deleted_while_late` record.

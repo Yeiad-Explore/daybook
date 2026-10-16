@@ -57,8 +57,11 @@ Every rule is enforced in Postgres (constraint, trigger, RLS policy or RPC) and 
 | C-DL-15 | DL-9: a reschedule must satisfy C-DL-04…08; conflicts are returned, not silently applied. | §7.4 | RPCs + guards | Phase 1 |
 | C-DL-16 | DL-10: late tasks stay in Overdue until done or rescheduled; there is no dismiss column or action. | §7.4 | schema + `get_today` | Phase 1 |
 | C-DL-17 | DL-11: deleting a late task needs a reason and logs `deleted_while_late`. | §7.4 | `delete_task` | Phase 1 |
-| C-DL-19 | DL-12: a late task cannot be soft-deleted by setting `deleted_at` directly; only `delete_task` may. | §7.4 | `task_soft_delete_guard` | `030_deadline_engine` |
+| C-DL-19 | DL-12: a late task (as Today's Overdue defines it: not done, due before today, a leaf, active space) cannot be soft-deleted by setting `deleted_at` directly; only `delete_task` may. | §7.4, Appendix A | `task_soft_delete_guard` | `030_deadline_engine` |
 | C-DL-20 | DL-13: soft-deleted tasks are ignored by C-DL-04…08. Restoring a task re-checks them and refuses with the rule's name if one would break. | §7.4 | guards (`deleted_at is null` filters) + `restore_item` | `030_deadline_engine` (restore: Phase 1) |
+| C-DL-21 | Trash first: clients hard-delete spaces, pages, blocks, tasks, table rows and time slots only when already in Trash (SET-3). Closes erasing late tasks through foreign-key cascades. | §2.3 p5, DL-12 | `trash_first` | `030_deadline_engine` |
+| C-DL-22 | Nothing live inside Trash: no row is created in, moved into or restored into a parent that is in Trash; trashing a roadmap step trashes its sub-steps. | DL-12, SET-3 | `require_live_parent`, `soft_delete_cascade` on tasks | `030_deadline_engine` |
+| C-DL-23 | Once a space has a deadline it changes only through `reschedule_space`, whatever its kind; goal → area keeps the dates hidden so switching kinds cannot swap a deadline. | DL-6, §5.5 | `space_deadline_guard` | `030_deadline_engine` |
 | C-DL-18 | `deadline_changes` targets exactly one thing: a task (`task_id` set) or the goal itself (`task_id` null). `new_due` is null only for `deleted_while_late`. `was_late` = old date before today at change time. | §10.3 | check constraints | `030_deadline_engine` |
 
 ### Spaces and maintained columns (SPC-9, DB-1, DB-2)
@@ -95,9 +98,9 @@ Every rule is enforced in Postgres (constraint, trigger, RLS policy or RPC) and 
 | C-TRG-07 | `task_parent_done` | After insert, update or delete, `done`/`completed_at` are recomputed up the parent chain (parent done ⇔ all live children done). | `041_task_tree` |
 | C-TRG-08 | `task_completed_at` | `completed_at = now()` when `done` becomes true; cleared when false. | `041_task_tree` |
 | C-TRG-09 | `space_deadline_guard` | C-DL-07, C-DL-08, C-DL-11. | `030_deadline_engine` |
-| C-TRG-10 | `table_cells_validate` | Each cell matches its column kind (text string; number/money number; date `YYYY-MM-DD`; select a valid option id; checkbox boolean; url http/https string); unknown column ids rejected. | `040_triggers` |
-| C-TRG-11 | `time_block_sync_flag` | When title or times change, or the slot is soft-deleted, and Calendar is connected: `sync_status` = `pending` (or `delete_pending`) and attempts reset. | `040_triggers` |
-| C-TRG-12 | `time_block_same_day` | `ends_at > starts_at`, and both fall on the same local date (profile timezone). | `040_triggers` |
+| C-TRG-10 | `table_cells_validate` | Each cell matches its column kind (text string; number/money number; date `YYYY-MM-DD`; select a valid option id; checkbox boolean; url http/https string); unknown column ids rejected. | `042_content_triggers` |
+| C-TRG-11 | `time_block_sync_flag` | When title or times change, or the slot is soft-deleted, and Calendar is connected: `sync_status` = `pending` (or `delete_pending`) and attempts reset. | `042_content_triggers` |
+| C-TRG-12 | `time_block_same_day` | `ends_at > starts_at`, and both fall on the same local date (profile timezone). | `042_content_triggers` |
 | C-TRG-13 | `soft_delete_cascade` | Setting `deleted_at` on a space, page or block propagates to its children; clearing it on restore clears theirs. | `040_triggers` |
 
 ### Schema rules from §10.3 (also database-enforced)

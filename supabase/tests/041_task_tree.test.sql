@@ -100,6 +100,7 @@ select ok((select done from public.tasks where title = 'Learn Python'),
 update public.tasks set deleted_at = null where title = 'Mini project';
 select ok(not (select done from public.tasks where title = 'Learn Python'),
   'C-TRG-07: restoring it re-opens the parent');
+update public.tasks set deleted_at = now() where title = 'Mini project';
 delete from public.tasks where title = 'Mini project';
 select ok((select done from public.tasks where title = 'Learn Python'),
   'C-TRG-07: hard-deleting the open child completes the parent');
