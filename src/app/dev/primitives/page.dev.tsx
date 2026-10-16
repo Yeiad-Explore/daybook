@@ -14,6 +14,7 @@ import { Panel } from "@/components/ui/panel";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Tag } from "@/components/ui/tag";
 import { TaskRow } from "@/components/ui/task-row";
+import { BehaviourDemos } from "./behaviour-demos";
 
 const MARKS = ["moss", "slate", "ochre", "teal", "clay", "graphite"] as const;
 const TODAY = "2026-10-16"; // PRD §12 fixture date, so the gallery never changes with the clock
@@ -188,6 +189,9 @@ export default function PrimitivesPage() {
             </p>
           </AuraCard>
         </div>
+      </Section>
+      <Section title="Dialog, popover, menu, tooltip, command, toast">
+        <BehaviourDemos />
       </Section>
     </main>
   );

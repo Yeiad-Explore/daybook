@@ -351,14 +351,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T18: Behaviour primitives and toast
+## T18: ✅ Behaviour primitives and toast
 
 **Description:** shadcn/ui (current docs for Tailwind v4) for dialog, popover, dropdown, tooltip, command, restyled 100% with tokens (no default shadcn classes or colours ship). Toast per DESIGN.md (dark card, lime/ember dot, optional Undo held for 6 seconds).
 
 **Acceptance criteria:**
-- [ ] Each primitive works by keyboard (open, navigate, close with Esc, focus returns)
-- [ ] Toast with Undo calls the undo handler within 6 s and disappears after
-- [ ] `pnpm check:tokens` passes; no shadcn default palette variables remain
+- [x] Each primitive works by keyboard (open, navigate, close with Esc, focus returns)
+- [x] Toast with Undo calls the undo handler within 6 s and disappears after (Base UI Toast, clock-controlled e2e)
+- [x] `pnpm check:tokens` passes; no shadcn default palette variables remain (behaviour from @base-ui/react + cmdk only; no shadcn styling packages installed)
 
 **Verification:** `pnpm test && pnpm test:e2e`
 
