@@ -38,10 +38,11 @@ Decided 2026-10-16, rationale in `docs/adr/0001-stack.md`. Check current docs (`
 
 | Command | What it does |
 |---|---|
-| `pnpm dev` | Dev server (Turbopack). Needs `.env.local` (copy `.env.example`; local values from `pnpm exec supabase status`) |
+| `pnpm dev` | Dev server (Turbopack). Needs `.env.local` (copy `.env.example`; local values from `pnpm exec supabase status`). Next.js allows one dev server per folder: stop it (by the PID on its port) before `pnpm test:e2e` |
 | `pnpm build` | Production build |
 | `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
 | `pnpm lint` | ESLint (Next.js config) |
+| `pnpm tokens` | Regenerate `src/styles/tokens.css` from the DESIGN.md front matter (never edit tokens.css by hand) |
 | `pnpm check:tokens` | Fails on raw colour values outside `src/styles/tokens.css` |
 | `pnpm test` | Vitest unit tests (`src/**/*.test.ts(x)`, `scripts/**/*.test.mjs`) |
 | `pnpm test:e2e` | Playwright (starts `pnpm dev` on port 3100); `e2e/helpers/checks.ts` has the light/dark × 400/1440 layout and axe checks |

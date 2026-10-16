@@ -19,6 +19,8 @@ Accepted (owner decision, 2026-10-16)
 
 1. **DESIGN.md v2 is the only design system.** No other design system, theme, component-library look or design skill's defaults may set colours, type, spacing, radii, shadows or motion.
 2. **Tokens are the only colour source.** Every DESIGN.md token becomes a CSS variable for light and dark themes (Tailwind v4 maps utilities onto those variables). Components never contain raw hex or rgba values; a check in CI rejects them outside the token file.
+   - `src/styles/tokens.css` is generated from the DESIGN.md front matter (`pnpm tokens`); a unit test fails if the two drift.
+   - Tailwind's default palette, radii, shadows, text sizes and breakpoints are removed (`--color-*: initial` etc.), so a class like `bg-red-500` does not exist. Spacing keeps Tailwind's numbers on a 4px base.
 3. **Colour meaning is fixed.** Lime = now/live; ember (signal) = late. A space's aura comes from its `mark`. Everything else is ink and greys.
 4. **shadcn/ui is behaviour only.** Dialog, popover, command, dropdown and tooltip are used as unstyled primitives and restyled entirely with DESIGN.md tokens. The default shadcn look never ships.
 5. **Gaps go through the owner.** If DESIGN.md does not cover something, propose an addition (and record it in DESIGN.md) before building it. Visual-polish work uses `high-end-visual-design` only, always within DESIGN.md.

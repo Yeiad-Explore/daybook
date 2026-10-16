@@ -1,0 +1,304 @@
+/* GENERATED from the DESIGN.md front matter by scripts/gen-tokens.mjs. Do not edit: run `pnpm tokens`. */
+
+/* The only file allowed to contain raw colour values (ADR 0002, `pnpm check:tokens`). */
+
+@theme {
+  /* Only DESIGN.md values exist: Tailwind's default palette, radii, shadows, sizes and breakpoints are removed. */
+  --color-*: initial;
+  --radius-*: initial;
+  --shadow-*: initial;
+  --text-*: initial;
+  --breakpoint-*: initial;
+  /* spacing: 4px base; DESIGN.md steps 1–9 = 4, 8, 12, 16, 20, 24, 32, 48, 72px (p-1 … p-6, p-8, p-12, p-18). */
+  --spacing: 4px;
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+  --shadow-card: 0 1px 1px rgba(15,16,16,.03), 0 6px 20px rgba(15,16,16,.05);
+  --shadow-float: 0 2px 6px rgba(15,16,16,.06), 0 24px 48px rgba(15,16,16,.14);
+  --shadow-glass-edge: inset 0 1px 0 rgba(255,255,255,.55);
+  --container-content: 1240px;
+  --container-document: 860px;
+  /* DESIGN.md "Responsive behavior": phone < 640 ≤ tablet < 900 ≤ laptop < 1200 ≤ desktop. */
+  --breakpoint-tablet: 640px;
+  --breakpoint-laptop: 900px;
+  --breakpoint-desktop: 1200px;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-inter-tight), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --color-canvas: var(--canvas);
+  --color-canvas-2: var(--canvas-2);
+  --color-surface: var(--surface);
+  --color-surface-glass: var(--surface-glass);
+  --color-surface-glass-dark: var(--surface-glass-dark);
+  --color-surface-dark: var(--surface-dark);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-on-dark: var(--on-dark);
+  --color-on-dark-2: var(--on-dark-2);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-hairline-glass: var(--hairline-glass);
+  --color-lime: var(--lime);
+  --color-lime-soft: var(--lime-soft);
+  --color-lime-ink: var(--lime-ink);
+  --color-signal: var(--signal);
+  --color-signal-wash: var(--signal-wash);
+  --color-aura-moss-light: var(--aura-moss-light);
+  --color-aura-moss-mid: var(--aura-moss-mid);
+  --color-aura-moss-deep: var(--aura-moss-deep);
+  --color-aura-slate-light: var(--aura-slate-light);
+  --color-aura-slate-mid: var(--aura-slate-mid);
+  --color-aura-slate-deep: var(--aura-slate-deep);
+  --color-aura-ochre-light: var(--aura-ochre-light);
+  --color-aura-ochre-mid: var(--aura-ochre-mid);
+  --color-aura-ochre-deep: var(--aura-ochre-deep);
+  --color-aura-teal-light: var(--aura-teal-light);
+  --color-aura-teal-mid: var(--aura-teal-mid);
+  --color-aura-teal-deep: var(--aura-teal-deep);
+  --color-aura-clay-light: var(--aura-clay-light);
+  --color-aura-clay-mid: var(--aura-clay-mid);
+  --color-aura-clay-deep: var(--aura-clay-deep);
+  --color-aura-graphite-light: var(--aura-graphite-light);
+  --color-aura-graphite-mid: var(--aura-graphite-mid);
+  --color-aura-graphite-deep: var(--aura-graphite-deep);
+  --color-aura-light: var(--aura-light);
+  --color-aura-mid: var(--aura-mid);
+  --color-aura-deep: var(--aura-deep);
+}
+
+:root {
+  color-scheme: light;
+  --canvas: #F4F6F6;
+  --canvas-2: #ECEEEE;
+  --surface: #FFFFFF;
+  --surface-glass: rgba(255,255,255,0.62);
+  --surface-glass-dark: rgba(52,54,54,0.58);
+  --surface-dark: #0E0F0F;
+  --ink: #0F1010;
+  --ink-2: #4A4D4D;
+  --ink-3: #8C8F8F;
+  --ink-4: #BFC2C2;
+  --on-dark: #F7F8F8;
+  --on-dark-2: rgba(247,248,248,0.64);
+  --hairline: #E6E8E8;
+  --hairline-strong: #D3D6D6;
+  --hairline-glass: rgba(255,255,255,0.45);
+  --lime: #E9FF6A;
+  --lime-soft: #E8E9C7;
+  --lime-ink: #4F6B1F;
+  --signal: #E4572E;
+  --signal-wash: #FBE6DE;
+  --aura-moss-light: #9DB168;
+  --aura-moss-mid: #4D6230;
+  --aura-moss-deep: #1E2814;
+  --aura-slate-light: #B9C9E6;
+  --aura-slate-mid: #5874B0;
+  --aura-slate-deep: #1F315E;
+  --aura-ochre-light: #E3C79A;
+  --aura-ochre-mid: #A47B47;
+  --aura-ochre-deep: #4A3720;
+  --aura-teal-light: #A9D3CD;
+  --aura-teal-mid: #3C7C76;
+  --aura-teal-deep: #173836;
+  --aura-clay-light: #E3B6A7;
+  --aura-clay-mid: #A55E4E;
+  --aura-clay-deep: #4A2620;
+  --aura-graphite-light: #D2D4D4;
+  --aura-graphite-mid: #7A7D7D;
+  --aura-graphite-deep: #2A2C2C;
+  --glass-filter: blur(24px) saturate(140%);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 48px;
+  --space-9: 72px;
+  --layout-index-width: 264px;
+  --layout-content-max: 1240px;
+  --layout-document-max: 860px;
+  --layout-row-height: 44px;
+  --layout-gutter: 24px;
+  /* Default aura (graphite) until an element sets data-mark. */
+  --aura-light: var(--aura-graphite-light);
+  --aura-mid: var(--aura-graphite-mid);
+  --aura-deep: var(--aura-graphite-deep);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #0C0D0D;
+  --canvas-2: #141616;
+  --surface: #161818;
+  --surface-glass: rgba(28,30,30,0.62);
+  --surface-glass-dark: rgba(18,19,19,0.66);
+  --surface-dark: #F2F3F3;
+  --ink: #F2F3F3;
+  --ink-2: #B4B8B8;
+  --ink-3: #7E8282;
+  --ink-4: #4A4E4E;
+  --on-dark: #0E0F0F;
+  --hairline: #242727;
+  --hairline-strong: #323636;
+  --hairline-glass: rgba(255,255,255,0.10);
+  --lime: #E9FF6A;
+  --lime-soft: #2C2F1C;
+  --lime-ink: #D6F25A;
+  --signal: #FF7A52;
+  --signal-wash: #3A1D14;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --canvas: #0C0D0D;
+    --canvas-2: #141616;
+    --surface: #161818;
+    --surface-glass: rgba(28,30,30,0.62);
+    --surface-glass-dark: rgba(18,19,19,0.66);
+    --surface-dark: #F2F3F3;
+    --ink: #F2F3F3;
+    --ink-2: #B4B8B8;
+    --ink-3: #7E8282;
+    --ink-4: #4A4E4E;
+    --on-dark: #0E0F0F;
+    --hairline: #242727;
+    --hairline-strong: #323636;
+    --hairline-glass: rgba(255,255,255,0.10);
+    --lime: #E9FF6A;
+    --lime-soft: #2C2F1C;
+    --lime-ink: #D6F25A;
+    --signal: #FF7A52;
+    --signal-wash: #3A1D14;
+  }
+}
+
+/* Aura palette per space mark (PRD mark_color). */
+
+[data-mark="moss"] {
+  --aura-light: var(--aura-moss-light);
+  --aura-mid: var(--aura-moss-mid);
+  --aura-deep: var(--aura-moss-deep);
+}
+[data-mark="slate"] {
+  --aura-light: var(--aura-slate-light);
+  --aura-mid: var(--aura-slate-mid);
+  --aura-deep: var(--aura-slate-deep);
+}
+[data-mark="ochre"] {
+  --aura-light: var(--aura-ochre-light);
+  --aura-mid: var(--aura-ochre-mid);
+  --aura-deep: var(--aura-ochre-deep);
+}
+[data-mark="teal"] {
+  --aura-light: var(--aura-teal-light);
+  --aura-mid: var(--aura-teal-mid);
+  --aura-deep: var(--aura-teal-deep);
+}
+[data-mark="clay"] {
+  --aura-light: var(--aura-clay-light);
+  --aura-mid: var(--aura-clay-mid);
+  --aura-deep: var(--aura-clay-deep);
+}
+[data-mark="graphite"] {
+  --aura-light: var(--aura-graphite-light);
+  --aura-mid: var(--aura-graphite-mid);
+  --aura-deep: var(--aura-graphite-deep);
+}
+
+/* Typography tokens: class="type-hero", "type-number-lg", … */
+
+@utility type-hero {
+  font-family: var(--font-inter-tight), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 56px;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+@utility type-display {
+  font-family: var(--font-inter-tight), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+@utility type-number-xl {
+  font-family: var(--font-inter-tight), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 48px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-number-lg {
+  font-family: var(--font-inter-tight), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-title {
+  font-family: var(--font-inter-tight), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+}
+@utility type-heading {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+@utility type-body {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14.5px;
+  font-weight: 400;
+  line-height: 1.55;
+}
+@utility type-body-sm {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.45;
+}
+@utility type-caption {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 11.5px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+@utility type-eyebrow {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+@utility type-button {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+}
+@utility type-number {
+  font-family: var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+

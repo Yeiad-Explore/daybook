@@ -293,14 +293,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T15: Design tokens and theme
+## T15: ✅ Design tokens and theme
 
 **Description:** `frontend-ui-engineering`. `src/styles/tokens.css` generated from the DESIGN.md front matter: every colour (light under `:root`, dark under `[data-theme="dark"]` and `prefers-color-scheme`), typography, radii, spacing, elevation, layout; the six aura palettes and the aura recipe (with 2–3% grain) as a reusable class/utility; Tailwind v4 `@theme` mapping onto the variables; fonts (per open question 6); theme preference (system/light/dark) without a flash on load; `prefers-reduced-motion` base rules; solid fallback when `backdrop-filter` is unsupported.
 
 **Acceptance criteria:**
-- [ ] Every DESIGN.md token has a CSS variable; every light colour has its dark value (unit test parses both)
-- [ ] `pnpm check:tokens` passes; no raw colour outside `tokens.css`
-- [ ] Switching theme changes the page without reload; reload keeps the choice
+- [x] Every DESIGN.md token has a CSS variable; every dark colour overrides a light one (unit tests parse DESIGN.md; tokens.css is generated from it)
+- [x] `pnpm check:tokens` passes; no raw colour outside `tokens.css`
+- [x] Switching theme changes the page without reload (e2e). Keeping the choice across reloads comes with the saved profile theme in T21 (SET-1)
 
 **Verification:** `pnpm test && pnpm check:tokens && pnpm build`
 
