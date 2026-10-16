@@ -136,13 +136,13 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T7: Triggers: shared rules
+## T7: ✅ Triggers: shared rules
 
 **Description:** (`set_updated_at` is already attached to every editable table by T4–T6; T7 adds its test.) Attach `set_updated_at` to every editable table; `sync_space_id` (blocks, tasks, time_blocks) with cross-owner rejection; `block_type_guard` on every child table; `blocks.type` immutable; `soft_delete_cascade` for spaces → pages → blocks → content (and clearing on restore); DB-2 protected columns if approved.
 
 **Acceptance criteria:**
-- [ ] C-TRG-01, C-TRG-02, C-TRG-03, C-TRG-13, C-SCH-01, C-RLS-08 pass
-- [ ] Attaching a child to another owner's block fails even with a valid id
+- [x] C-TRG-01, C-TRG-02, C-TRG-03, C-TRG-13, C-SCH-01, C-RLS-08 pass
+- [x] Attaching a child to another owner's block fails even with a valid id
 
 **Verification:** `supabase test db`
 
@@ -154,12 +154,12 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T8: Triggers: task tree
+## T8: ✅ Triggers: task tree
 
 **Description:** `task_tree_guard` (roadmap-only parents, same block, no cycles, depth ≤ 3), `task_completed_at`, `task_parent_done` (recompute up the chain on insert, update, delete and soft delete).
 
 **Acceptance criteria:**
-- [ ] C-TRG-04, C-TRG-07, C-TRG-08 pass, including: a cycle is rejected; a 5th level is rejected; checking the last child marks the parent chain done; un-checking a child un-completes the chain; adding a child under a done step un-completes it (RM-2 AC2)
+- [x] C-TRG-04, C-TRG-07, C-TRG-08 pass, including: a cycle is rejected; a 5th level is rejected; checking the last child marks the parent chain done; un-checking a child un-completes the chain; adding a child under a done step un-completes it (RM-2 AC2)
 
 **Verification:** `supabase test db`
 
@@ -171,14 +171,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T9: Deadline engine guards
+## T9: ✅ Deadline engine guards
 
 **Description:** `doubt-driven-development` on the design before writing. `task_deadline_guard`, `task_due_change_guard` (transaction-local `app.reschedule` flag), `space_deadline_guard`; DL-12, DL-13 and SPC-9 if approved. Tests at date boundaries use `p_today = 2026-10-16` and the §12 fixtures.
 
 **Acceptance criteria:**
-- [ ] C-DL-02…08, C-DL-10, C-DL-11 pass (C-TRG-05, C-TRG-06, C-TRG-09)
-- [ ] §7.4 AC2: a direct `update tasks set due_date = …` on an existing goal task is rejected; the same update succeeds only with the reschedule flag set inside the transaction
-- [ ] TODO-1 AC1/AC2 and RM-2 AC1 rejections happen in the database with clear error messages the UI can show
+- [x] C-DL-02…08, C-DL-10, C-DL-11 pass (C-TRG-05, C-TRG-06, C-TRG-09)
+- [x] §7.4 AC2: a direct `update tasks set due_date = …` on an existing goal task is rejected; the same update succeeds only with the reschedule flag set inside the transaction
+- [x] TODO-1 AC1/AC2 and RM-2 AC1 rejections happen in the database with clear error messages the UI can show
 
 **Verification:** `supabase test db`
 
@@ -190,12 +190,12 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T10: Triggers: tables and time slots
+## T10: ✅ Triggers: tables and time slots
 
 **Description:** `table_cells_validate` (per Appendix B value types), `time_block_same_day` (profile timezone), `time_block_sync_flag` (reads the connection status with a `security definer` helper, because `google_connections` has no client policies).
 
 **Acceptance criteria:**
-- [ ] C-TRG-10, C-TRG-11, C-TRG-12 pass, including invalid number/date/select/url cells, unknown column ids, a slot crossing local midnight (TB-1 AC2) and end before start (TB-1 AC1)
+- [x] C-TRG-10, C-TRG-11, C-TRG-12 pass, including invalid number/date/select/url cells, unknown column ids, a slot crossing local midnight (TB-1 AC2) and end before start (TB-1 AC1)
 
 **Verification:** `supabase test db`
 
@@ -207,14 +207,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T11: RPC stubs
+## T11: ✅ RPC stubs
 
 **Description:** `api-and-interface-design` on the §10.7 signatures. Create every function with its final name, parameters, return type, `security invoker/definer` choice and grants (`authenticated` only; never `anon`). Bodies raise "not available until Phase N" (CONSTRAINTS.md E1). `get_calendar_status()` and `set_calendar_prefs()` may be implemented fully if trivial.
 
 **Acceptance criteria:**
-- [ ] Every §10.7 function exists with the documented signature (pgTAP `has_function`)
-- [ ] `anon` cannot execute any of them; `authenticated` can
-- [ ] Each stub's error names its phase
+- [x] Every §10.7 function exists with the documented signature (pgTAP `has_function`)
+- [x] `anon` cannot execute any of them; `authenticated` can
+- [x] Each stub's error names its phase
 
 **Verification:** `supabase test db`
 
@@ -226,14 +226,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T12: Auth allowlist and generated types
+## T12: ✅ Auth allowlist and generated types
 
 **Description:** `security-and-hardening` + `source-driven-development` (Auth hooks page). A "Before User Created" hook as a Postgres function that allows only the owner's email (configured, not hard-coded in app code), granted to `supabase_auth_admin` only; enable it in `config.toml`. Add `pnpm db:types` (`supabase gen types`) and generate `src/lib/database.types.ts`.
 
 **Acceptance criteria:**
-- [ ] C-AUTH-01: the hook returns an error for any other email and `{}` for the owner's (pgTAP calls the function directly)
-- [ ] `authenticated` and `anon` cannot execute the hook function
-- [ ] Generated types compile; `pnpm typecheck` passes
+- [x] C-AUTH-01: the hook returns an error for any other email and `{}` for the owner's (pgTAP calls the function directly)
+- [x] `authenticated` and `anon` cannot execute the hook function
+- [x] Generated types compile; `pnpm typecheck` passes
 
 **Verification:** `supabase test db && pnpm db:types && pnpm typecheck`
 
@@ -244,9 +244,9 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 **Estimated scope:** S
 
 ### Checkpoint CP-B
-- [ ] `supabase db reset && supabase test db` green from an empty database
-- [ ] Every C-DL, C-RLS, C-TRG, C-SCH and C-AUTH-01 row marked "Phase 0" has a passing test
-- [ ] Owner review of the schema before UI work builds on it
+- [x] `supabase db reset && supabase test db` green from an empty database
+- [x] Every C-DL, C-RLS, C-TRG, C-SCH and C-AUTH-01 row marked "Phase 0" has a passing test
+- [x] Owner review of the schema before UI work builds on it
 
 ---
 
