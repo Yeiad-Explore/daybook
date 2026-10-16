@@ -23,6 +23,30 @@
 }
 
 @layer components {
+  /* DESIGN.md glass (elevation level 2): only over auras or photos. */
+  .glass {
+    background: var(--surface-glass);
+    border: 1px solid var(--hairline-glass);
+    backdrop-filter: var(--glass-filter);
+    -webkit-backdrop-filter: var(--glass-filter);
+    box-shadow: var(--shadow-glass-edge);
+  }
+
+  .glass-dark {
+    background: var(--surface-glass-dark);
+    color: var(--on-dark);
+  }
+
+  /* DESIGN.md Accessibility: solid fallback where backdrop-filter is unsupported. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+    }
+    .glass-dark {
+      background: color-mix(in srgb, var(--surface-dark) 92%, transparent);
+    }
+  }
+
   /* DESIGN.md "Aura recipe": soft nature gradient in the element's mark palette (data-mark),
      with 2–3% grain so it reads as photographic. Default palette: graphite. */
   .aura {

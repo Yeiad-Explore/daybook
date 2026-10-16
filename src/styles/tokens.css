@@ -40,6 +40,7 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
+  --color-ink-3-small: var(--ink-3-small);
   --color-ink-4: var(--ink-4);
   --color-on-dark: var(--on-dark);
   --color-on-dark-2: var(--on-dark-2);
@@ -85,6 +86,7 @@
   --ink: #0F1010;
   --ink-2: #4A4D4D;
   --ink-3: #8C8F8F;
+  --ink-3-small: #696C6C;
   --ink-4: #BFC2C2;
   --on-dark: #F7F8F8;
   --on-dark-2: rgba(247,248,248,0.64);
@@ -146,6 +148,7 @@
   --ink: #F2F3F3;
   --ink-2: #B4B8B8;
   --ink-3: #7E8282;
+  --ink-3-small: #7E8282;
   --ink-4: #4A4E4E;
   --on-dark: #0E0F0F;
   --hairline: #242727;
@@ -170,6 +173,7 @@
     --ink: #F2F3F3;
     --ink-2: #B4B8B8;
     --ink-3: #7E8282;
+    --ink-3-small: #7E8282;
     --ink-4: #4A4E4E;
     --on-dark: #0E0F0F;
     --hairline: #242727;

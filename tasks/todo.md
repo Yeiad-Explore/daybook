@@ -312,14 +312,15 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T16: Primitives A
+## T16: ✅ Primitives A
 
 **Description:** Panel, Glass panel, Floating card, Pill button (primary with trailing icon circle, secondary, ghost, lime), Tag (incl. outlined variant), Segmented control (keyboard accessible). DEV-1 `/dev/primitives` page if approved.
 
 **Acceptance criteria:**
-- [ ] Each primitive matches its DESIGN.md component spec using tokens only
-- [ ] Focus is visible (lime-soft ring + ink border); pressed = scale 0.98; reduced motion respected
-- [ ] The primitives page passes axe and the 400/1440px, light/dark checks
+- [x] Each primitive matches its DESIGN.md component spec using tokens only
+- [x] Focus is visible (lime-soft ring + ink border); pressed = scale 0.98; reduced motion respected
+- [x] The primitives page passes axe and the 400/1440px, light/dark checks (after DESIGN.md v2.1 / ADR 0003: ink-3-small)
+- [x] DEV-1: /dev/primitives is absent from production builds (`pnpm check:no-dev-routes`, proven with a planted route)
 
 **Verification:** `pnpm test:e2e` (primitives spec), `pnpm check:tokens`
 

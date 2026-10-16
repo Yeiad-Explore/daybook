@@ -49,6 +49,7 @@ Decided 2026-10-16, rationale in `docs/adr/0001-stack.md`. Check current docs (`
 | `pnpm db:start` / `pnpm db:reset` | Start the local Supabase stack (Docker) / rebuild the local DB from migrations |
 | `pnpm db:types` | Regenerate `src/lib/database.types.ts` from the local schema (run after every migration) |
 | `pnpm test:db` | pgTAP database tests in `supabase/tests/` (helpers and §12 fixtures in `000-setup-tests-hooks.sql`) |
+| `pnpm check:no-dev-routes` | After `pnpm build`: fails if any `/dev` route is in the production output (DEV-1) |
 | `pnpm check:fast` | typecheck + lint + tokens (after every edit) |
 | `pnpm check:task` | check:fast + unit + database + e2e (end of every task) |
 

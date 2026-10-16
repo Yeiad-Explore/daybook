@@ -1,5 +1,5 @@
 ---
-version: 2.0
+version: 2.1  # 2.1 (16 Oct 2026): ink-3-small added for small grey text (WCAG AA), see docs/adr/0003
 name: Daybook
 status: "Working name. Replace 'Daybook' everywhere once the final product name is chosen."
 inspiration: "Aesthetic extracted from the 'Synex – AI Fintech Website' concept by Awsmd (Dribbble). Inspiration only: no Synex name, logo, copy, photography or other assets are reused. Daybook is an original implementation of the same visual language."
@@ -16,7 +16,8 @@ colors:
   # Ink
   ink: "#0F1010"
   ink-2: "#4A4D4D"
-  ink-3: "#8C8F8F"            # first phrase of two-tone headlines (sampled #8C8C8C), labels
+  ink-3: "#8C8F8F"            # first phrase of two-tone headlines (sampled #8C8C8C); text 24px and larger only
+  ink-3-small: "#696C6C"      # small grey text: eyebrows, labels, captions, chart labels (ink-3 fails AA below 24px)
   ink-4: "#BFC2C2"            # placeholders, inactive barcode bars, disabled
   on-dark: "#F7F8F8"
   on-dark-2: "rgba(247,248,248,0.64)"
@@ -49,6 +50,7 @@ colors-dark:
   ink: "#F2F3F3"
   ink-2: "#B4B8B8"
   ink-3: "#7E8282"
+  ink-3-small: "#7E8282"
   ink-4: "#4A4E4E"
   on-dark: "#0E0F0F"
   hairline: "#242727"
@@ -267,7 +269,7 @@ What makes the look recognisable (keep all of these):
 - **Dark** `{colors.surface-dark}`: dark cards (fading from an aura at the top to near-black at the bottom), primary buttons, toast.
 
 ### Ink
-`{colors.ink}` for primary text and numbers; `{colors.ink-2}` secondary; `{colors.ink-3}` labels, eyebrows and the grey half of headlines; `{colors.ink-4}` placeholders, inactive barcode bars, disabled. On dark: `{colors.on-dark}` and `{colors.on-dark-2}`.
+`{colors.ink}` for primary text and numbers; `{colors.ink-2}` secondary; `{colors.ink-3}` the grey half of two-tone headlines and other text 24px and larger; `{colors.ink-3-small}` small grey text: labels, eyebrows, captions, chart and timetable labels (light-mode ink-3 is only 2.8–3.3:1, below WCAG AA for small text); `{colors.ink-4}` placeholders, inactive barcode bars, disabled. Wherever this document says "ink-3" for text smaller than 24px, use ink-3-small. On dark: `{colors.on-dark}` and `{colors.on-dark-2}`.
 
 ### Accent
 - **Lime** `{colors.lime}`: live/now only (NOW marker on the Deadline Rail and Day Timetable, the live dot before a card title, trend arrows on dark cards, one hero CTA per screen). Never as text on light backgrounds.
