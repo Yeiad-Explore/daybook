@@ -2,7 +2,7 @@
 -- C-DL-20 (DL-13), C-SPC-01 (SPC-9). Reschedule RPCs arrive in Phase 1; here the transaction flag
 -- they set (app.reschedule) is set directly to prove the guards accept it and only it.
 begin;
-select plan(46);
+select plan(48);
 
 select tests.create_user('owner@test.local');
 select tests.seed(tests.uid('owner@test.local'));
@@ -273,6 +273,29 @@ select is((select count(*)::int from public.tasks where title in ('Shed', 'Paint
 update public.tasks set deleted_at = null where title = 'Garden';
 select is((select count(*)::int from public.tasks where title in ('Shed', 'Paint shed') and deleted_at is null), 2,
   'restoring the step brings its sub-steps back');
+
+-- Review cycle 3, #1: "late" does not depend on the space's status (no archive-delete-reactivate).
+reset role;
+update public.tasks set deleted_at = null where title = 'Late leaf';
+select tests.authenticate_as('owner@test.local');
+update public.spaces set status = 'archived' where name = 'AI Engineering';
+select throws_ok(
+  $$ update public.tasks set deleted_at = now() where title = 'Late leaf' $$,
+  '42501', null, 'C-DL-19: archiving the space first does not make a late task deletable'
+);
+update public.spaces set status = 'active' where name = 'AI Engineering';
+
+-- Review cycle 3, #4: restoring a block restores its steps in tree order, whatever the row order.
+insert into public.blocks (page_id, type, title, position) select id, 'roadmap', 'Reordered', 7 from public.pages where title = 'Roadmap';
+insert into public.tasks (block_id, title, due_date, position) select id, 'Step A', '2026-12-01', 1 from public.blocks where title = 'Reordered';
+insert into public.tasks (block_id, title, due_date, position) select id, 'Step B', '2026-12-10', 2 from public.blocks where title = 'Reordered';
+update public.tasks set parent_id = (select id from public.tasks where title = 'Step B') where title = 'Step A';
+update public.tasks set note = 'touched' where title = 'Step B';  -- B's new row version now sits after A
+update public.blocks set deleted_at = now() where title = 'Reordered';
+select lives_ok(
+  $$ update public.blocks set deleted_at = null where title = 'Reordered' $$,
+  'C-TRG-13: a block whose steps were reordered restores cleanly'
+);
 
 select * from finish();
 rollback;
