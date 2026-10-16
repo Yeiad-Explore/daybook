@@ -42,6 +42,11 @@ Decided 2026-10-16, rationale in `docs/adr/0001-stack.md`. Check current docs (`
 | `pnpm build` | Production build |
 | `pnpm typecheck` | `next typegen` + `tsc --noEmit` |
 | `pnpm lint` | ESLint (Next.js config) |
+| `pnpm check:tokens` | Fails on raw colour values outside `src/styles/tokens.css` |
+| `pnpm test` | Vitest unit tests (`src/**/*.test.ts(x)`, `scripts/**/*.test.mjs`) |
+| `pnpm test:e2e` | Playwright (starts `pnpm dev` on port 3100); `e2e/helpers/checks.ts` has the light/dark × 400/1440 layout and axe checks |
+| `pnpm check:fast` | typecheck + lint + tokens (after every edit) |
+| `pnpm check:task` | check:fast + unit + e2e (end of every task) |
 
 Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pass.
 
