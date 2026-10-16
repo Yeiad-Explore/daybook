@@ -149,6 +149,23 @@ begin
 end;
 $$;
 
+-- Id of the first row matching p_where in p_table for a user, readable from any role
+-- (used to aim writes at another owner's rows).
+create or replace function tests.row_id(p_table text, p_email text, p_where text default 'true')
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_id uuid;
+begin
+  execute format('select id from public.%I where owner_id = $1 and (%s) order by created_at limit 1', p_table, p_where)
+    into v_id using tests.uid(p_email);
+  return v_id;
+end;
+$$;
+
 -- Run as the owner: at least one row is visible, so a "non-owner sees nothing" result means something.
 create or replace function tests.owner_sees_rows(p_table text)
 returns text
