@@ -269,12 +269,12 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T14: Sign in with Google
+## T14: ✅ Sign in with Google
 
 **Description:** `/login` with "Continue with Google"; `signInWithOAuth` requesting `https://www.googleapis.com/auth/calendar.events` with `access_type=offline` and `prompt=consent` (AUTH-1 AC2, GC-1); the callback route exchanges the code and lands on `/today`; a rejected account sees "This Daybook is private." (AUTH-2 AC1). The provider tokens are not stored yet (that is GC-2, Phase 3). TEST-1 local email sign-in for Playwright, if approved.
 
 **Acceptance criteria:**
-- [ ] AUTH-1 AC1: manual check at CP-C, owner signs in with Google and lands on `/today`
+- [x] AUTH-1 AC1: manual check at CP-C, owner signs in with Google and lands on `/today`
 - [x] AUTH-1 AC2: unit test on the sign-in options, plus e2e on the real /authorize request
 - [x] AUTH-2 AC1: e2e test, the rejection shows "This Daybook is private."; no user record exists (verified through the local Auth API in T12)
 - [x] AUTH-3 AC1: session survives a browser restart (persistent cookies; new browser context)
@@ -287,9 +287,9 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 **Estimated scope:** M
 
-### Checkpoint CP-C
-- [ ] Owner signs in locally with Google; a different Google account is refused
-- [ ] All tests green
+### Checkpoint CP-C ✅ (owner, 16 Oct 2026)
+- [x] Owner signs in locally with Google (ourcoc4@gmail.com, landed on /today); a different Google account is refused ("This Daybook is private."; no user record created, checked in the local database)
+- [x] All tests green
 
 ---
 
