@@ -1,4 +1,4 @@
-# ADR 0003: A second grey for small text (DESIGN.md v2.1)
+# ADR 0003: Accessibility colour rules (DESIGN.md v2.1–2.2)
 
 ## Status
 
@@ -24,6 +24,23 @@ Accepted (owner decision, 2026-10-16)
 
 - **Darken `ink-3` everywhere to #696C6C.** One token, but the big headlines lose their light grey phrase. Rejected by the owner.
 - **Use `ink-2` (#4A4D4D) for small grey text.** No new colour, but small labels become almost as dark as secondary text and the hierarchy flattens. Rejected.
+
+## Further measurements and decisions (DESIGN.md v2.2, owner, 2026-10-16)
+
+Measured before building the T17 primitives (light theme unless noted):
+
+| Pair | Ratio | Needed | Decision |
+|---|---|---|---|
+| Late tag: ember #E4572E on signal-wash | 3.07 | 4.5 | New `signal-ink` #BC3D18 for late text (4.58 on wash, 5.5 on surface); ember stays for dots, badge fill and nodes. Dark keeps #FF7A52 (6:1). |
+| Done date: ink-4 struck | 1.5–2.3 | 4.5 | Done dates use `ink-3-small`, struck through (4.6–5.3). |
+| Checkbox circle: ink-4 | 1.8 (dark 2.1) | 3 (non-text) | Control borders use `ink-3` (3.0–3.3 light, 4.6 dark). |
+| Input border: hairline | 1.2 | 3 (non-text) | Same: `ink-3`. Hairlines stay for separators and panels. |
+| Small ink-2 / ink-3-small on light glass over deep aura | 2.3–4.1 | 4.5 | Small text on glass is `ink` (8.4–12). Greys only for 24px+. |
+| Small on-dark directly on ochre / graphite / slate aura | 3.6–4.4 | 4.5 | Small on-dark text only on a dark aura's fade or a 30% scrim. |
+| White text on light-theme dark glass (58%) over the light corner of an aura | 4.17–4.68 (on-dark-2: 2.7–4.4) | 4.5 | Dark glass 62% in light theme (worst 4.55); small text on dark glass is full on-dark. |
+| on-dark / surface-dark in dark theme | inverted (near-black text) | n/a | Aura cards and dark glass use theme-fixed copies (`*-fixed` tokens), per DESIGN.md "aura cards look the same in both themes". |
+
+Rejected alternatives: darkening ember everywhere (duller dots and badges), keeping ink-4 done dates (an accessibility exception), keeping faint control borders (fails WCAG 1.4.11), raising glass to about 80% white (hides the auras).
 
 ## Consequences
 

@@ -51,7 +51,11 @@
   --color-lime-soft: var(--lime-soft);
   --color-lime-ink: var(--lime-ink);
   --color-signal: var(--signal);
+  --color-signal-ink: var(--signal-ink);
   --color-signal-wash: var(--signal-wash);
+  --color-surface-dark-fixed: var(--surface-dark-fixed);
+  --color-on-dark-fixed: var(--on-dark-fixed);
+  --color-on-dark-2-fixed: var(--on-dark-2-fixed);
   --color-aura-moss-light: var(--aura-moss-light);
   --color-aura-moss-mid: var(--aura-moss-mid);
   --color-aura-moss-deep: var(--aura-moss-deep);
@@ -81,7 +85,7 @@
   --canvas-2: #ECEEEE;
   --surface: #FFFFFF;
   --surface-glass: rgba(255,255,255,0.62);
-  --surface-glass-dark: rgba(52,54,54,0.58);
+  --surface-glass-dark: rgba(52,54,54,0.62);
   --surface-dark: #0E0F0F;
   --ink: #0F1010;
   --ink-2: #4A4D4D;
@@ -97,6 +101,7 @@
   --lime-soft: #E8E9C7;
   --lime-ink: #4F6B1F;
   --signal: #E4572E;
+  --signal-ink: #BC3D18;
   --signal-wash: #FBE6DE;
   --aura-moss-light: #9DB168;
   --aura-moss-mid: #4D6230;
@@ -131,6 +136,10 @@
   --layout-document-max: 860px;
   --layout-row-height: 44px;
   --layout-gutter: 24px;
+  /* Theme-fixed copies: aura cards and dark glass look the same in both themes (DESIGN.md "Dark theme"). */
+  --surface-dark-fixed: #0E0F0F;
+  --on-dark-fixed: #F7F8F8;
+  --on-dark-2-fixed: rgba(247,248,248,0.64);
   /* Default aura (graphite) until an element sets data-mark. */
   --aura-light: var(--aura-graphite-light);
   --aura-mid: var(--aura-graphite-mid);
@@ -158,6 +167,7 @@
   --lime-soft: #2C2F1C;
   --lime-ink: #D6F25A;
   --signal: #FF7A52;
+  --signal-ink: #FF7A52;
   --signal-wash: #3A1D14;
 }
 
@@ -183,6 +193,7 @@
     --lime-soft: #2C2F1C;
     --lime-ink: #D6F25A;
     --signal: #FF7A52;
+    --signal-ink: #FF7A52;
     --signal-wash: #3A1D14;
   }
 }

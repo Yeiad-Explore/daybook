@@ -1,5 +1,5 @@
 ---
-version: 2.1  # 2.1 (16 Oct 2026): ink-3-small added for small grey text (WCAG AA), see docs/adr/0003
+version: 2.2  # 2.1/2.2 (16 Oct 2026): WCAG AA colour rules (ink-3-small, signal-ink, control borders, text on glass), see docs/adr/0003
 name: Daybook
 status: "Working name. Replace 'Daybook' everywhere once the final product name is chosen."
 inspiration: "Aesthetic extracted from the 'Synex – AI Fintech Website' concept by Awsmd (Dribbble). Inspiration only: no Synex name, logo, copy, photography or other assets are reused. Daybook is an original implementation of the same visual language."
@@ -11,7 +11,7 @@ colors:
   canvas-2: "#ECEEEE"         # section bands, segmented-control track
   surface: "#FFFFFF"          # main panels, rows, inputs
   surface-glass: "rgba(255,255,255,0.62)"      # light frosted glass (over auras/images only)
-  surface-glass-dark: "rgba(52,54,54,0.58)"    # Index sidebar glass, dark chips
+  surface-glass-dark: "rgba(52,54,54,0.62)"    # Index sidebar glass, dark chips (0.62 from v2.2: white text >= 4.5:1 over every aura)
   surface-dark: "#0E0F0F"     # dark cards, primary buttons, toast
   # Ink
   ink: "#0F1010"
@@ -30,7 +30,8 @@ colors:
   lime-soft: "#E8E9C7"        # pale lime card (sampled #E8E9C7): Routine card, highlighted column
   lime-ink: "#4F6B1F"         # positive text on light surfaces (lime itself fails contrast on white)
   # Time states
-  signal: "#E4572E"           # ember: overdue / late only
+  signal: "#E4572E"           # ember: overdue / late only (dots, badge fill, late nodes)
+  signal-ink: "#BC3D18"       # late TEXT ("2d late"); ember text fails AA on the wash
   signal-wash: "#FBE6DE"      # overdue band background, late tag background
   # Aura palettes (blurred nature backgrounds). Each = [light, mid, deep]
   aura-moss: ["#9DB168", "#4D6230", "#1E2814"]
@@ -60,6 +61,7 @@ colors-dark:
   lime-soft: "#2C2F1C"
   lime-ink: "#D6F25A"
   signal: "#FF7A52"
+  signal-ink: "#FF7A52"
   signal-wash: "#3A1D14"
 
 typography:
@@ -222,7 +224,7 @@ components:
     padding: 16px
   text-input:
     backgroundColor: "{colors.surface}"
-    border: "1px solid {colors.hairline}"
+    border: "1px solid {colors.ink-3}"   # controls need 3:1 (WCAG 1.4.11); hairlines are for separators
     rounded: "{rounded.sm}"
     padding: 10px 12px
   text-input-focused:
@@ -277,7 +279,8 @@ What makes the look recognisable (keep all of these):
 - **Lime ink** `{colors.lime-ink}`: positive deltas as text on light surfaces ("↗ on target").
 
 ### Time states
-- **Signal (ember)** `{colors.signal}` #E4572E: late/overdue only (late tag text, the late-count badge, late milestone nodes, alert dots).
+- **Signal (ember)** `{colors.signal}` #E4572E: late/overdue only (the late-count badge, late milestone nodes, alert dots).
+- **Signal ink** `{colors.signal-ink}`: late text such as "2d late" (ember itself is only 3.1:1 on the wash).
 - **Signal wash** `{colors.signal-wash}`: background of late tags and of the Overdue panel header strip.
 Lime means "now / good", ember means "late". Nothing else is coloured.
 
@@ -433,7 +436,7 @@ Every block is a white panel (`{rounded.lg}`, `{elevation.card}`). Header row: 2
 Icon/aura dot + label (body-sm, on-dark) + optional right-aligned count badge or days-left. Hover: white 8% overlay pill. Active: white 14% pill + 500 weight. Children of a space are indented with a 1px hairline-glass tree line.
 
 ### Task row
-44px, white surface, hairline separators (inset 16px), hover background canvas, radius md on hover. Layout: **circular checkbox** (18px, 1.5px ink-4 border; checked = black circle with white tick) · title (body) · source line under the title on Today (aura dot + "Health · Workouts", caption ink-3) · deadline tag at the right · a ⋯ menu on hover. Late rows: the deadline tag turns ember and a 6px ember dot sits before the title.
+44px, white surface, hairline separators (inset 16px), hover background canvas, radius md on hover. Layout: **circular checkbox** (18px, 1.5px ink-3 border; checked = black circle with white tick) · title (body) · source line under the title on Today (aura dot + "Health · Workouts", caption ink-3) · deadline tag at the right · a ⋯ menu on hover. Late rows: the deadline tag turns ember and a 6px ember dot sits before the title.
 
 ### Deadline tag
 A small pill (caption/number style):
@@ -443,8 +446,8 @@ A small pill (caption/number style):
 | Future (`25 Oct`) | canvas-2 pill, ink-2 text |
 | Soon (`tomorrow`, `in 3d`) | white pill with hairline border, ink text |
 | Today (`today`, `today 18:00`) | black pill, white text |
-| Late (`2d late`) | signal-wash pill, ember text, ember dot |
-| Done | no pill; date in ink-4, struck through |
+| Late (`2d late`) | signal-wash pill, signal-ink text, ember dot |
+| Done | no pill; date in ink-3-small, struck through |
 | Moved | extra canvas-2 tag `moved 2×` |
 
 ### Countdown
@@ -485,7 +488,7 @@ The pale-lime card (`{colors.lime-soft}`, `{rounded.lg}`): title + streak tag ("
 White panel, document width (860px max), 16px body text at 1.65 line-height, headings in Inter Tight 500. No glass behind text.
 
 ### Inputs
-White, 1px hairline, `{rounded.sm}`; focus = ink border + lime-soft ring. Date/time pickers open as floating cards. Inline add forms are a single pill-shaped row at the bottom of a block: "+ Add a task" field, date pill, black pill button.
+White, 1px ink-3 border (controls need 3:1), `{rounded.sm}`; focus = ink border + lime-soft ring. Date/time pickers open as floating cards. Inline add forms are a single pill-shaped row at the bottom of a block: "+ Add a task" field, date pill, black pill button.
 
 ### Toast
 Dark rounded-md card bottom-right with a lime dot for success and an ember dot for errors; one line + optional "Undo" ghost button.
@@ -538,6 +541,10 @@ Touch targets ≥44px on touch devices. The page never scrolls sideways; wide ta
 
 ## Accessibility
 - Text contrast ≥4.5:1 (body) and ≥3:1 (large numbers) on every surface, including glass and auras; use a 20–40% scrim behind text on busy auras.
+- On light glass over an aura, small text is `{colors.ink}` (greys fall below 4.5:1 where the aura is deep); greys only for text 24px and larger. Small `{colors.on-dark}` text never sits directly on an aura: only on the dark fade of a dark aura card or on a 30% scrim.
+- Control boundaries (checkboxes, inputs) are ≥3:1: `{colors.ink-3}`. Hairlines are only for separators and panels.
+- On dark glass, small text is full `{colors.on-dark}`; `{colors.on-dark-2}` only for text 24px and larger.
+- Aura cards and dark glass look the same in both themes: they use the light-theme values of surface-dark, on-dark and on-dark-2 (the dark theme inverts those only for primary buttons).
 - Focus is always visible (lime-soft ring + ink border).
 - Status never by colour alone.
 - Blur effects have a solid fallback when `backdrop-filter` is unsupported (use `{colors.surface}` at 92% opacity).

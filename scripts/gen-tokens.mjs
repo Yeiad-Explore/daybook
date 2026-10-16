@@ -59,6 +59,7 @@ export function generateTokensCss(design) {
     `--font-sans: var(--font-inter), ${FALLBACK};`,
     `--font-display: var(--font-inter-tight), ${FALLBACK};`,
     ...flatColors.map((k) => `--color-${k}: var(--${k});`),
+    ...["surface-dark", "on-dark", "on-dark-2"].map((k) => `--color-${k}-fixed: var(--${k}-fixed);`),
     ...auras.flatMap((a) => AURA_STOPS.map((s) => `--color-aura-${a}-${s}: var(--aura-${a}-${s});`)),
     "--color-aura-light: var(--aura-light);",
     "--color-aura-mid: var(--aura-mid);",
@@ -71,6 +72,8 @@ export function generateTokensCss(design) {
     `--glass-filter: ${elevation["blur-glass"].replace(/^backdrop-filter:\s*/, "")};`,
     ...Object.entries(spacing).map(([k, v]) => `--space-${k}: ${v};`),
     ...Object.entries(layout).map(([k, v]) => `--layout-${k}: ${v};`),
+    "/* Theme-fixed copies: aura cards and dark glass look the same in both themes (DESIGN.md \"Dark theme\"). */",
+    ...["surface-dark", "on-dark", "on-dark-2"].map((k) => `--${k}-fixed: ${colors[k]};`),
     "/* Default aura (graphite) until an element sets data-mark. */",
     ...AURA_STOPS.map((s) => `--aura-${s}: var(--aura-graphite-${s});`),
   ]);

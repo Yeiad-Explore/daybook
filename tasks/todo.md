@@ -332,14 +332,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T17: Primitives B
+## T17: ✅ Primitives B
 
 **Description:** Aura card (glass, dark, sand variants; driven by `mark`), KPI item, Task row (circular checkbox, title, source line, deadline tag, late dot), Deadline tag with a pure `deadlineTagText(due, dueTime, done, today)` that implements PRD §7.5 exactly.
 
 **Acceptance criteria:**
-- [ ] `deadlineTagText` unit tests cover every §7.5 row with `today = 2026-10-16` (done struck, "2d late", "today", "today 18:00", "tomorrow", "in 3d", "25 Oct", "31 Jan 2027"); full date available on hover
-- [ ] Late state uses words and colour (NFR-7); aura text passes contrast (scrim where needed)
-- [ ] Primitives page checks pass
+- [x] `deadlineTag` unit tests cover every §7.5 row with `today = 2026-10-16` (done struck, "2d late", "today", "today 18:00", "tomorrow", "in 3d", "25 Oct", "31 Jan 2027"); full date available on hover and to screen readers
+- [x] Late state uses words and colour (NFR-7); aura and glass text measured (axe cannot) and fixed per DESIGN.md v2.2 / ADR 0003
+- [x] Primitives page checks pass
 
 **Verification:** `pnpm test && pnpm test:e2e`
 

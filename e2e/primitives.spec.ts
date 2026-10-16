@@ -27,3 +27,19 @@ test("segmented control is one Tab stop and arrow keys select (radio group)", as
   await expect(page.getByText("Selected: 7d")).toBeVisible();
   await expect(group.getByRole("radio", { name: "90D" })).toHaveAttribute("tabindex", "-1");
 });
+
+test("task row: keyboard toggles done, and late is said in words (NFR-7)", async ({ page }) => {
+  await page.goto("/dev/primitives");
+  const box = page.getByRole("checkbox", { name: "Done: Buy running shoes" });
+  await expect(box).not.toBeChecked();
+  await box.focus();
+  await page.keyboard.press("Space");
+  await expect(box).toBeChecked();
+  await page.keyboard.press("Space");
+  await expect(box).not.toBeChecked();
+
+  const row = page.getByRole("listitem").filter({ hasText: "Buy running shoes" });
+  await expect(row).toContainText("2d late");
+  await expect(row.locator("time")).toHaveAttribute("title", "Wed 14 Oct 2026");
+  await expect(row).toContainText("due Wed 14 Oct 2026"); // screen-reader text
+});

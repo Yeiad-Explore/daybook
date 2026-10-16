@@ -23,6 +23,12 @@
 }
 
 @layer components {
+  /* DESIGN.md dark aura card: the aura shows in the top third, then fades to near-black
+     (theme-fixed: aura cards are the same in both themes). */
+  .aura-fade-dark {
+    background: linear-gradient(to bottom, transparent 0%, transparent 28%, var(--surface-dark-fixed) 62%);
+  }
+
   /* DESIGN.md glass (elevation level 2): only over auras or photos. */
   .glass {
     background: var(--surface-glass);
@@ -32,9 +38,10 @@
     box-shadow: var(--shadow-glass-edge);
   }
 
+  /* Same in both themes: white text on dark glass (DESIGN.md v2.2). */
   .glass-dark {
     background: var(--surface-glass-dark);
-    color: var(--on-dark);
+    color: var(--on-dark-fixed);
   }
 
   /* DESIGN.md Accessibility: solid fallback where backdrop-filter is unsupported. */
@@ -43,7 +50,7 @@
       background: color-mix(in srgb, var(--surface) 92%, transparent);
     }
     .glass-dark {
-      background: color-mix(in srgb, var(--surface-dark) 92%, transparent);
+      background: color-mix(in srgb, var(--surface-dark-fixed) 92%, transparent);
     }
   }
 
