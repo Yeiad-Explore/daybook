@@ -1,6 +1,6 @@
 -- Row Level Security: C-RLS-01..05 (C-RLS-06/07 arrive with their tables, C-RLS-08 with T7).
 begin;
-select plan(27);
+select plan(65);
 
 select tests.create_user('owner@test.local');
 select tests.create_user('other@test.local');
@@ -20,6 +20,12 @@ select ok((select count(*) from public.pages) > 0, 'owner reads their pages');
 select ok((select count(*) from public.blocks) > 0, 'owner reads their blocks');
 select ok((select count(*) from public.tasks) = 4, 'owner reads their 4 tasks');
 select ok((select count(*) from public.deadline_changes) = 1, 'owner reads their deadline history');
+select tests.owner_sees_rows(t) from unnest(array['tracker_fields', 'tracker_entries', 'table_columns', 'table_rows',
+  'time_blocks', 'routine_steps', 'routine_checks', 'notes', 'reviews']) t;
+
+-- C-RLS-07: google_connections is not readable or writable by the owner either.
+select throws_ok($$ select * from public.google_connections $$, '42501', null, 'C-RLS-07: owner cannot read google_connections directly');
+select throws_ok($$ update public.google_connections set status = 'disconnected' $$, '42501', null, 'C-RLS-07: owner cannot update google_connections directly');
 
 -- C-RLS-06: deadline_changes is append-only, even for the owner.
 select throws_ok($$ update public.deadline_changes set reason = 'edited' $$, '42501', null, 'C-RLS-06: owner cannot edit deadline history');
@@ -45,6 +51,8 @@ select * from tests.other_sees_nothing('spaces');
 select * from tests.other_sees_nothing('pages');
 select * from tests.other_sees_nothing('blocks');
 select * from tests.other_sees_nothing('tasks');
+select tests.other_sees_nothing(t) from unnest(array['tracker_fields', 'tracker_entries', 'table_columns', 'table_rows',
+  'time_blocks', 'routine_steps', 'routine_checks', 'notes', 'reviews']) t;
 select is((select count(*)::int from public.deadline_changes), 0, 'C-RLS-04: non-owner reads no deadline history');
 select is(
   (select count(*)::int from public.profiles where id = tests.uid('owner@test.local')), 0,

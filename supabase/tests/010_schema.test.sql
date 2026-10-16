@@ -1,6 +1,6 @@
 -- Schema rules: C-DL-01, C-DL-08 (check), C-SCH-02, C-SCH-03, C-SCH-06, C-DB-01.
 begin;
-select plan(22);
+select plan(27);
 
 select tests.create_user('owner@test.local');
 
@@ -61,9 +61,9 @@ select throws_ok(
      select owner_id, id, repeat('x', 81), 9 from public.spaces where name = 'Finance' and position = 1 limit 1 $$,
   '23514', null, 'C-SCH-03: 81-character page title is rejected'
 );
-select is(
-  (select title from public.pages where space_id = (select id from public.spaces where name = 'Health') ),
-  'Workouts', 'fixture page exists'
+select ok(
+  exists (select 1 from public.pages p join public.spaces s on s.id = p.space_id where s.name = 'Health' and p.title = 'Workouts'),
+  'fixture page exists'
 );
 select lives_ok(
   $$ insert into public.pages (owner_id, space_id, position)
@@ -125,6 +125,34 @@ select throws_ok(
      select owner_id, id, space_id, title, due_date, '2026-10-20', 'ab', true
      from public.tasks where title = 'Buy running shoes' $$,
   '23514', null, 'C-DL-12: a reason shorter than 3 characters is rejected'
+);
+
+-- C-SCH-04: tracker field decimals and target.
+select throws_ok(
+  $$ insert into public.tracker_fields (owner_id, block_id, label, decimals, position)
+     select owner_id, id, 'Too precise', 4, 9 from public.blocks where title = 'Body & food' $$,
+  '23514', null, 'C-SCH-04: decimals 4 is rejected'
+);
+select throws_ok(
+  $$ insert into public.tracker_fields (owner_id, block_id, label, target_value, position)
+     select owner_id, id, 'No kind', 2000, 9 from public.blocks where title = 'Body & food' $$,
+  '23514', null, 'C-SCH-04: a target without a target kind is rejected'
+);
+
+-- C-SCH-05: one per day / per week.
+select throws_ok(
+  $$ insert into public.tracker_entries (owner_id, field_id, block_id, entry_date, value)
+     select owner_id, field_id, block_id, entry_date, 77.0 from public.tracker_entries $$,
+  '23505', null, 'C-SCH-05: a second entry for the same field and date is rejected (TRK-2 AC1)'
+);
+select throws_ok(
+  $$ insert into public.routine_checks (owner_id, step_id, block_id, check_date)
+     select owner_id, step_id, block_id, check_date from public.routine_checks $$,
+  '23505', null, 'C-SCH-05: a second check for the same step and date is rejected'
+);
+select throws_ok(
+  $$ insert into public.reviews (owner_id, week_start, stats) select owner_id, week_start, '{}' from public.reviews $$,
+  '23505', null, 'C-SCH-05: a second review for the same week is rejected'
 );
 
 select * from finish();

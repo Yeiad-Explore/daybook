@@ -18,14 +18,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T1: Scaffold the Next.js app
+## T1: ✅ Scaffold the Next.js app
 
 **Description:** Create the app with `pnpm create next-app` (TypeScript, ESLint, Tailwind CSS, App Router, `src/` directory, `@/*` alias, no React Compiler, no Cache Components until a phase needs them). Turn on `strict`, pin the TypeScript version agreed in open question 1, add `typecheck`, `lint`, `dev`, `build` scripts, `.gitignore` (including `.env*.local`) and `.env.example`. Fill in the Commands section of CLAUDE.md.
 
 **Acceptance criteria:**
-- [ ] `pnpm dev` serves the starter page; `pnpm build` succeeds
-- [ ] `tsconfig.json` has `"strict": true`; `pnpm typecheck` and `pnpm lint` pass
-- [ ] No starter styles, fonts or copy remain that conflict with DESIGN.md
+- [x] `pnpm dev` serves the starter page; `pnpm build` succeeds
+- [x] `tsconfig.json` has `"strict": true`; `pnpm typecheck` and `pnpm lint` pass
+- [x] No starter styles, fonts or copy remain that conflict with DESIGN.md
 
 **Verification:** `pnpm typecheck && pnpm lint && pnpm build`
 
@@ -37,14 +37,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T2: Test tooling
+## T2: ✅ Test tooling
 
 **Description:** Vitest for unit tests; Playwright with `@axe-core/playwright` and a shared helper that checks no horizontal scroll at 400px and 1440px in light and dark; `pnpm check:tokens` (a small script that fails on raw colour values outside `src/styles/tokens.css`); `check:fast` and `check:task` scripts that mirror `CONSTRAINTS.md`.
 
 **Acceptance criteria:**
-- [ ] `pnpm test` runs one passing sample test; `pnpm test:e2e` runs one passing smoke test against `pnpm dev`
-- [ ] The e2e helper fails a test when the page scrolls sideways or axe reports a critical/serious violation
-- [ ] `pnpm check:tokens` fails on a planted `#fff` in a component and passes once it is removed
+- [x] `pnpm test` runs one passing sample test; `pnpm test:e2e` runs one passing smoke test against `pnpm dev`
+- [x] The e2e helper fails a test when the page scrolls sideways or axe reports a critical/serious violation
+- [x] `pnpm check:tokens` fails on a planted `#fff` in a component and passes once it is removed
 
 **Verification:** `pnpm test && pnpm test:e2e && pnpm check:tokens`
 
@@ -56,14 +56,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T3: Supabase local stack and pgTAP helpers
+## T3: ✅ Supabase local stack and pgTAP helpers
 
 **Description:** `supabase init`; configure `supabase/config.toml` (site URL, Google provider reading client id/secret from env, `enable_signup` behaviour documented, timezone-neutral settings); enable `pgtap`. Write test helpers: create a test user, act as a user (`set local role authenticated` plus JWT claims, per current Supabase docs), and a fixture builder that inserts the PRD §12 subset needed for rule tests (Health goal 1 Sep 2026 → 31 Jan 2027 with "Buy running shoes" due 14 Oct; AI Engineering goal with the "Learn Python" stage due 15 Nov and the leaf "Loops: for and while" due 16 Oct; AI Agency with "Send proposal follow-up to Bayside Café" due 15 Oct; Finance and Skincare areas). The fixture builder is filled in as tables arrive (T4–T6).
 
 **Acceptance criteria:**
-- [ ] `supabase start` and `supabase test db` run locally; a first pgTAP test passes
-- [ ] Helpers can create two users (owner, other) and switch between them inside one test transaction
-- [ ] Every test file runs inside `begin; … rollback;` and leaves no data behind
+- [x] `supabase start` and `supabase test db` run locally; a first pgTAP test passes
+- [x] Helpers can create two users (owner, other) and switch between them inside one test transaction
+- [x] Every test file runs inside `begin; … rollback;` and leaves no data behind
 
 **Verification:** `supabase db reset && supabase test db`
 
@@ -75,14 +75,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T4: Migration: enums, profiles, spaces, pages, blocks
+## T4: ✅ Migration: enums, profiles, spaces, pages, blocks
 
 **Description:** `source-driven-development` for current Supabase migration and RLS guidance first. Create all enums from §10.1; the shared `set_updated_at()` function; `profiles` (+ DB-1 auto-create trigger, if approved); `spaces`, `pages`, `blocks` with every column, default, check and index from §10.3–10.4; RLS enabled with the four owner policies per table. `full-output-enforcement` for the migration file.
 
 **Acceptance criteria:**
-- [ ] C-DL-01, C-DL-08 (check part), C-SCH-02, C-SCH-03 (space, page), C-SCH-06 pass
-- [ ] C-RLS-01…05 pass for these tables, including the second non-owner user seeing and changing nothing
-- [ ] `supabase db reset` applies cleanly
+- [x] C-DL-01, C-DL-08 (check part), C-SCH-02, C-SCH-03 (space, page), C-SCH-06 pass
+- [x] C-RLS-01…05 pass for these tables, including the second non-owner user seeing and changing nothing
+- [x] `supabase db reset` applies cleanly
 
 **Verification:** `supabase db reset && supabase test db`
 
@@ -94,13 +94,13 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T5: Migration: tasks and deadline_changes
+## T5: ✅ Migration: tasks and deadline_changes
 
 **Description:** `tasks` and `deadline_changes` per §10.3 with indexes (§10.4, including the trigram/full-text index on `tasks.title`); RLS (owner policies on `tasks`; select + insert only on `deadline_changes`). Check constraints for C-DL-18.
 
 **Acceptance criteria:**
-- [ ] C-SCH-03 (task title), C-DL-09 (no status column), C-DL-18 pass
-- [ ] C-RLS-02…06 pass for both tables; updating or deleting a `deadline_changes` row fails for the owner too
+- [x] C-SCH-03 (task title), C-DL-09 (no status column), C-DL-18 pass
+- [x] C-RLS-02…06 pass for both tables; updating or deleting a `deadline_changes` row fails for the owner too
 
 **Verification:** `supabase db reset && supabase test db`
 
@@ -112,14 +112,14 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 
 ---
 
-## T6: Migration: content tables
+## T6: ✅ Migration: content tables
 
 **Description:** `tracker_fields`, `tracker_entries`, `table_columns`, `table_rows`, `time_blocks`, `routine_steps`, `routine_checks`, `notes` (with generated `search` tsvector), `google_connections` (no client policies), `reviews`; all indexes including GIN on `table_rows.cells` and `notes.search`; RLS.
 
 **Acceptance criteria:**
-- [ ] C-SCH-04, C-SCH-05 pass
-- [ ] C-RLS-01 passes across the whole `public` schema (zero tables without RLS)
-- [ ] C-RLS-02…05, C-RLS-07 pass for every table; the non-owner user reads zero rows and every write fails
+- [x] C-SCH-04, C-SCH-05 pass
+- [x] C-RLS-01 passes across the whole `public` schema (zero tables without RLS)
+- [x] C-RLS-02…05, C-RLS-07 pass for every table; the non-owner user reads zero rows and every write fails
 
 **Verification:** `supabase db reset && supabase test db`
 
@@ -130,15 +130,15 @@ Commands below (`pnpm typecheck`, `pnpm test`, …) are created in T1–T3.
 **Estimated scope:** M
 
 ### Checkpoint CP-A
-- [ ] Every table, enum and index in PRD §10.1–10.4 exists
-- [ ] RLS suite green, including the second non-owner user on every table
-- [ ] Owner review before triggers
+- [x] Every table, enum and index in PRD §10.1–10.4 exists
+- [x] RLS suite green, including the second non-owner user on every table
+- [x] Owner review before triggers
 
 ---
 
 ## T7: Triggers: shared rules
 
-**Description:** Attach `set_updated_at` to every editable table; `sync_space_id` (blocks, tasks, time_blocks) with cross-owner rejection; `block_type_guard` on every child table; `blocks.type` immutable; `soft_delete_cascade` for spaces → pages → blocks → content (and clearing on restore); DB-2 protected columns if approved.
+**Description:** (`set_updated_at` is already attached to every editable table by T4–T6; T7 adds its test.) Attach `set_updated_at` to every editable table; `sync_space_id` (blocks, tasks, time_blocks) with cross-owner rejection; `block_type_guard` on every child table; `blocks.type` immutable; `soft_delete_cascade` for spaces → pages → blocks → content (and clearing on restore); DB-2 protected columns if approved.
 
 **Acceptance criteria:**
 - [ ] C-TRG-01, C-TRG-02, C-TRG-03, C-TRG-13, C-SCH-01, C-RLS-08 pass

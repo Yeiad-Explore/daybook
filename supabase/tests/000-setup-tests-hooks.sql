@@ -115,6 +115,50 @@ begin
 
   insert into public.deadline_changes (owner_id, task_id, space_id, item_title, old_due, new_due, reason, was_late)
   select p_owner, t.id, t.space_id, t.title, '2026-10-12', '2026-10-14', 'Shop closed', true from public.tasks t where t.title = 'Buy running shoes' and t.owner_id = p_owner;
+
+  -- One row in every content table.
+  insert into public.pages (owner_id, space_id, title, position) values (p_owner, v_health, 'Daily Tracker', 0) returning id into v_page;
+  insert into public.blocks (owner_id, page_id, space_id, type, title, position) values (p_owner, v_page, v_health, 'tracker', 'Body & food', 1);
+  insert into public.tracker_fields (owner_id, block_id, label, unit, decimals, target_value, target_kind, position)
+  select p_owner, b.id, 'Weight', 'kg', 1, 72, 'reach', 1 from public.blocks b where b.title = 'Body & food' and b.owner_id = p_owner;
+  insert into public.tracker_entries (owner_id, field_id, block_id, entry_date, value)
+  select p_owner, f.id, f.block_id, '2026-10-16', 77.2 from public.tracker_fields f where f.label = 'Weight' and f.owner_id = p_owner;
+
+  insert into public.table_columns (owner_id, block_id, name, kind, signed, summary, position)
+  select p_owner, b.id, 'Amount', 'money', true, 'sum', 1 from public.blocks b where b.title = 'Income and expenses' and b.owner_id = p_owner;
+  insert into public.table_rows (owner_id, block_id, cells, position)
+  select p_owner, c.block_id, jsonb_build_object(c.id::text, -1200), 1 from public.table_columns c where c.name = 'Amount' and c.owner_id = p_owner;
+
+  insert into public.time_blocks (owner_id, block_id, space_id, title, starts_at, ends_at)
+  select p_owner, b.id, b.space_id, 'Morning run', '2026-10-16 06:30+06', '2026-10-16 07:15+06' from public.blocks b where b.title = 'Workout slots' and b.owner_id = p_owner;
+
+  insert into public.routine_steps (owner_id, block_id, label, position)
+  select p_owner, b.id, s.label, s.pos from public.blocks b,
+    (values ('Cleanser', 1), ('Vitamin C serum', 2), ('Moisturizer', 3), ('Sunscreen SPF 50', 4)) s(label, pos)
+  where b.title = 'Morning' and b.owner_id = p_owner;
+  insert into public.routine_checks (owner_id, step_id, block_id, check_date)
+  select p_owner, s.id, s.block_id, '2026-10-16' from public.routine_steps s where s.label = 'Cleanser' and s.owner_id = p_owner;
+
+  insert into public.pages (owner_id, space_id, title, position) values (p_owner, v_ai, 'Notes', 2) returning id into v_page;
+  insert into public.blocks (owner_id, page_id, space_id, type, title, position) values (p_owner, v_page, v_ai, 'notes', 'Python notes', 1);
+  insert into public.notes (owner_id, block_id, body_text)
+  select p_owner, b.id, 'for loops iterate over a sequence' from public.blocks b where b.title = 'Python notes' and b.owner_id = p_owner;
+
+  insert into public.reviews (owner_id, week_start, stats) values (p_owner, '2026-10-10', '{}');
+  insert into public.google_connections (owner_id, google_email, scopes) values (p_owner, 'owner@test.local', array['https://www.googleapis.com/auth/calendar.events']);
+end;
+$$;
+
+-- Run as the owner: at least one row is visible, so a "non-owner sees nothing" result means something.
+create or replace function tests.owner_sees_rows(p_table text)
+returns text
+language plpgsql
+as $$
+declare
+  n bigint;
+begin
+  execute format('select count(*) from public.%I', p_table) into n;
+  return extensions.ok(n > 0, p_table || ': owner reads their rows');
 end;
 $$;
 
