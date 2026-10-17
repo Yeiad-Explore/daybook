@@ -52,7 +52,7 @@ test("SET-1: week start, currency and name persist; an invalid currency is expla
   await page.getByLabel("Display name").focus(); // leaving the field triggers the check
   await expect(page.getByRole("alert").filter({ hasText: "3-letter currency code" })).toBeVisible();
   await page.getByLabel("Currency").fill("usd");
-  await page.getByLabel("Display name").fill("Kabid");
+  await page.getByLabel("Display name").fill("Test Name");
   await page.getByLabel("Currency").focus(); // blur the name, then the currency
   await page.getByRole("radiogroup", { name: "Theme" }).getByRole("radio", { name: "Light" }).focus();
   await saved(page);
@@ -61,13 +61,20 @@ test("SET-1: week start, currency and name persist; an invalid currency is expla
   await hydrated(page);
   await expect(page.getByRole("radiogroup", { name: "Week starts on" }).getByRole("radio", { checked: true })).toHaveText("Mon");
   await expect(page.getByLabel("Currency")).toHaveValue("USD");
-  await expect(page.getByLabel("Display name")).toHaveValue("Kabid");
+  await expect(page.getByLabel("Display name")).toHaveValue("Test Name");
+  const index = page.getByRole("navigation", { name: "Index" });
+  await expect(index).toContainText("Test Name");
 
   // Put the defaults back (PRD §5.8): Saturday, BDT.
   await page.getByRole("radiogroup", { name: "Week starts on" }).getByRole("radio", { name: "Sat" }).click();
   await page.getByLabel("Currency").fill("BDT");
   await page.getByLabel("Display name").focus();
   await saved(page);
+  // No display name: the Index falls back to the Google account name, else the email; never "Daybook".
+  await page.getByLabel("Display name").fill("");
+  await page.getByLabel("Currency").focus();
+  await expect(index).not.toContainText("Test Name");
+  await expect(index).not.toContainText("Daybook");
 });
 
 test("AUTH-3 AC3: Sign out ends the session on this device", async ({ browser }) => {

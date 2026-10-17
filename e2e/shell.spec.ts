@@ -39,7 +39,7 @@ test("a space opens on its first page; a space without pages says so", async ({ 
 });
 
 test("unknown pages, foreign or malformed ids and bad dates show the not-found page", async ({ page }) => {
-  for (const url of ["/no-such-page", "/s/00000000-0000-4000-8000-000000000000", "/s/not-a-uuid", "/review/last-week"]) {
+  for (const url of ["/no-such-page", "/s/00000000-0000-4000-8000-000000000000", "/s/not-a-uuid", "/review/last-week", "/review/2026-02-31"]) {
     await page.goto(url);
     await expect(page.getByRole("heading", { level: 1 }), url).toContainText("Nothing here.");
     await expect(page.getByRole("link", { name: "Go to Today" })).toBeVisible();

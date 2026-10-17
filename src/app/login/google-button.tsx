@@ -1,8 +1,20 @@
 "use client";
 
+import { ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { googleSignInOptions } from "@/lib/auth/sign-in-options";
 import { createClient } from "@/lib/supabase/client";
+
+/** A sign-in problem on the glass card: ink text with an ember dot (status never by colour alone). */
+export function SignInAlert({ children }: { children: string }) {
+  return (
+    <p role="alert" className="type-body-sm flex items-center gap-2 text-ink">
+      <span aria-hidden className="size-2 shrink-0 rounded-pill bg-signal" />
+      {children}
+    </p>
+  );
+}
 
 export function GoogleButton() {
   const [pending, setPending] = useState(false);
@@ -20,10 +32,10 @@ export function GoogleButton() {
 
   return (
     <>
-      <button type="button" onClick={signIn} disabled={pending}>
+      <Button variant="primary" icon={<ArrowRight size={12} strokeWidth={1.5} />} onClick={signIn} disabled={pending} className="self-start">
         {pending ? "Opening Google…" : "Continue with Google"}
-      </button>
-      {failed && <p role="alert">Couldn&apos;t reach Google. Try again.</p>}
+      </Button>
+      {failed && <SignInAlert>Couldn&apos;t reach Google. Try again.</SignInAlert>}
     </>
   );
 }
