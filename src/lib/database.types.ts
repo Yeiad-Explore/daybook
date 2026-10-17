@@ -49,12 +49,6 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "spaces"
       referencedColumns: ["id"]
-    },{
-      foreignKeyName: "deadline_changes_task_id_fkey"
-      columns: ["task_id"]
-isOneToOne: false
-      referencedRelation: "tasks"
-      referencedColumns: ["id"]
     }
                   ]
                 },"google_connections": {

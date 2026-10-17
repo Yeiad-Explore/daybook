@@ -1,7 +1,7 @@
 -- Trash, restore, pages, status and order: C-DL-17 (DL-11), C-DL-20 (DL-13 restore), C-TRASH-01
 -- (SET-3, purge), C-PG-01, C-SPC-03, C-ORD-01. Fixtures: PRD §12 subset, today = 2026-10-16.
 begin;
-select plan(42);
+select plan(47);
 
 select tests.create_user('owner@test.local');
 select tests.create_user('other@test.local');
@@ -93,6 +93,14 @@ select is(public.restore_item('spaces', (select id from public.spaces where name
 select is((select count(*)::int from public.pages p join public.spaces s on s.id = p.space_id where s.name = 'Hobbies' and p.deleted_at is null), 1,
   'SPC-5: its page trashed with it comes back; the one trashed earlier stays in Trash');
 
+-- Pages deleted forever while their space was in Trash: the space comes back with a fresh Overview.
+insert into public.spaces (kind, name, position) values ('area', 'Garden', 10);
+update public.spaces set deleted_at = now() where name = 'Garden';
+delete from public.pages where space_id = (select id from public.spaces where name = 'Garden');
+select is(public.restore_item('spaces', (select id from public.spaces where name = 'Garden')) ->> 'status', 'restored', 'C-PG-01: a space whose pages are gone restores');
+select results_eq($$ select p.title from public.pages p join public.spaces s on s.id = p.space_id where s.name = 'Garden' $$,
+  $$ values ('Overview') $$, 'C-PG-01: and gets an Overview page, so it is never empty');
+
 select throws_ok($$ select public.restore_item('profiles', gen_random_uuid()) $$, '22023', null, 'C-TRASH-01: other tables are refused');
 select throws_ok(
   format($$ select public.restore_item('tasks', %L) $$, pg_temp.task('Buy running shoes')),
@@ -124,6 +132,16 @@ select lives_ok(
 select lives_ok(
   $$ update public.spaces set deleted_at = now() where name = 'Read 12 books' $$,
   'SPC-5: trashing the space takes its last page with it'
+);
+
+select throws_ok(
+  $$ insert into public.spaces (kind, name, end_goal, start_date, position) values ('goal', 'No end', 'Something', '2026-10-16', 11) $$,
+  '23514', 'A goal needs a deadline.', 'SPC-1 AC1: a goal without a deadline is rejected with the PRD''s words'
+);
+select throws_ok(
+  $$ insert into public.deadline_changes (space_id, item_title, old_due, new_due, reason, was_late)
+     select id, 'Invented', '2026-10-01', '2026-10-02', 'Never happened', false from public.spaces where name = 'Health' $$,
+  '42501', null, 'C-RLS-06: the owner cannot write deadline history directly; only the RPCs do'
 );
 
 ------------------------------------------------------------------------------------------------
@@ -174,7 +192,13 @@ select throws_ok(format($$ select public.reorder('spaces', %L, null, null) $$, t
 reset role;
 update public.tasks set deleted_at = now() - interval '31 days' where title = 'Spare task';
 update public.blocks set deleted_at = now() - interval '29 days' where title = 'Spare list';
+select tests.authenticate_as('owner@test.local');
+select public.delete_task((select id from public.tasks where title = 'Buy running shoes'), 'Gave up on running');
+reset role;
+update public.tasks set deleted_at = now() - interval '31 days' where title = 'Buy running shoes';
 select ok(public.purge_trash() >= 1, 'SET-3: the daily purge removes old Trash');
+select is((select count(*)::int from public.deadline_changes where item_title = 'Buy running shoes' and task_id is null), 0,
+  'D-P1-13: history of a task deleted forever still points at the task, never at the goal');
 select is((select count(*)::int from public.tasks where title = 'Spare task'), 0, 'SET-3: a task in Trash for 31 days is gone');
 select is((select count(*)::int from public.blocks where title = 'Spare list'), 1, 'SET-3: a block in Trash for 29 days stays');
 select is((select count(*)::int from cron.job where jobname = 'purge_trash' and schedule = '0 21 * * *'), 1,

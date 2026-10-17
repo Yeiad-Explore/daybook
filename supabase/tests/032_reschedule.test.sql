@@ -1,7 +1,7 @@
 -- Rescheduling (PRD §7.4): reschedule_task and reschedule_space. C-DL-12..15, C-DL-20 (trashed
 -- tasks can be rescheduled), C-DL-25..27. Fixtures: PRD §12 subset, today = 2026-10-16 (Asia/Dhaka).
 begin;
-select plan(47);
+select plan(51);
 
 select tests.create_user('owner@test.local');
 select tests.create_user('other@test.local');
@@ -161,6 +161,18 @@ select is(
   'C-DL-20: a trashed task can be rescheduled'
 );
 
+-- A trashed step with sub-steps: rescheduling moves the sub-steps trashed with it, so the restore works.
+insert into public.tasks (block_id, title, due_date, position) select id, 'Learn Git', '2026-12-01', 9 from public.blocks where title = 'AI Engineering roadmap';
+insert into public.tasks (block_id, parent_id, title, due_date, position) select block_id, id, 'Branches', '2026-11-20', 1 from public.tasks where title = 'Learn Git';
+update public.tasks set deleted_at = now() where title = 'Learn Git';
+select is(public.reschedule_task(pg_temp.task('Learn Git'), '2026-11-10', 'Git first') ->> 'status', 'conflict',
+  'C-DL-20: a trashed step''s trashed sub-steps still count as blockers');
+select is(public.reschedule_task(pg_temp.task('Learn Git'), '2026-11-10', 'Git first', true) ->> 'moved', '2',
+  'C-DL-20: and move with it');
+select is(public.restore_item('tasks', pg_temp.task('Learn Git')) ->> 'status', 'restored', 'DL-13: then the step restores');
+select results_eq($$ select deleted_at is null, due_date from public.tasks where title = 'Branches' $$, $$ values (true, '2026-11-10'::date) $$,
+  'DL-13: with its sub-step, on the new date');
+
 ------------------------------------------------------------------------------------------------
 -- reschedule_space (DL-4, DL-5, D-P1-4)
 ------------------------------------------------------------------------------------------------
@@ -177,7 +189,7 @@ select is((select deadline from public.spaces where name = 'Health'), '2027-01-3
 
 select is(
   public.reschedule_space(pg_temp.space('Health'), '2026-10-17', 'Racing it', true),
-  jsonb_build_object('status', 'rescheduled', 'space_id', pg_temp.space('Health'), 'old_due', '2027-01-31', 'new_due', '2026-10-17', 'moved', 1),
+  jsonb_build_object('status', 'rescheduled', 'space_id', pg_temp.space('Health'), 'old_due', '2027-01-31', 'new_due', '2026-10-17', 'moved', 2),
   'C-DL-26 / DL-4: with the flag the task moves with the goal'
 );
 select results_eq(
@@ -208,8 +220,8 @@ select throws_ok(
   '22023', 'This space has no deadline to move.', 'C-DL-25: an area has no deadline to reschedule'
 );
 select is(
-  public.reschedule_space(pg_temp.space('AI Engineering'), '2027-05-31', 'One more month') ->> 'moved', '0',
-  'reschedule_space: a later deadline needs no task moves'
+  public.reschedule_space(pg_temp.space('AI Engineering'), '2027-05-31', 'One more month') ->> 'moved', '1',
+  'reschedule_space: a later deadline moves only the goal (moved counts everything with a new date)'
 );
 select is((select deadline from public.spaces where name = 'AI Engineering'), '2027-05-31'::date, 'reschedule_space: the deadline is stored');
 select throws_ok(

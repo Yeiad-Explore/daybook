@@ -185,7 +185,7 @@ select throws_ok(
 select throws_ok(
   format($$ insert into public.deadline_changes (space_id, item_title, old_due, new_due, reason, was_late) values (%L, 'x', '2026-10-01', '2026-10-02', 'spoof', false) $$,
          tests.row_id('spaces', 'owner@test.local')),
-  '23503', null, 'C-RLS-08: deadline history cannot point at another owner''s space'
+  '42501', null, 'C-RLS-06/08: a client cannot write deadline history at all, so not for another owner''s space either'
 );
 
 ------------------------------------------------------------------------------------------------
