@@ -4,6 +4,7 @@ import { CalendarCheck, GripVertical, History, NotebookPen, Plus, Settings } fro
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { useQuickCapture } from "@/components/capture/capture";
 import { Sortable } from "@/components/ui/sortable";
 import { cx } from "@/lib/cx";
 import type { Enums } from "@/lib/database.types";
@@ -42,6 +43,7 @@ export function IndexNav({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const capture = useQuickCapture();
   const [spaces, setSpaces] = useServerState(serverSpaces);
   const save = useSave();
 
@@ -148,7 +150,22 @@ export function IndexNav({
         <span className="type-body-sm truncate font-medium">{name}</span>
       </div>
 
-      <div className="flex">{item("/today", "Today", { leading: <CalendarCheck {...icon} />, trailing: badge })}</div>
+      <div className="flex flex-col gap-0.5">
+        <div className="flex">{item("/today", "Today", { leading: <CalendarCheck {...icon} />, trailing: badge })}</div>
+        <button
+          type="button"
+          aria-keyshortcuts="N"
+          onClick={() => {
+            onNavigate?.();
+            capture.open();
+          }}
+          className="type-body-sm flex min-h-9 items-center gap-2.5 rounded-pill px-3 text-left hover:bg-on-dark-fixed/8 pointer-coarse:min-h-11"
+        >
+          <Plus {...icon} />
+          <span className="flex-1">New task</span>
+          <kbd className="type-caption rounded-xs bg-on-dark-fixed/14 px-1.5">N</kbd>
+        </button>
+      </div>
 
       <div className="flex flex-col gap-1">
         {group("Goals", "goal", "No goals yet.")}

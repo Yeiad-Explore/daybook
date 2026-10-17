@@ -13,6 +13,7 @@ import { Agenda } from "./agenda";
 import { DayTimetable } from "./day-timetable";
 import { MidnightRefresh } from "./midnight-refresh";
 import { RoutineCard } from "./routine-card";
+import { TodayCapture } from "./today-capture";
 import { TrackersCard } from "./trackers-card";
 
 export const metadata = { title: "Today · Daybook" };
@@ -93,6 +94,7 @@ export default async function TodayPage() {
       <div className="grid gap-8 desktop:grid-cols-12">
         <div className="min-w-0 desktop:col-span-8">
           <Agenda data={agenda} />
+          <TodayCapture today={agenda.today} />
         </div>
         <aside aria-label="Today's schedule and logging" className="flex min-w-0 flex-col gap-4 desktop:col-span-4">
           <DayTimetable slots={agenda.slots} timezone={profile.timezone} />

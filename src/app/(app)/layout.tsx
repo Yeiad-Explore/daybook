@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
+import { QuickCaptureProvider } from "@/components/capture/capture";
 import type { IndexSpace } from "@/components/shell/index-nav";
 import { IndexNav } from "@/components/shell/index-nav";
 import { MobileIndex } from "@/components/shell/mobile-index";
@@ -38,6 +39,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   };
 
   return (
+    <QuickCaptureProvider timezone={profile.timezone}>
     <div className="min-h-dvh">
       <a href="#content" className="type-button sr-only rounded-pill bg-surface px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50">
         Skip to content
@@ -55,5 +57,6 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
     </div>
+    </QuickCaptureProvider>
   );
 }
