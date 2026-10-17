@@ -28,6 +28,7 @@ export function TaskRow({
   detail,
   lead,
   menu,
+  menuVisible,
   className,
   rowRef,
   style,
@@ -48,6 +49,8 @@ export function TaskRow({
   detail?: ReactNode;
   lead?: ReactNode;
   menu?: ReactNode;
+  /** Show the menu cell all the time (Today's Overdue actions), not only on hover. */
+  menuVisible?: boolean;
   className?: string;
   /** Drag-to-reorder wiring (Sortable) lands on the row itself, so the list stays li-only. */
   rowRef?: (el: HTMLLIElement | null) => void;
@@ -75,7 +78,7 @@ export function TaskRow({
       <div className="min-w-0 flex-1 py-1">
         <div className="type-body flex min-w-0 items-center gap-2">
           {late && <span aria-hidden className="size-1.5 shrink-0 rounded-pill bg-signal" />}
-          {titleSlot ?? <span className={cx("truncate", done && "text-ink-3-small line-through")}>{title}</span>}
+          {titleSlot ?? <span className={cx("truncate max-tablet:line-clamp-2 max-tablet:whitespace-normal", done && "text-ink-3-small line-through")}>{title}</span>}
           {milestone && (
             <Flag size={12} strokeWidth={1.5} className="shrink-0 text-ink-2" aria-label="On the Deadline Rail" role="img" />
           )}
@@ -95,7 +98,9 @@ export function TaskRow({
         )}
       </div>
       {due && <DeadlineTag due={due} dueTime={dueTime} done={done} doneLate={doneLate} today={today} movedCount={movedCount} />}
-      {menu && <div className="opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100">{menu}</div>}
+      {menu && (
+        <div className={cx(!menuVisible && "opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 pointer-coarse:opacity-100")}>{menu}</div>
+      )}
     </li>
   );
 }

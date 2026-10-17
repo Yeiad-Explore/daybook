@@ -1,6 +1,6 @@
 "use client";
 
-import { Ellipsis, Plus } from "lucide-react";
+import { Ellipsis, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTrash } from "@/components/deadlines/use-trash";
@@ -110,6 +110,12 @@ export function PageTabs({ pages: serverPages }: { pages: PageRow[] }) {
       >
         <Plus size={14} strokeWidth={1.5} aria-hidden /> Page
       </button>
+      <Link
+        href={`/s/${space.id}/settings`}
+        className="type-button ml-auto flex min-h-9 shrink-0 items-center gap-1.5 rounded-pill px-3 text-[12px] text-ink-2 hover:bg-canvas-2 pointer-coarse:min-h-11"
+      >
+        <Settings size={14} strokeWidth={1.5} aria-hidden /> Space settings
+      </Link>
       {dialog}
     </nav>
   );
