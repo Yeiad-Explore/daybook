@@ -54,7 +54,7 @@ export function MoveUnderDialog({
               {task.parent_id && <option value={STAGE}>Its own stage</option>}
               {options.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {"— ".repeat(t.depth)}
+                  {t.depth > 0 && `${"  ".repeat(t.depth)}↳ `}
                   {t.title}
                 </option>
               ))}

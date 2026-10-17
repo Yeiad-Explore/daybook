@@ -64,7 +64,7 @@ export function useTrash(today: string) {
       <DialogContent>
         <DialogTitle>{pending.late.length === 1 && pending.late[0].id === pending.id ? "This task is late" : "Late tasks inside"}</DialogTitle>
         <DialogDescription>
-          Deleting late work is kept in your deadline history, with your reason.
+          Daybook keeps late work you delete in your deadline history, with your reason.
         </DialogDescription>
         <ul className="type-body-sm flex flex-col gap-1 rounded-md bg-signal-wash p-3">
           {pending.late.map((t) => (

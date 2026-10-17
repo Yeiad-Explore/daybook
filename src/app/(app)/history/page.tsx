@@ -136,7 +136,7 @@ export default async function HistoryPage({ searchParams }: PageProps<"/history"
                         {" → "}
                         {r.kind === "deleted_while_late" ? "deleted" : r.new_due && <time dateTime={r.new_due} title={longDate(r.new_due)}>{shortDate(r.new_due, today)}</time>}
                       </td>
-                      <td className="type-number px-3 py-3 text-right whitespace-nowrap">{days === null ? "—" : `${days > 0 ? "+" : ""}${days}d`}</td>
+                      <td className="type-number px-3 py-3 text-right whitespace-nowrap">{days === null ? <span className="sr-only">not moved</span> : `${days > 0 ? "+" : ""}${days}d`}</td>
                       <td className="px-3 py-3">{r.reason}</td>
                       <td className="px-3 py-3 whitespace-nowrap">
                         {r.was_late ? <span className="type-caption rounded-pill bg-signal-wash px-2 py-[3px] text-signal-ink">yes</span> : "no"}

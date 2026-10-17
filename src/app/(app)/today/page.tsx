@@ -50,12 +50,14 @@ export default async function TodayPage() {
 
       {summaries.length > 0 && (
         <section aria-label="Goals" className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2">
-          {summaries.map(({ goal, summary }) => {
+          {summaries.map(({ goal, summary }, i) => {
             const next = summary.milestones.find((m) => !m.done);
+            // DESIGN.md "Aura card": the three variants side by side, so each row of three has one dark card.
+            const variant = (["glass", "dark", "sand"] as const)[i % 3];
             return (
               <Link key={goal.id} href={`/s/${goal.id}`} prefetch={false} className="w-[min(100%,22rem)] shrink-0 snap-start rounded-xl desktop:w-[calc((100%-2rem)/3)]">
-                <AuraCard variant="glass" mark={goal.mark} className="h-full transition-transform duration-200 hover:-translate-y-0.5">
-                  <div className="flex h-full flex-col gap-3">
+                <AuraCard variant={variant} mark={goal.mark} className="h-full transition-transform duration-200 hover:-translate-y-0.5">
+                  <div className={variant === "dark" ? "flex flex-col gap-3" /* on the dark fade, not on the aura */ : "flex h-full flex-col gap-3"}>
                     <p className="type-heading truncate">{goal.name}</p>
                     <div className="flex items-baseline gap-2">
                       <p className="type-number-xl">

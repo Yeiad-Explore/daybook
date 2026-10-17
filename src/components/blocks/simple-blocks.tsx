@@ -25,14 +25,14 @@ export function SlotsBlock({ slots, ...props }: Props & { slots: Slot[] }) {
               <span className="type-number w-32 shrink-0 text-ink-2">
                 {format(local(s.starts_at), "EEE d MMM")}
                 <br />
-                {format(local(s.starts_at), "HH:mm")}–{format(local(s.ends_at), "HH:mm")}
+                {format(local(s.starts_at), "HH:mm")} to {format(local(s.ends_at), "HH:mm")}
               </span>
               <span className="type-body min-w-0 truncate">{s.title}</span>
             </li>
           ))}
         </ul>
       )}
-      <p className="type-caption mt-3 px-1 text-ink-3-small">Adding slots here and Google Calendar come with the Time block’s full build.</p>
+      <p className="type-caption mt-3 px-1 text-ink-3-small">Adding slots here comes in Phase 2, and Google Calendar in Phase 3.</p>
     </BlockFrame>
   );
 }

@@ -63,10 +63,7 @@ export function DeadlineRail({ summary, weekStartsOn }: { summary: SpaceSummary;
   return (
     <Panel className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="type-heading flex items-center gap-2">
-          <span aria-hidden className="size-2 rounded-pill bg-lime ring-1 ring-ink/20" />
-          Deadline Rail
-        </h2>
+        <h2 className="type-heading">Deadline Rail</h2>
         <SegmentedControl label="Rail range" options={[...RANGES]} value={range} onChange={setRange} />
       </div>
 
@@ -81,7 +78,7 @@ export function DeadlineRail({ summary, weekStartsOn }: { summary: SpaceSummary;
             const i = Math.floor((e.clientX - rect.left) / step);
             const bar = bars[i];
             if (!bar) return setHover(null);
-            const days = bar.from === bar.to ? shortDate(bar.from, today) : `${shortDate(bar.from, today)}–${shortDate(bar.to, today)}`;
+            const days = bar.from === bar.to ? shortDate(bar.from, today) : `${shortDate(bar.from, today)} to ${shortDate(bar.to, today)}`;
             setHover({ x: x(i), title: days, detail: bar.count === 0 ? "nothing due" : `${bar.count} due` });
           }}
           onMouseLeave={() => setHover(null)}
