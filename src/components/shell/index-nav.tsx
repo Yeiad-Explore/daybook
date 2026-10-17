@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarCheck, Plus, Settings, Sparkles } from "lucide-react";
+import { CalendarCheck, NotebookPen, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -92,7 +92,7 @@ export function IndexNav({
       {archivedCount > 0 && <p className="type-caption px-3">Archived ({archivedCount})</p>}
 
       <div className="mt-auto flex flex-col gap-0.5">
-        {item("/review", "Review", { exact: false, leading: <Sparkles {...icon} /> })}
+        {item("/review", "Review", { exact: false, leading: <NotebookPen {...icon} /> })}
         {item("/settings", "Settings", { exact: false, leading: <Settings {...icon} /> })}
         <Link
           href="/new"

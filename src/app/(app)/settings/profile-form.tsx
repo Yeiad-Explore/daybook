@@ -102,13 +102,13 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
 
   return (
     <Panel className="flex max-w-document flex-col gap-6">
-      <Field id="display_name" label="Display name" error={errors.display_name?.message}>
+      <Field id="display_name" label="Display name" hint="Leave empty to use your Google account name." error={errors.display_name?.message}>
         <input
           id="display_name"
           className={inputClass}
           autoComplete="name"
           aria-invalid={!!errors.display_name}
-          aria-describedby={errors.display_name ? "display_name-error" : undefined}
+          aria-describedby={errors.display_name ? "display_name-error" : "display_name-hint"}
           {...form.register("display_name", { onBlur: () => commit("display_name") })}
         />
       </Field>

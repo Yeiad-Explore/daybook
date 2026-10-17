@@ -33,3 +33,6 @@ supabase/.temp
 .DS_Store
 *.pem
 .vercel
+
+# graphify knowledge graph: local tool output (rebuilt by `graphify update .`)
+graphify-out/
