@@ -2,9 +2,10 @@ import { Check } from "lucide-react";
 import type { ReactNode } from "react";
 import { deadlineTag } from "@/lib/deadline-tag";
 import { cx } from "@/lib/cx";
+import type { Enums } from "@/lib/database.types";
 import { DeadlineTag } from "./deadline-tag";
 
-type MarkColor = "moss" | "slate" | "ochre" | "teal" | "clay" | "graphite";
+type MarkColor = Enums<"mark_color">;
 
 /**
  * DESIGN.md "Task row" (v2.2): 44px row, circular checkbox (ink-3 border; checked = black circle,

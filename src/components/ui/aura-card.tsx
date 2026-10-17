@@ -1,8 +1,9 @@
 import type { ComponentProps } from "react";
 import { cx } from "@/lib/cx";
+import type { Enums } from "@/lib/database.types";
 import { GlassPanel } from "./glass-panel";
 
-type MarkColor = "moss" | "slate" | "ochre" | "teal" | "clay" | "graphite";
+type MarkColor = Enums<"mark_color">;
 
 /**
  * DESIGN.md "Aura card" (signature), three variants, radius xl, 24px padding. At most three visible

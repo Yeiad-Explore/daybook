@@ -1,13 +1,8 @@
 import { cache } from "react";
+import type { Tables } from "@/lib/database.types";
 import { createClient } from "@/lib/supabase/server";
 
-export type Profile = {
-  id: string;
-  display_name: string | null;
-  timezone: string;
-  week_starts_on: number;
-  currency: string;
-  theme: "system" | "light" | "dark";
+export type Profile = Pick<Tables<"profiles">, "id" | "display_name" | "timezone" | "week_starts_on" | "currency" | "theme"> & {
   /** What to call the owner: display name, else the Google account name, else the email. */
   name: string;
 };

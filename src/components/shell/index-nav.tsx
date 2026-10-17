@@ -5,12 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { cx } from "@/lib/cx";
+import type { Enums } from "@/lib/database.types";
 
 export type IndexSpace = {
   id: string;
-  kind: "goal" | "area";
+  kind: Enums<"space_kind">;
   name: string;
-  mark: "moss" | "slate" | "ochre" | "teal" | "clay" | "graphite";
+  mark: Enums<"mark_color">;
   daysLeft: number | null;
 };
 

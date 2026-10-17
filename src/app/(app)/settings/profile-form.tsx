@@ -41,6 +41,14 @@ function Field({ id, label, hint, error, children }: { id: string; label: string
   );
 }
 
+const formValues = (p: Profile): ProfileFields => ({
+  display_name: p.display_name ?? "",
+  timezone: p.timezone,
+  week_starts_on: p.week_starts_on as ProfileFields["week_starts_on"],
+  currency: p.currency,
+  theme: p.theme,
+});
+
 /**
  * SET-1: every field saves as soon as it changes (text fields on blur) and takes effect at once.
  * Optimistic: the theme switches immediately and rolls back with an error toast if the save fails.
@@ -53,13 +61,7 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
   const form = useForm<ProfileFields>({
     resolver: zodResolver(profileFields),
     mode: "onBlur",
-    defaultValues: {
-      display_name: profile.display_name ?? "",
-      timezone: profile.timezone,
-      week_starts_on: profile.week_starts_on as ProfileFields["week_starts_on"],
-      currency: profile.currency,
-      theme: profile.theme,
-    },
+    defaultValues: formValues(profile),
   });
 
   const save = useMutation({
@@ -77,14 +79,7 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
       if (!context) return;
       setSaved(context.before);
       document.documentElement.dataset.theme = context.before.theme;
-      const b = context.before;
-      form.reset({
-        display_name: b.display_name ?? "",
-        timezone: b.timezone,
-        week_starts_on: b.week_starts_on as ProfileFields["week_starts_on"],
-        currency: b.currency,
-        theme: b.theme,
-      });
+      form.reset(formValues(context.before));
       toast.error("Couldn't save. Check your connection and try again.");
     },
     onSuccess: () => {
