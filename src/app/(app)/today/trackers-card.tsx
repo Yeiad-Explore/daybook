@@ -9,6 +9,7 @@ import { Panel } from "@/components/ui/panel";
 import { Tag } from "@/components/ui/tag";
 import { blockHref, type TodayTracker } from "@/lib/deadlines";
 import { formatNumber } from "@/lib/money";
+import { entriesToLog } from "@/lib/tracker-logic";
 import { createClient } from "@/lib/supabase/client";
 import { useSave } from "@/lib/use-save";
 import { useServerState } from "@/lib/use-server-state";
@@ -37,15 +38,9 @@ function TrackerForm({ tracker: serverTracker, today }: { tracker: TodayTracker;
   const shown = (f: TodayTracker["fields"][number]) => typed[f.id] ?? (f.today_value === null ? "" : String(f.today_value));
 
   function submit() {
-    const rows: { field_id: string; block_id: string; entry_date: string; value: number }[] = [];
-    for (const f of tracker.fields) {
-      const text = shown(f).trim().replace(/,/g, "");
-      if (text === "") continue; // empty writes nothing and clears nothing (TRK-2 AC2)
-      const value = Number(text);
-      if (!Number.isFinite(value)) return setProblem(`${f.label}: enter a number, like 77.2.`);
-      rows.push({ field_id: f.id, block_id: tracker.block_id, entry_date: today, value });
-    }
-    if (rows.length === 0) return setProblem("Enter at least one value to log.");
+    const result = entriesToLog(tracker.fields, (id) => shown(tracker.fields.find((f) => f.id === id)!), tracker.block_id, today);
+    if ("error" in result) return setProblem(result.error);
+    const { rows } = result;
     setProblem(null);
     const values = new Map(rows.map((r) => [r.field_id, r.value]));
     setTracker({ ...tracker, logged: true, fields: tracker.fields.map((f) => ({ ...f, today_value: values.get(f.id) ?? f.today_value })) });

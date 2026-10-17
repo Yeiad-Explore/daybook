@@ -43,21 +43,27 @@ export type NewTask = { title: string; spaceId: string; blockId: string | null; 
 async function addTask({ title, spaceId, blockId, due }: NewTask) {
   const supabase = createClient();
   let target = blockId;
+  let madeBlock = false;
   if (!target) {
     const { data: page, error: pageError } = await supabase.from("pages").select("id").eq("space_id", spaceId).is("deleted_at", null).order("position").limit(1).single();
     if (pageError) throw pageError;
     const { data: last } = await supabase.from("blocks").select("position").eq("page_id", page.id).order("position", { ascending: false }).limit(1);
-    const { data: created, error } = await supabase
+    const { data: block, error } = await supabase
       .from("blocks")
       .insert({ page_id: page.id, type: "todo", title: "To-do list", span: 6, position: (last?.[0]?.position ?? 0) + 1, space_id: DERIVED_SPACE_ID })
       .select("id")
       .single();
     if (error) throw error;
-    target = created.id;
+    target = block.id;
+    madeBlock = true;
   }
   const { data: tail } = await supabase.from("tasks").select("position").eq("block_id", target).is("parent_id", null).order("position", { ascending: false }).limit(1);
   const { error } = await supabase.from("tasks").insert({ block_id: target, title, due_date: due, position: (tail?.[0]?.position ?? 0) + 1, space_id: DERIVED_SPACE_ID });
-  if (error) throw error;
+  if (error) {
+    // A To-do list made just for this task goes again when the task is refused (a deadline rule), so a retry does not add a second one.
+    if (madeBlock) await supabase.from("blocks").delete().eq("id", target);
+    throw error;
+  }
 }
 
 /** The shared "add a task" call: client-side rules first (TODO-1), then the database's, with its message on refusal. */

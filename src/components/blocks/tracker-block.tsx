@@ -10,7 +10,7 @@ import { Tag } from "@/components/ui/tag";
 import { formatNumber } from "@/lib/money";
 import type { Block, TrackerField } from "@/lib/space-page";
 import { createClient } from "@/lib/supabase/client";
-import { entriesInRange, metaLine, RANGES, trendTag, type Range, type Series } from "@/lib/tracker-logic";
+import { entriesInRange, entriesToLog, metaLine, RANGES, trendTag, type Range, type Series } from "@/lib/tracker-logic";
 import { useSave } from "@/lib/use-save";
 import { useServerState } from "@/lib/use-server-state";
 import { BlockFrame, type BlockActions } from "./block-frame";
@@ -175,15 +175,9 @@ function LogForm({
   const shown = (f: TrackerField) => typed[`${date}:${f.id}`] ?? (existing(f) === undefined ? "" : String(existing(f)));
 
   function submit() {
-    const rows: { field_id: string; block_id: string; entry_date: string; value: number }[] = [];
-    for (const f of fields) {
-      const text = shown(f).trim().replace(/,/g, "");
-      if (text === "") continue;
-      const value = Number(text);
-      if (!Number.isFinite(value)) return setProblem(`${f.label}: enter a number, like 77.2.`);
-      rows.push({ field_id: f.id, block_id: blockId, entry_date: date, value });
-    }
-    if (rows.length === 0) return setProblem("Enter at least one value to log.");
+    const result = entriesToLog(fields, (id) => shown(fields.find((f) => f.id === id)!), blockId, date);
+    if ("error" in result) return setProblem(result.error);
+    const { rows } = result;
     setProblem(null);
     onLogged(rows);
     // The typed text is dropped now, not when the save lands: the optimistic series already holds it,

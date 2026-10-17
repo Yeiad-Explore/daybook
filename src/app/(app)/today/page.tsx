@@ -11,7 +11,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getToday } from "@/lib/today-data";
 import { Agenda } from "./agenda";
 import { DayTimetable } from "./day-timetable";
-import { MidnightRefresh } from "./midnight-refresh";
 import { RoutineCard } from "./routine-card";
 import { TodayCapture } from "./today-capture";
 import { TrackersCard } from "./trackers-card";
@@ -37,7 +36,6 @@ export default async function TodayPage() {
 
   return (
     <div className="flex flex-col gap-8 pt-2">
-      <MidnightRefresh timezone={profile.timezone} today={agenda.today} />
       <header className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <p className="type-eyebrow text-ink-3-small">Today · {format(parseISO(agenda.today), "EEEE")}</p>

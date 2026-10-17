@@ -61,11 +61,23 @@ export const loadSpacePage = cache(async (spaceId: string, pageId: string) => {
   // TRK-3: one 90-day series per live field; the block slices it for 7D / 30D / 90D.
   const live = (fields ?? []).filter((f) => !f.archived_at);
   const series = Object.fromEntries(
-    await Promise.all(live.map(async (f) => [f.id, (await supabase.rpc("tracker_series", { p_field_id: f.id, p_days: 90 })).data as unknown as Series] as const)),
+    await Promise.all(
+      live.map(async (f) => {
+        const { data, error } = await supabase.rpc("tracker_series", { p_field_id: f.id, p_days: 90 });
+        if (error) throw error;
+        return [f.id, data as unknown as Series] as const;
+      }),
+    ),
   );
   // RT-4 / RT-5: the streak and the 84-day strip come from the database, once per routine block.
   const streaks = Object.fromEntries(
-    await Promise.all(ids(["routine"]).map(async (id) => [id, (await supabase.rpc("routine_streak", { p_block_id: id, p_today: today })).data as unknown as RoutineStreak] as const)),
+    await Promise.all(
+      ids(["routine"]).map(async (id) => {
+        const { data, error } = await supabase.rpc("routine_streak", { p_block_id: id, p_today: today });
+        if (error) throw error;
+        return [id, data as unknown as RoutineStreak] as const;
+      }),
+    ),
   );
 
   // SPC cover: a private bucket, so the browser gets a short-lived signed URL (NFR-3).

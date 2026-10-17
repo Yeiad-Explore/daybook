@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chartGeometry, entriesInRange, metaLine, statusWords, trendTag, type Series } from "./tracker-logic";
+import { chartGeometry, entriesInRange, entriesToLog, metaLine, statusWords, trendTag, type Series } from "./tracker-logic";
 
 const field = (over: Partial<Series["field"]> = {}): Series["field"] => ({ id: "f", block_id: "b", label: "Weight", unit: "kg", decimals: 1, target_value: null, target_kind: null, ...over });
 
@@ -61,5 +61,19 @@ describe("chartGeometry (DESIGN.md Tracker chart)", () => {
   });
   it("labels the first, middle and last day", () => {
     expect(chartGeometry(entries, 7, "2026-10-16", 600, 200, null).xTicks.map((t) => t.date)).toEqual(["2026-10-10", "2026-10-13", "2026-10-16"]);
+  });
+});
+
+describe("entriesToLog (TRK-2)", () => {
+  const fields = [{ id: "w", label: "Weight" }, { id: "c", label: "Calories" }];
+  it("keeps only the fields with a number typed, so empty inputs write and clear nothing", () => {
+    expect(entriesToLog(fields, (id) => ({ w: "77.2", c: "  " })[id as "w" | "c"], "b", "2026-10-16")).toEqual({ rows: [{ field_id: "w", block_id: "b", entry_date: "2026-10-16", value: 77.2 }] });
+  });
+  it("accepts thousands separators", () => {
+    expect(entriesToLog(fields, (id) => (id === "c" ? "1,850" : ""), "b", "d")).toEqual({ rows: [{ field_id: "c", block_id: "b", entry_date: "d", value: 1850 }] });
+  });
+  it("refuses a value that is not a number, and a form with nothing in it", () => {
+    expect(entriesToLog(fields, (id) => (id === "w" ? "heavy" : ""), "b", "d")).toEqual({ error: "Weight: enter a number, like 77.2." });
+    expect(entriesToLog(fields, () => "", "b", "d")).toEqual({ error: "Enter at least one value to log." });
   });
 });

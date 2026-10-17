@@ -3,6 +3,7 @@
 import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import { ArrowRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSpace } from "@/components/space/space-context";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
   const { today, timezone } = useSpace();
   const save = useSave();
   const toast = useToast();
+  const router = useRouter();
   const [slots, setSlots] = useServerState(serverSlots);
   const [editing, setEditing] = useState<Slot | null>(null);
   const config = block.config as TimeConfig;
@@ -72,10 +74,12 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
     const { error } = await supabase.from("time_blocks").update({ deleted_at: new Date().toISOString() }).eq("id", slot.id);
     if (error) return toast.error(errorMessage(error));
     setSlots((all) => all.filter((s) => s.id !== slot.id));
+    router.refresh();
     toast.undoable(`${slot.title} moved to Trash.`, async () => {
       const { error: undoError } = await supabase.rpc("restore_item", { p_table: "time_blocks", p_id: slot.id });
       if (undoError) toast.error(errorMessage(undoError));
       else setSlots((all) => [...all, slot]);
+      router.refresh();
     });
   }
 

@@ -45,7 +45,7 @@ export function TrackerChart({ field, entries, days, today }: { field: Series["f
       {g.targetY !== null && (
         <g>
           <line x1="0" x2={W} y1={g.targetY} y2={g.targetY} className="stroke-ink-3" strokeWidth="1" strokeDasharray="5 5" />
-          <text x={W - 4} y={g.targetY - 5} textAnchor="end" className="fill-ink-3-small" fontSize="11">
+          <text x={52} y={g.targetY - 5} className="fill-ink-3-small" fontSize="11">
             target {fmt(field.target_value!)}
           </text>
         </g>

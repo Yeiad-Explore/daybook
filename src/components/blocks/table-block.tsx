@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, GripVertical, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { useSpace } from "@/components/space/space-context";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export function TableBlock({
   const { today, currency, weekStartsOn } = useSpace();
   const save = useSave();
   const toast = useToast();
+  const router = useRouter();
   const [columns, setColumns] = useServerState(serverColumns);
   const [rows, setRows] = useServerState(serverRows);
   const [manage, setManage] = useState(false);
@@ -101,10 +103,12 @@ export function TableBlock({
     const { error } = await supabase.from("table_rows").update({ deleted_at: new Date().toISOString() }).eq("id", row.id);
     if (error) return toast.error(errorMessage(error));
     setRows((all) => all.filter((r) => r.id !== row.id));
+    router.refresh();
     toast.undoable("Row moved to Trash.", async () => {
       const { error: undoError } = await supabase.rpc("restore_item", { p_table: "table_rows", p_id: row.id });
       if (undoError) toast.error(errorMessage(undoError));
       else setRows((all) => [...all, row]);
+      router.refresh();
     });
   }
 

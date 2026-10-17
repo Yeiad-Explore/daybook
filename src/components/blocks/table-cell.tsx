@@ -1,5 +1,6 @@
 "use client";
 
+import { format, parseISO } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { cx } from "@/lib/cx";
@@ -14,12 +15,12 @@ const DOT: Record<Tone, string> = {
   closed: "border border-ink-3 bg-transparent",
 };
 
-/** DESIGN.md "Table": ৳ prefix at 70% size, tabular figures. */
+/** DESIGN.md "Table": ৳ prefix smaller than the figures (85%, not 70%: Inter has no taka glyph and the fallback becomes unreadable), tabular figures. */
 export function MoneyText({ value, currency }: { value: number; currency: string }) {
   return (
     <span className="type-number tabular-nums">
       {value < 0 && "−"}
-      <span className="text-[0.7em]">{currencySymbol(currency)}</span>
+      <span className="text-[0.85em]">{currencySymbol(currency)}</span>
       {formatNumber(Math.abs(value))}
     </span>
   );
@@ -96,15 +97,45 @@ export function Cell({ column, value, onCommit, currency, label, disabled }: Cel
   }
 
   if (column.kind === "date") {
+    if (editing) {
+      // One write when the picker is done (Enter or leaving the field), not one per keystroke: typing a year
+      // fires a change for every valid prefix, and those writes could land out of order.
+      const done = (commit: boolean) => {
+        setEditing(false);
+        const next = draft || null;
+        const valid = next === null || "value" in parseCell(column, next);
+        if (commit && valid && next !== (value ?? null)) onCommit(next);
+      };
+      return (
+        <input
+          type="date"
+          autoFocus
+          disabled={disabled}
+          aria-label={label}
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={() => done(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") done(true);
+            if (e.key === "Escape") done(false);
+          }}
+          className="type-number min-h-11 w-full min-w-36 rounded-sm bg-canvas px-3 text-ink"
+        />
+      );
+    }
     return (
-      <input
-        type="date"
+      <button
+        type="button"
         disabled={disabled}
-        aria-label={label}
-        value={typeof value === "string" ? value : ""}
-        onChange={(e) => onCommit(e.target.value || null)}
-        className="type-number min-h-11 w-full min-w-36 rounded-sm bg-transparent px-3 text-ink hover:bg-canvas focus-visible:bg-canvas"
-      />
+        onClick={() => {
+          setDraft(typeof value === "string" ? value : "");
+          setEditing(true);
+        }}
+        className={cx(cellBase, "min-w-36 text-left")}
+      >
+        <span className="sr-only">{label}: </span>
+        {typeof value === "string" && value ? <span className="type-number">{format(parseISO(value), "d MMM yyyy")}</span> : <span className="text-ink-3-small">–</span>}
+      </button>
     );
   }
 

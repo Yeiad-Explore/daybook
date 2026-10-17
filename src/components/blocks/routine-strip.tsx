@@ -9,7 +9,7 @@ const LOOK: Record<State, string> = {
   complete: "bg-ink",
   partial: "bg-ink-4",
   missed: "border border-ink-3 bg-transparent",
-  not_scheduled: "bg-canvas-2",
+  not_scheduled: "bg-canvas-2 ring-1 ring-inset ring-hairline",
   open: "bg-lime ring-1 ring-ink", // today, not finished: lime means now
 };
 const WORDS: Record<State, string> = { complete: "complete", partial: "partial", missed: "missed", not_scheduled: "not scheduled", open: "today, in progress" };

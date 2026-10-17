@@ -4,6 +4,7 @@ import { QuickCaptureProvider } from "@/components/capture/capture";
 import type { IndexSpace } from "@/components/shell/index-nav";
 import { IndexNav } from "@/components/shell/index-nav";
 import { MobileIndex } from "@/components/shell/mobile-index";
+import { MidnightRefresh } from "@/components/shell/midnight-refresh";
 import { TopBar } from "@/components/shell/top-bar";
 import { getProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
@@ -40,6 +41,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <QuickCaptureProvider timezone={profile.timezone}>
+    <MidnightRefresh timezone={profile.timezone} today={today} />
     <div className="min-h-dvh">
       <a href="#content" className="type-button sr-only rounded-pill bg-surface px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50">
         Skip to content

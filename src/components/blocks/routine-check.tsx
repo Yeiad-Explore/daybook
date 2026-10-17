@@ -17,7 +17,7 @@ export function RoutineCheck({ label, checked, disabled, onToggle }: { label: st
         aria-hidden
         className={cx(
           "grid size-6 place-items-center rounded-pill border-[1.5px] transition-colors",
-          checked ? "border-surface-dark-fixed bg-surface-dark-fixed text-on-dark-fixed" : "border-ink-3 bg-transparent group-hover:border-ink",
+          checked ? "border-ink bg-surface-dark-fixed text-on-dark-fixed" : "border-ink-3 bg-transparent group-hover:border-ink",
         )}
       >
         {checked && <Check size={14} strokeWidth={2.25} />}

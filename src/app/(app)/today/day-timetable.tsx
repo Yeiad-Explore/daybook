@@ -66,7 +66,7 @@ export function DayTimetable({ slots, timezone }: { slots: TodaySlot[]; timezone
               style={{ top: y(p.from) + 10, height: Math.max(22, y(p.to) - y(p.from) - 2), left: `${(p.lane / p.lanes) * 100}%`, width: `calc(${100 / p.lanes}% - 3px)` }}
             >
               <p className="type-caption truncate font-medium text-ink">{p.title}</p>
-              {p.to - p.from >= 45 && <p className="type-caption truncate text-ink-3-small">{`${hhmm(p.startMin)} to ${hhmm(p.endMin)}`}</p>}
+              {p.to - p.from >= 60 && <p className="type-caption truncate text-ink-3-small">{`${hhmm(p.startMin)} to ${hhmm(p.endMin)}`}</p>}
             </div>
           ))}
           {now !== null && now >= DAY_START && (
@@ -83,21 +83,21 @@ export function DayTimetable({ slots, timezone }: { slots: TodaySlot[]; timezone
       ) : (
         <ul className="flex flex-col divide-y divide-hairline">
           {slots.map((s) => (
-            <li key={s.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
-              <span className="type-number w-24 shrink-0 text-ink-2">
-                {local(s.starts_at)} to {local(s.ends_at)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <Link href={blockHref(s)} prefetch={false} className="type-body block truncate underline-offset-4 hover:underline">
-                  {s.title}
-                </Link>
-                <p className="type-caption flex items-center gap-1.5 text-ink-3-small">
-                  <span aria-hidden data-mark={s.mark} className="size-2 rounded-pill bg-aura-mid" />
-                  {s.space_name}
-                </p>
+            <li key={s.id} className="flex flex-col gap-1 py-2.5">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="type-number text-ink-2">
+                  {local(s.starts_at)} to {local(s.ends_at)}
+                </span>
+                {overlapping.has(s.id) && <Tag>Overlaps</Tag>}
+                <Tag variant="outlined">{SYNC[s.sync_status]}</Tag>
               </div>
-              {overlapping.has(s.id) && <Tag>Overlaps</Tag>}
-              <Tag variant="outlined">{SYNC[s.sync_status]}</Tag>
+              <Link href={blockHref(s)} prefetch={false} className="type-body break-words underline-offset-4 hover:underline">
+                {s.title}
+              </Link>
+              <p className="type-caption flex items-center gap-1.5 text-ink-3-small">
+                <span aria-hidden data-mark={s.mark} className="size-2 rounded-pill bg-aura-mid" />
+                {s.space_name}
+              </p>
             </li>
           ))}
         </ul>

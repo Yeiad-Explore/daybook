@@ -76,6 +76,11 @@ function CropDialog({ file, space, onClose }: { file: File; space: Tables<"space
   const save = useSave();
   const toast = useToast();
   const [url] = useState(() => URL.createObjectURL(file));
+  // The preview URL is freed when the dialog closes (not in an effect cleanup: dev strict mode runs that at once).
+  const close = () => {
+    URL.revokeObjectURL(url);
+    onClose();
+  };
   const [focus, setFocus] = useState(50);
   const [busy, setBusy] = useState(false);
 
@@ -95,12 +100,15 @@ function CropDialog({ file, space, onClose }: { file: File; space: Tables<"space
       canvas.getContext("2d")!.drawImage(img, sx, sy, sw, sh, 0, 0, COVER_WIDTH, COVER_HEIGHT);
       const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/webp", 0.85));
       if (!blob) throw new Error("encode");
-      const path = `${space.owner_id}/${space.id}/cover.webp`;
-      const { error } = await createClient().storage.from("covers").upload(path, blob, { upsert: true, contentType: "image/webp" });
+      // Browsers without WebP encoding hand back a PNG; the file is named and typed for what it really is.
+      const ext = blob.type === "image/webp" ? "webp" : "png";
+      const path = `${space.owner_id}/${space.id}/cover.${ext}`;
+      const { error } = await createClient().storage.from("covers").upload(path, blob, { upsert: true, contentType: blob.type });
       if (error) throw error;
+      if (space.cover_path && space.cover_path !== path) await createClient().storage.from("covers").remove([space.cover_path]);
       await save.mutateAsync({ request: () => createClient().from("spaces").update({ cover_path: path }).eq("id", space.id) });
       toast.success("Cover saved.");
-      onClose();
+      close();
     } catch (error) {
       toast.error(error instanceof Error && ["decode", "encode"].includes(error.message) ? "That file couldn't be read as a photo. Try a JPEG, PNG or WebP." : errorMessage(error));
     } finally {
@@ -109,7 +117,7 @@ function CropDialog({ file, space, onClose }: { file: File; space: Tables<"space
   }
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && close()}>
       <DialogContent className="w-[min(40rem,calc(100%-2rem))]">
         <DialogTitle>Crop the cover</DialogTitle>
         <DialogDescription>This is the part that will show. Slide to choose which band of a tall photo to keep.</DialogDescription>
@@ -121,7 +129,7 @@ function CropDialog({ file, space, onClose }: { file: File; space: Tables<"space
           <input type="range" min={0} max={100} value={focus} onChange={(e) => setFocus(Number(e.target.value))} className="flex-1 accent-[var(--ink)]" aria-label="Vertical position of the crop" />
         </label>
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" onClick={close}>
             Cancel
           </Button>
           <Button variant="primary" disabled={busy} onClick={() => void upload()}>

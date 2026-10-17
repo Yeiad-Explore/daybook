@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { useToast } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
 import { useSave } from "@/lib/use-save";
@@ -30,6 +31,8 @@ export function useRoutine({
   const save = useSave();
   const toast = useToast();
   const [checked, setChecked] = useServerState(checkedIds);
+  // Writes go one after another: a quick double tap must not send the delete before the insert has landed.
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
   const isComplete = (ids: string[]) => scheduledToday && stepIds.length > 0 && stepIds.every((id) => ids.includes(id));
   const complete = isComplete(checked);
   const streak = streakBeforeToday + (complete ? 1 : 0);
@@ -44,13 +47,11 @@ export function useRoutine({
       toast.success(`Streak ${n} ${n === 1 ? "day" : "days"}. Every step is done.`);
     }
     const supabase = createClient();
-    save.mutate({
-      request: () =>
-        on
-          ? supabase.from("routine_checks").insert({ step_id: stepId, block_id: blockId, check_date: today })
-          : supabase.from("routine_checks").delete().eq("step_id", stepId).eq("check_date", today),
-      rollback: () => setChecked(previous),
-    });
+    const request = () =>
+      on
+        ? supabase.from("routine_checks").upsert({ step_id: stepId, block_id: blockId, check_date: today }, { onConflict: "step_id,check_date", ignoreDuplicates: true })
+        : supabase.from("routine_checks").delete().eq("step_id", stepId).eq("check_date", today);
+    queue.current = queue.current.then(() => save.mutateAsync({ request, rollback: () => setChecked(previous) }).catch(() => undefined));
   }
 
   return { checked, toggle, complete, streak };

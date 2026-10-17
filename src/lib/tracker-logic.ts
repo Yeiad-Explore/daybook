@@ -92,3 +92,26 @@ export function chartGeometry(entries: Entry[], days: number, today: string, wid
   const xTicks = [0, Math.round((days - 1) / 2), days - 1].map((i) => ({ x: x(i), date: addDaysTo(start, i) }));
   return { points, line, band, targetY: target === null ? null : y(target), yTicks, xTicks, baseline };
 }
+
+export type EntryRow = { field_id: string; block_id: string; entry_date: string; value: number };
+
+/**
+ * The entries to upsert from a log form (TRK-2): one per field with a number typed. Empty inputs are
+ * skipped, so they neither create nor clear an entry (AC2). Returns the first message when a value is not a number.
+ */
+export function entriesToLog(
+  fields: { id: string; label: string }[],
+  typed: (fieldId: string) => string,
+  blockId: string,
+  date: string,
+): { rows: EntryRow[] } | { error: string } {
+  const rows: EntryRow[] = [];
+  for (const f of fields) {
+    const text = typed(f.id).trim().replace(/,/g, "");
+    if (text === "") continue;
+    const value = Number(text);
+    if (!Number.isFinite(value)) return { error: `${f.label}: enter a number, like 77.2.` };
+    rows.push({ field_id: f.id, block_id: blockId, entry_date: date, value });
+  }
+  return rows.length === 0 ? { error: "Enter at least one value to log." } : { rows };
+}
