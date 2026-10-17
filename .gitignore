@@ -25,6 +25,8 @@ supabase/.temp
 
 # local notes and agent config stay off the remote
 *.md
+# The design source stays tracked: tokens.css is generated from it and tests read it.
+!DESIGN.md
 .claude/
 
 # misc
