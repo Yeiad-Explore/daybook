@@ -1,5 +1,5 @@
 ---
-version: 2.2  # 2.1/2.2 (16 Oct 2026): WCAG AA colour rules (ink-3-small, signal-ink, control borders, text on glass), see docs/adr/0003
+version: 2.3  # 2.3 (17 Oct 2026): control-edge, light theme default. 2.1/2.2 (16 Oct 2026): WCAG AA colour rules (ink-3-small, signal-ink, control borders, text on glass), see docs/adr/0003
 name: Daybook
 status: "Working name. Replace 'Daybook' everywhere once the final product name is chosen."
 inspiration: "Aesthetic extracted from the 'Synex – AI Fintech Website' concept by Awsmd (Dribbble). Inspiration only: no Synex name, logo, copy, photography or other assets are reused. Daybook is an original implementation of the same visual language."
@@ -25,6 +25,7 @@ colors:
   hairline: "#E6E8E8"
   hairline-strong: "#D3D6D6"
   hairline-glass: "rgba(255,255,255,0.45)"     # 1px edge on glass panels
+  control-edge: "rgba(0,0,0,0)"   # inset edge on canvas-2 controls; none in light, visible in dark (v2.3)
   # Accent
   lime: "#E9FF6A"             # electric lime (sampled #ECFF6E): NOW marker, live dots, one hero CTA, trend arrows on dark
   lime-soft: "#E8E9C7"        # pale lime card (sampled #E8E9C7): Routine card, highlighted column
@@ -57,6 +58,7 @@ colors-dark:
   hairline: "#242727"
   hairline-strong: "#323636"
   hairline-glass: "rgba(255,255,255,0.10)"
+  control-edge: "#323636"
   lime: "#E9FF6A"
   lime-soft: "#2C2F1C"
   lime-ink: "#D6F25A"
@@ -543,6 +545,7 @@ Touch targets ≥44px on touch devices. The page never scrolls sideways; wide ta
 - Text contrast ≥4.5:1 (body) and ≥3:1 (large numbers) on every surface, including glass and auras; use a 20–40% scrim behind text on busy auras.
 - On light glass over an aura, small text is `{colors.ink}` (greys fall below 4.5:1 where the aura is deep); greys only for text 24px and larger. Small `{colors.on-dark}` text never sits directly on an aura: only on the dark fade of a dark aura card or on a 30% scrim.
 - Control boundaries (checkboxes, inputs) are ≥3:1: `{colors.ink-3}`. Hairlines are only for separators and panels.
+- Secondary buttons, segmented-control items and other canvas-2 pills carry a 1px inset `{colors.control-edge}`: transparent in light (the look is unchanged), #323636 in dark, where canvas-2 is almost the colour of the surface and the pill would otherwise vanish (v2.3).
 - On dark glass, small text is full `{colors.on-dark}`; `{colors.on-dark-2}` only for text 24px and larger.
 - Aura cards and dark glass look the same in both themes: they use the light-theme values of surface-dark, on-dark and on-dark-2 (the dark theme inverts those only for primary buttons).
 - Focus is always visible (lime-soft ring + ink border).

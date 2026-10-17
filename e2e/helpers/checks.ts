@@ -7,7 +7,12 @@ export const themes = ["light", "dark"] as const;
 
 /** Applies a theme the way the saved profile setting will (data-theme on <html>). */
 export async function applyTheme(page: Page, theme: "light" | "dark" | "system") {
-  await page.evaluate((t) => (document.documentElement.dataset.theme = t), theme);
+  await page.evaluate(async (t) => {
+    document.documentElement.dataset.theme = t;
+    // Let the colour transitions this starts finish, so checks read the final colours, not a mid-fade.
+    await new Promise(requestAnimationFrame);
+    await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
+  }, theme);
 }
 
 export async function expectNoHorizontalScroll(page: Page, view = "") {

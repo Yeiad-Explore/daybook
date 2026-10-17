@@ -9,16 +9,21 @@ test.describe.configure({ mode: "serial" });
 test.use({ storageState: OWNER_STATE });
 
 const saved = (page: import("@playwright/test").Page) => expect(page.getByText("Saved.").last()).toBeVisible();
+// Interacting before React hydrates is lost: hydration resets the fields to their saved values.
+const hydrated = (page: import("@playwright/test").Page) =>
+  page.waitForFunction(() => Object.keys(document.getElementById("timezone") ?? {}).some((k) => k.startsWith("__reactProps")));
 
 test("SET-1: the theme takes effect at once and persists across reloads", async ({ page }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/settings");
+  await hydrated(page);
   const theme = page.getByRole("radiogroup", { name: "Theme" });
   await theme.getByRole("radio", { name: "Dark" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await saved(page);
   await page.reload();
+  await hydrated(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.getByRole("radiogroup", { name: "Theme" }).getByRole("radio", { checked: true })).toHaveText("Dark");
   await page.getByRole("radiogroup", { name: "Theme" }).getByRole("radio", { name: "Light" }).click();
@@ -29,6 +34,7 @@ test("SET-1: the theme takes effect at once and persists across reloads", async 
 
 test("SET-1: changing the timezone re-computes today (TODAY-1)", async ({ page }) => {
   await page.goto("/settings");
+  await hydrated(page);
   const pill = page.locator("header time");
   for (const tz of ["Pacific/Kiritimati", "Asia/Dhaka"]) {
     await page.getByLabel("Timezone").selectOption(tz);
@@ -39,6 +45,7 @@ test("SET-1: changing the timezone re-computes today (TODAY-1)", async ({ page }
 
 test("SET-1: week start, currency and name persist; an invalid currency is explained and not saved", async ({ page }) => {
   await page.goto("/settings");
+  await hydrated(page);
   await page.getByRole("radiogroup", { name: "Week starts on" }).getByRole("radio", { name: "Mon" }).click();
   await saved(page);
   await page.getByLabel("Currency").fill("BD"); // 2 letters (the field stops at 3)
@@ -51,6 +58,7 @@ test("SET-1: week start, currency and name persist; an invalid currency is expla
   await saved(page);
 
   await page.reload();
+  await hydrated(page);
   await expect(page.getByRole("radiogroup", { name: "Week starts on" }).getByRole("radio", { checked: true })).toHaveText("Mon");
   await expect(page.getByLabel("Currency")).toHaveValue("USD");
   await expect(page.getByLabel("Display name")).toHaveValue("Kabid");
@@ -66,6 +74,7 @@ test("AUTH-3 AC3: Sign out ends the session on this device", async ({ browser })
   const context = await browser.newContext({ storageState: SIGN_OUT_STATE });
   const page = await context.newPage();
   await page.goto("/settings");
+  await hydrated(page);
   await page.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/login$/);
   await page.goto("/today");

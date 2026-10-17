@@ -62,7 +62,7 @@ export function IndexNav({
       {list.map((s) =>
         item(`/s/${s.id}`, s.name, {
           exact: false,
-          leading: <span aria-hidden data-mark={s.mark} className="size-2.5 shrink-0 rounded-pill bg-aura-mid" />,
+          leading: <span aria-hidden data-mark={s.mark} className="size-2.5 shrink-0 rounded-pill bg-aura-light" />, // light stop: mid is lost on dark glass
           trailing:
             s.daysLeft === null ? undefined : (
               <span className="type-number shrink-0">

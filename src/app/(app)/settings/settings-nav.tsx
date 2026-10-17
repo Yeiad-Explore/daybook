@@ -24,7 +24,7 @@ export function SettingsNav() {
             aria-current={active ? "page" : undefined}
             className={cx(
               "type-button rounded-pill px-3 py-1.5 pointer-coarse:min-h-11 pointer-coarse:py-3",
-              active ? "bg-surface text-ink shadow-card" : "text-ink-3-small hover:text-ink",
+              active ? "bg-surface text-ink shadow-card ring-1 ring-inset ring-control-edge" : "text-ink-3-small hover:text-ink",
             )}
           >
             {t.label}

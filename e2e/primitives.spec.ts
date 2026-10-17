@@ -154,6 +154,15 @@ test.describe("dark theme: overlays and highlights stay visible", () => {
     expect(ratio(item, menu)).toBeGreaterThanOrEqual(1.3);
   });
 
+  test("secondary buttons and the active segment keep a visible edge on dark panels", async ({ page }) => {
+    // Their fill (canvas-2) is almost the dark surface's colour, so the shape comes from control-edge.
+    const shadows = await page.evaluate(() => [
+      getComputedStyle([...document.querySelectorAll("button")].find((b) => b.textContent === "Add to Google Calendar")!).boxShadow,
+      getComputedStyle(document.querySelector("[role=radiogroup] [aria-checked=true]")!).boxShadow,
+    ]);
+    for (const shadow of shadows) expect(shadow).toContain("rgb(50, 54, 54)"); // dark control-edge #323636
+  });
+
   test("the selected palette item stands out from the palette", async ({ page }) => {
     await page.getByRole("button", { name: "Open command palette" }).click();
     await page.keyboard.press("ArrowDown");

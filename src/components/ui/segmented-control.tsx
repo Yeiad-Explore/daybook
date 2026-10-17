@@ -51,7 +51,7 @@ export function SegmentedControl<T extends string>({
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cx(
               "type-button rounded-pill px-2.5 py-1.5 text-[12px] transition-colors pointer-coarse:min-h-11",
-              checked ? "bg-surface text-ink shadow-card" : "text-ink-3-small hover:text-ink",
+              checked ? "bg-surface text-ink shadow-card ring-1 ring-inset ring-control-edge" : "text-ink-3-small hover:text-ink",
             )}
           >
             {option.label}

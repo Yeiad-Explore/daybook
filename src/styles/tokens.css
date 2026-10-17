@@ -47,6 +47,7 @@
   --color-hairline: var(--hairline);
   --color-hairline-strong: var(--hairline-strong);
   --color-hairline-glass: var(--hairline-glass);
+  --color-control-edge: var(--control-edge);
   --color-lime: var(--lime);
   --color-lime-soft: var(--lime-soft);
   --color-lime-ink: var(--lime-ink);
@@ -97,6 +98,7 @@
   --hairline: #E6E8E8;
   --hairline-strong: #D3D6D6;
   --hairline-glass: rgba(255,255,255,0.45);
+  --control-edge: rgba(0,0,0,0);
   --lime: #E9FF6A;
   --lime-soft: #E8E9C7;
   --lime-ink: #4F6B1F;
@@ -163,6 +165,7 @@
   --hairline: #242727;
   --hairline-strong: #323636;
   --hairline-glass: rgba(255,255,255,0.10);
+  --control-edge: #323636;
   --lime: #E9FF6A;
   --lime-soft: #2C2F1C;
   --lime-ink: #D6F25A;
@@ -189,6 +192,7 @@
     --hairline: #242727;
     --hairline-strong: #323636;
     --hairline-glass: rgba(255,255,255,0.10);
+    --control-edge: #323636;
     --lime: #E9FF6A;
     --lime-soft: #2C2F1C;
     --lime-ink: #D6F25A;

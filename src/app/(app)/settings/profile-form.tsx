@@ -13,6 +13,8 @@ import type { Profile } from "@/lib/profile";
 import { profileFields, WEEK_STARTS, type ProfileFields } from "@/lib/profile-schema";
 import { createClient } from "@/lib/supabase/client";
 
+type ProfilePatch = Partial<Omit<Profile, "name">>; // name is derived, not a column
+
 const THEMES = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
@@ -61,7 +63,7 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
   });
 
   const save = useMutation({
-    mutationFn: async (patch: Partial<Profile>) => {
+    mutationFn: async (patch: ProfilePatch) => {
       const { error } = await createClient().from("profiles").update(patch).eq("id", profile.id);
       if (error) throw error;
     },
@@ -98,7 +100,7 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
     const next = name === "display_name" ? ((value as string) || null) : value;
     if (next === saved[name]) return;
     if (name === "currency") form.setValue("currency", value as string);
-    save.mutate({ [name]: next } as Partial<Profile>);
+    save.mutate({ [name]: next } as ProfilePatch);
   }
 
   const { errors } = form.formState;

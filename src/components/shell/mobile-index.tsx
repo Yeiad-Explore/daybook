@@ -12,7 +12,7 @@ export function MobileIndex(props: { name: string; spaces: IndexSpace[]; archive
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       <DialogPrimitive.Trigger
         aria-label="Open the Index"
-        className="grid size-11 place-items-center rounded-pill bg-canvas-2 text-ink laptop:hidden"
+        className="grid size-11 place-items-center rounded-pill bg-canvas-2 text-ink ring-1 ring-inset ring-control-edge laptop:hidden"
       >
         <Menu size={18} strokeWidth={1.5} aria-hidden />
       </DialogPrimitive.Trigger>

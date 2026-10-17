@@ -8,6 +8,8 @@ export type Profile = {
   week_starts_on: number;
   currency: string;
   theme: "system" | "light" | "dark";
+  /** What to call the owner: display name, else the Google account name, else the email. */
+  name: string;
 };
 
 /** The signed-in owner's profile, once per request (null when signed out). */
@@ -20,5 +22,7 @@ export const getProfile = cache(async (): Promise<Profile | null> => {
     .select("id, display_name, timezone, week_starts_on, currency, theme")
     .eq("id", claims.claims.sub)
     .maybeSingle();
-  return data;
+  if (!data) return null;
+  const meta = claims.claims.user_metadata as { full_name?: string } | undefined;
+  return { ...data, name: data.display_name ?? meta?.full_name ?? claims.claims.email ?? "You" };
 });

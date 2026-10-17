@@ -25,7 +25,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     .filter((s) => s.status === "active")
     .map((s) => ({ id: s.id, kind: s.kind, name: s.name, mark: s.mark, daysLeft: s.deadline ? daysLeft(s.deadline, today) : null }));
   const archivedCount = (rows ?? []).filter((s) => s.status === "archived").length;
-  const index = { name: profile.display_name ?? "Daybook", spaces, archivedCount };
+  const index = { name: profile.name, spaces, archivedCount };
 
   return (
     <div className="min-h-dvh">
