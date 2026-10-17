@@ -9,7 +9,9 @@ import type { BlockActions } from "@/components/blocks/block-frame";
 import { NotesBlock } from "@/components/blocks/notes-block";
 import { RoadmapBlock } from "@/components/blocks/roadmap-block";
 import { LaterBlock, SlotsBlock } from "@/components/blocks/simple-blocks";
+import { TableBlock } from "@/components/blocks/table-block";
 import { TodoBlock } from "@/components/blocks/todo-block";
+import { TrackerBlock } from "@/components/blocks/tracker-block";
 import { useTrash } from "@/components/deadlines/use-trash";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sortable, type DragHandle } from "@/components/ui/sortable";
@@ -41,6 +43,9 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
   // Stable per-block arrays: they change only when the server data does, so a re-render (a toast,
   // a menu) never resets a block's optimistic state.
   const tasksByBlock = useMemo(() => Map.groupBy(data.tasks, (t) => t.block_id), [data.tasks]);
+  const fieldsByBlock = useMemo(() => Map.groupBy(data.trackerFields, (f) => f.block_id), [data.trackerFields]);
+  const columnsByBlock = useMemo(() => Map.groupBy(data.columns, (c) => c.block_id), [data.columns]);
+  const rowsByBlock = useMemo(() => Map.groupBy(data.rows, (r) => r.block_id), [data.rows]);
   const slotsByBlock = useMemo(() => Map.groupBy(data.slots, (s) => s.block_id), [data.slots]);
 
   useEffect(() => {
@@ -107,6 +112,12 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
         return <RoadmapBlock {...common} tasks={tasks} setConfig={setConfig} />;
       case "notes":
         return <NotesBlock {...common} body={(data.notes.find((n) => n.block_id === block.id)?.body ?? null) as JSONContent | null} />;
+      case "table":
+        return <TableBlock {...common} setConfig={setConfig} columns={columnsByBlock.get(block.id) ?? NONE} rows={rowsByBlock.get(block.id) ?? NONE} />;
+      case "tracker":
+        return (
+          <TrackerBlock {...common} setConfig={setConfig} fields={fieldsByBlock.get(block.id) ?? NONE} series={data.series} />
+        );
       case "timeblock":
         return <SlotsBlock {...common} slots={slotsByBlock.get(block.id) ?? NONE} />;
       default:

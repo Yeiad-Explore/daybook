@@ -9,6 +9,9 @@ export type SpaceCtx = {
   /** The owner's local date (TODAY-1) and timezone (NFR-6). */
   today: string;
   timezone: string;
+  /** Profile currency (ISO 4217) and the first day of the week (0 = Sunday), for money and date filters. */
+  currency: string;
+  weekStartsOn: number;
   /** Blocks on this page (TODO-6 books time in the first Time block here). */
   blocks: Block[];
 };

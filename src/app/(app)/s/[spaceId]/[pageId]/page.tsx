@@ -25,6 +25,8 @@ export default async function SpacePagePage({ params }: PageProps<"/s/[spaceId]/
     pageId,
     today: summary.today,
     timezone: profile.timezone,
+    currency: profile.currency,
+    weekStartsOn: profile.week_starts_on,
     blocks: data.blocks,
   };
 

@@ -59,7 +59,7 @@ export function BlockFrame({
       onKeyDown={onKeyDown}
       style={style}
       className={cx(
-        "group/block relative col-span-12 scroll-mt-24 rounded-lg bg-surface p-5 shadow-card tablet:p-6",
+        "group/block relative col-span-12 min-w-0 scroll-mt-24 rounded-lg bg-surface p-5 shadow-card tablet:p-6",
         SPAN_CLASS[block.span],
         dragging && "shadow-float",
       )}

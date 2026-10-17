@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 
-export type Ordered = "spaces" | "pages" | "blocks" | "tasks";
+export type Ordered = "spaces" | "pages" | "blocks" | "tasks" | "tracker_fields" | "table_columns" | "table_rows" | "routine_steps";
 
 /**
  * The `reorder` RPC (§9.3 fractional index). `before` / `after` are the new neighbours; null at
