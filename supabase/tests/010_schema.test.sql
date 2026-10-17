@@ -71,7 +71,7 @@ select lives_ok(
   'a page without a title gets the default'
 );
 select is(
-  (select count(*)::int from public.pages where title = 'Untitled page'), 1,
+  (select count(*)::int from public.pages where title = 'Untitled page' and owner_id = tests.uid('owner@test.local')), 1,
   'default page title is "Untitled page"'
 );
 

@@ -14,3 +14,9 @@ minimumReleaseAgeExclude:
   - '@next/swc-win32-x64-msvc@16.4.2'
   - eslint-config-next@16.4.2
   - next@16.4.2
+
+# CONSTRAINTS.md exception E3: GHSA-vfj7-8cjw-p6xm (braces <=3.0.3, high) reaches us only through
+# eslint-config-next (lint tooling, never shipped). No patched release exists yet (3.0.3 is the latest).
+auditConfig:
+  ignoreGhsas:
+    - GHSA-vfj7-8cjw-p6xm
