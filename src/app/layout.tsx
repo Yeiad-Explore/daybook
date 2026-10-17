@@ -18,7 +18,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // Light unless the owner chose dark or "system" (SET-1). Set on the server, so no flash on load.
   const theme = (await getProfile())?.theme ?? "light";
   return (
-    <html lang="en" data-theme={theme} className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="en" data-theme={theme} suppressHydrationWarning className={`${inter.variable} ${interTight.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>
