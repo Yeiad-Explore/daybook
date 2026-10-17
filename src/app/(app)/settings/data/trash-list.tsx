@@ -13,7 +13,7 @@ import type { TrashEntry } from "@/lib/trash";
 import { useSave } from "@/lib/use-save";
 import { useServerState } from "@/lib/use-server-state";
 
-const KIND = { spaces: "Space", pages: "Page", blocks: "Block", tasks: "Task" } as const;
+const KIND = { spaces: "Space", pages: "Page", blocks: "Block", tasks: "Task", table_rows: "Row", time_blocks: "Slot" } as const;
 
 /** SET-3: restore puts an item back (the database re-checks the deadline rules, DL-13); delete forever is final. */
 export function TrashList({ entries: serverEntries, today, timezone }: { entries: TrashEntry[]; today: string; timezone: string }) {
@@ -62,7 +62,7 @@ export function TrashList({ entries: serverEntries, today, timezone }: { entries
             <DialogTitle>Delete forever?</DialogTitle>
             <DialogDescription>
               <span className="text-ink">{forever.name}</span>
-              {forever.table === "tasks" ? "" : " and everything in it"} will be gone. This can&apos;t be undone.
+              {["tasks", "table_rows", "time_blocks"].includes(forever.table) ? "" : " and everything in it"} will be gone. This can&apos;t be undone.
               {forever.table === "spaces" ? " Its deadline history goes with it." : " Its deadline history stays."}
             </DialogDescription>
             <div className="flex justify-end gap-2">
