@@ -95,6 +95,7 @@ test("TRK-4, TRK-5, TRK-6: history edit and delete, logging streak, archiving ke
 });
 
 test("Tracker passes layout and accessibility checks in light and dark at 400 and 1440px", async ({ page }) => {
+  test.slow(); // four page loads, each with an accessibility scan
   const s = await seedSpace({ name: unique("Body"), kind: "area" });
   const block = await seedBlock(s, "tracker", "Body & food");
   const weight = await seedField(s, block, "Weight", { unit: "kg", target_value: 72, target_kind: "reach" });

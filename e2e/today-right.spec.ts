@@ -69,6 +69,7 @@ test("Trackers card: 'Log today' until today has values, then 'Logged'; the form
 });
 
 test("Today with the right column passes layout and accessibility checks in light and dark at 400 and 1440px", async ({ page }) => {
+  test.slow(); // four page loads, each with an accessibility scan
   const s = await seedSpace({ name: unique("Study"), kind: "area" });
   const slots = await seedBlock(s, "timeblock", "Study sessions", 6);
   await seedSlot(s, slots, unique("Reading"), at(day(0), "10:00"), at(day(0), "11:00"));

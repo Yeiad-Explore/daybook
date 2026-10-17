@@ -110,10 +110,10 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
               )}
             </div>
             <div className="flex items-center">
-              <button type="button" aria-label={`Edit ${s.title}`} onClick={() => setEditing(s)} className="grid size-9 place-items-center rounded-pill text-ink-2 hover:bg-canvas-2 pointer-coarse:size-11">
+              <button type="button" aria-label={`Edit ${s.title}`} disabled={s.id.startsWith("new-")} onClick={() => setEditing(s)} className="grid size-9 place-items-center rounded-pill text-ink-2 hover:bg-canvas-2 pointer-coarse:size-11">
                 <Pencil size={14} strokeWidth={1.5} aria-hidden />
               </button>
-              <button type="button" aria-label={`Delete ${s.title}`} onClick={() => void trash(s)} className="grid size-9 place-items-center rounded-pill text-ink-2 hover:bg-canvas-2 pointer-coarse:size-11">
+              <button type="button" aria-label={`Delete ${s.title}`} disabled={s.id.startsWith("new-")} onClick={() => void trash(s)} className="grid size-9 place-items-center rounded-pill text-ink-2 hover:bg-canvas-2 pointer-coarse:size-11">
                 <Trash2 size={14} strokeWidth={1.5} aria-hidden />
               </button>
             </div>

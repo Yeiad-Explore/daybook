@@ -75,6 +75,7 @@ test("TBL-3, TBL-4, TBL-7: ledger strip, summary footer and month groups with th
   await seedRow(s, block, cols, { Date: "2026-10-02", Item: "Retainer", Amount: 18000 });
   await seedRow(s, block, cols, { Date: "2026-10-05", Item: "Groceries", Amount: -3400.5 });
   await open(page, s);
+  await hydrated(page, "#table-group");
   const strip = page.getByLabel("Income, expenses and net for the rows shown");
   await expect(strip).toContainText("৳43,000");
   await expect(strip).toContainText("৳15,400.5");
@@ -119,6 +120,7 @@ test("TBL-5 AC: 'What I ate' filtered to Date = today shows only today's meals a
 });
 
 test("Table passes layout and accessibility checks in light and dark at 400 and 1440px", async ({ page }) => {
+  test.slow(); // four page loads, each with an accessibility scan
   const s = await seedSpace({ name: unique("Ledger"), kind: "area" });
   const block = await seedBlock(s, "table", "Client pipeline");
   const cols = await seedColumns(s, block, [

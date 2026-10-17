@@ -2,13 +2,14 @@ import { Check } from "lucide-react";
 import { cx } from "@/lib/cx";
 
 /** DESIGN.md "Routine card": a circular check at the end of the row, black when done (never colour alone: it holds a tick). */
-export function RoutineCheck({ label, checked, onToggle }: { label: string; checked: boolean; onToggle: () => void }) {
+export function RoutineCheck({ label, checked, disabled, onToggle }: { label: string; checked: boolean; disabled?: boolean; onToggle: () => void }) {
   return (
     <button
       type="button"
       role="checkbox"
       aria-checked={checked}
       aria-label={label}
+      disabled={disabled}
       onClick={onToggle}
       className="group grid size-11 shrink-0 place-items-center rounded-pill"
     >

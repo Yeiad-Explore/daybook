@@ -186,10 +186,10 @@ function LogForm({
     if (rows.length === 0) return setProblem("Enter at least one value to log.");
     setProblem(null);
     onLogged(rows);
-    save.mutate(
-      { request: () => createClient().from("tracker_entries").upsert(rows, { onConflict: "field_id,entry_date" }) },
-      { onSuccess: () => setTyped({}) },
-    );
+    // The typed text is dropped now, not when the save lands: the optimistic series already holds it,
+    // and clearing later would wipe whatever was typed in between.
+    setTyped((t) => Object.fromEntries(Object.entries(t).filter(([key]) => !rows.some((r) => key === `${date}:${r.field_id}`))));
+    save.mutate({ request: () => createClient().from("tracker_entries").upsert(rows, { onConflict: "field_id,entry_date" }) });
   }
 
   return (

@@ -145,13 +145,14 @@ export function TableBlock({
             column={c}
             value={row.cells[c.id]}
             currency={currency}
+            disabled={row.id.startsWith("new-")}
             label={`${c.name}, row ${rows.indexOf(row) + 1}`}
             onCommit={(value) => editCell(row, c, value)}
           />
         </td>
       ))}
       <td className="w-10 px-1">
-        <button type="button" aria-label={`Delete row ${rows.indexOf(row) + 1}`} onClick={() => void trashRow(row)} className="grid size-8 place-items-center rounded-pill text-ink-2 opacity-0 hover:bg-canvas-2 group-hover/row:opacity-100 focus-visible:opacity-100 pointer-coarse:size-11 pointer-coarse:opacity-100">
+        <button type="button" aria-label={`Delete row ${rows.indexOf(row) + 1}`} disabled={row.id.startsWith("new-")} onClick={() => void trashRow(row)} className="grid size-8 place-items-center rounded-pill text-ink-2 opacity-0 hover:bg-canvas-2 group-hover/row:opacity-100 focus-visible:opacity-100 pointer-coarse:size-11 pointer-coarse:opacity-100">
           <Trash2 size={14} strokeWidth={1.5} aria-hidden />
         </button>
       </td>

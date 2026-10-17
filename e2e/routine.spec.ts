@@ -82,6 +82,7 @@ test("RT-2: a routine can be limited to weekdays; today is marked when it is not
 });
 
 test("Routine passes layout and accessibility checks in light and dark at 400 and 1440px", async ({ page }) => {
+  test.slow(); // four page loads, each with an accessibility scan
   const s = await seedSpace({ name: unique("Skincare"), kind: "area" });
   await morning(s);
   await checkScreen(page, `/s/${s.spaceId}/${s.pageId}`);

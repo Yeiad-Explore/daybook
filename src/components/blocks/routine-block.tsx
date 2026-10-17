@@ -92,13 +92,16 @@ export function RoutineBlock({
     save.mutate({ request: () => reorderRequest("routine_steps", steps[from].id, before, after), rollback: () => setSteps(previous) });
   }
 
-  const row = (step: RoutineStep, handle: DragHandle) => (
+  const row = (step: RoutineStep, handle: DragHandle) => {
+    const saving = step.id.startsWith("new-"); // not saved yet: nothing can be written against its id
+    return (
     <li key={step.id} ref={handle.ref as never} style={handle.style} className={cx("group/step flex items-center gap-1 border-t border-hairline first:border-t-0", handle.dragging && "rounded-md bg-surface shadow-float")}>
       <button type="button" aria-label={`Move ${step.label} (drag, or Space and arrow keys)`} {...handle.handle} className="grid h-8 w-6 shrink-0 cursor-grab place-items-center rounded-sm text-ink-3-small opacity-0 group-hover/step:opacity-100 focus-visible:opacity-100 pointer-coarse:hidden">
         <GripVertical size={14} strokeWidth={1.5} aria-hidden />
       </button>
       <input
         aria-label={`Step: ${step.label}`}
+        disabled={saving}
         defaultValue={step.label}
         key={step.label}
         maxLength={80}
@@ -110,12 +113,13 @@ export function RoutineBlock({
         onKeyDown={(e) => e.key === "Enter" && e.currentTarget.blur()}
         className={cx("type-body min-h-11 min-w-0 flex-1 rounded-sm bg-transparent px-2 hover:bg-canvas", routine.checked.includes(step.id) && "text-ink-2")}
       />
-      <button type="button" aria-label={`Archive ${step.label}`} onClick={() => archive(step)} className="grid size-9 place-items-center rounded-pill text-ink-3-small opacity-0 hover:bg-canvas-2 group-hover/step:opacity-100 focus-visible:opacity-100 pointer-coarse:size-11 pointer-coarse:opacity-100">
+      <button type="button" aria-label={`Archive ${step.label}`} disabled={saving} onClick={() => archive(step)} className="grid size-9 place-items-center rounded-pill text-ink-3-small opacity-0 hover:bg-canvas-2 group-hover/step:opacity-100 focus-visible:opacity-100 pointer-coarse:size-11 pointer-coarse:opacity-100">
         <X size={14} strokeWidth={1.5} aria-hidden />
       </button>
-      <RoutineCheck label={`Done: ${step.label}`} checked={routine.checked.includes(step.id)} onToggle={() => routine.toggle(step.id)} />
+      <RoutineCheck label={`Done: ${step.label}`} checked={routine.checked.includes(step.id)} disabled={saving} onToggle={() => routine.toggle(step.id)} />
     </li>
-  );
+    );
+  };
 
   return (
     <BlockFrame block={block} actions={actions} drag={drag} controls={<SchedulePopover days={days} weekStartsOn={weekStartsOn} onChange={(next) => setConfig({ ...config, days: next })} />}>

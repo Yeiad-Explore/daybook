@@ -90,6 +90,7 @@ test("Cover photo: upload and crop, shown behind the hero, then remove", async (
 });
 
 test("Space settings with the progress and cover panels pass layout and accessibility checks", async ({ page }) => {
+  test.slow(); // four page loads, each with an accessibility scan
   const s = await seedSpace({ name: unique("Health"), kind: "goal", deadline: day(90) });
   const block = await seedBlock(s, "tracker", "Body");
   await seedField(s, block, "Weight", { unit: "kg" });

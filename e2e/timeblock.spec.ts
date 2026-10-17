@@ -76,6 +76,7 @@ test("slots can be edited and deleted with Undo", async ({ page }) => {
 });
 
 test("Time block passes layout and accessibility checks in light and dark at 400 and 1440px", async ({ page }) => {
+  test.slow(); // four page loads, each with an accessibility scan
   const s = await seedSpace({ name: unique("Study"), kind: "area" });
   const block = await seedBlock(s, "timeblock", "Study sessions", 6);
   await seedSlot(s, block, "Reading", at(day(1), "09:00"), at(day(1), "10:00"));

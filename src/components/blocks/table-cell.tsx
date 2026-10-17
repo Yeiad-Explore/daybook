@@ -45,10 +45,12 @@ export type CellProps = {
   currency: string;
   /** For screen readers: "Calories, Rice and fish". */
   label: string;
+  /** The row is still being saved: it cannot be edited until it has its real id. */
+  disabled?: boolean;
 };
 
 /** One editable cell. Click to edit text, number, money and url; native controls for date, select and checkbox. */
-export function Cell({ column, value, onCommit, currency, label }: CellProps) {
+export function Cell({ column, value, onCommit, currency, label, disabled }: CellProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +60,7 @@ export function Cell({ column, value, onCommit, currency, label }: CellProps) {
       <div className="flex min-h-11 items-center justify-center">
         <input
           type="checkbox"
+          disabled={disabled}
           aria-label={label}
           checked={value === true}
           onChange={(e) => onCommit(e.target.checked)}
@@ -72,6 +75,7 @@ export function Cell({ column, value, onCommit, currency, label }: CellProps) {
     return (
       <div className="relative flex min-h-11 items-center px-2">
         <select
+          disabled={disabled}
           aria-label={label}
           value={typeof value === "string" ? value : ""}
           onChange={(e) => onCommit(e.target.value || null)}
@@ -95,6 +99,7 @@ export function Cell({ column, value, onCommit, currency, label }: CellProps) {
     return (
       <input
         type="date"
+        disabled={disabled}
         aria-label={label}
         value={typeof value === "string" ? value : ""}
         onChange={(e) => onCommit(e.target.value || null)}
@@ -166,7 +171,7 @@ export function Cell({ column, value, onCommit, currency, label }: CellProps) {
 
   return (
     <div className="flex items-center">
-      <button type="button" onClick={start} className={cx(cellBase, align)}>
+      <button type="button" disabled={disabled} onClick={start} className={cx(cellBase, align)}>
         <span className="sr-only">{label}: </span>
         {display()}
       </button>
