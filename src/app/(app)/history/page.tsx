@@ -20,7 +20,8 @@ const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : u
 /**
  * PRD §5.7 /history: every reschedule and late deletion (DL-7, DL-11, DL-14), newest first, with the
  * days moved and whether it was late at the time; filters by space and date range; this month's
- * totals per space.
+ * totals per space. The table scrolls inside its panel on phones; that box is `relative` so screen-reader
+ * text in it (position: absolute) cannot widen the page.
  */
 export default async function HistoryPage({ searchParams }: PageProps<"/history">) {
   const profile = await getProfile();
@@ -103,7 +104,7 @@ export default async function HistoryPage({ searchParams }: PageProps<"/history"
         {(rows ?? []).length === 0 ? (
           <p className="type-body text-ink-2">{space || from || to ? "No moved deadlines match these filters." : "No deadline has moved yet."}</p>
         ) : (
-          <div tabIndex={0} role="region" aria-label="Deadline history table" className="-mx-6 overflow-x-auto px-6">
+          <div tabIndex={0} role="region" aria-label="Deadline history table" className="relative -mx-6 overflow-x-auto px-6">
             <table className="w-full min-w-[56rem] border-collapse text-left">
               <caption className="sr-only">Moved and deleted deadlines, newest first</caption>
               <thead>

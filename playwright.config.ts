@@ -9,6 +9,9 @@ export default defineConfig({
   testDir: "e2e",
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
+  // A dev server compiling routes under parallel workers can take over 5 s for a server round trip;
+  // the app's own budget (NFR-1) is met by optimistic updates, which the assertions see at once.
+  expect: { timeout: 10_000 },
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",

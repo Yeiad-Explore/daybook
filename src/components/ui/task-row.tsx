@@ -85,14 +85,14 @@ export function TaskRow({
         </div>
         {detail}
         {source && (
-          <p className="type-caption flex items-center gap-1.5 text-ink-3-small">
+          <p className="type-caption flex min-w-0 items-center gap-1.5 text-ink-3-small">
             <span aria-hidden data-mark={source.mark} className="size-2.5 shrink-0 rounded-pill bg-aura-mid" />
             {source.href ? (
-              <a href={source.href} className="truncate hover:text-ink hover:underline">
+              <a href={source.href} className="min-w-0 truncate hover:text-ink hover:underline">
                 {source.label}
               </a>
             ) : (
-              source.label
+              <span className="min-w-0 truncate">{source.label}</span>
             )}
           </p>
         )}

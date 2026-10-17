@@ -3,6 +3,7 @@
 import { Ellipsis, Plus, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useTrash } from "@/components/deadlines/use-trash";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sortable } from "@/components/ui/sortable";
@@ -28,6 +29,7 @@ export function PageTabs({ pages: serverPages }: { pages: PageRow[] }) {
   const save = useSave();
   const { trash, dialog } = useTrash(today);
   const [pages, setPages] = useServerState(serverPages);
+  const [adding, setAdding] = useState(false);
 
   function move(from: number, to: number) {
     if (to < 0 || to >= pages.length) return;
@@ -38,8 +40,11 @@ export function PageTabs({ pages: serverPages }: { pages: PageRow[] }) {
   }
 
   async function addPage() {
+    if (adding) return;
+    setAdding(true);
     const position = Math.max(0, ...pages.map((p) => p.position)) + 1;
     const { data, error } = await createClient().from("pages").insert({ space_id: space.id, position }).select("id").single();
+    setAdding(false);
     if (error) return toast.error(errorMessage(error));
     router.push(`/s/${space.id}/${data.id}?rename=1`);
   }
@@ -105,6 +110,7 @@ export function PageTabs({ pages: serverPages }: { pages: PageRow[] }) {
       </div>
       <button
         type="button"
+        disabled={adding}
         onClick={() => void addPage()}
         className="type-button flex min-h-9 shrink-0 items-center gap-1 rounded-pill px-3 text-[12px] text-ink-2 hover:bg-canvas-2 pointer-coarse:min-h-11"
       >

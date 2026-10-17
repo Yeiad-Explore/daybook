@@ -8,6 +8,8 @@ import { localStack, OWNER_EMAIL } from "../global-setup";
 // owned by the e2e owner. Every space gets a unique name so parallel specs never share rows.
 
 let cached: ReturnType<typeof createClient<Database>> | null = null;
+let order = 0; // rows seeded later sort later
+const nextPosition = () => ++order;
 function admin() {
   if (!cached) {
     const { url, secret } = localStack();
@@ -61,7 +63,7 @@ export async function seedSpace(opts: {
 export async function seedBlock(ctx: { owner_id: string; pageId: string }, type: Enums<"block_type">, title: string, span = 12) {
   const { data, error } = await admin()
     .from("blocks")
-    .insert({ owner_id: ctx.owner_id, page_id: ctx.pageId, type, title, span, position: Date.now() % 100000, space_id: undefined as unknown as string })
+    .insert({ owner_id: ctx.owner_id, page_id: ctx.pageId, type, title, span, position: nextPosition(), space_id: undefined as unknown as string })
     .select("id")
     .single();
   if (error) throw error;
@@ -77,7 +79,7 @@ export async function seedTask(
 ) {
   const { data, error } = await admin()
     .from("tasks")
-    .insert({ owner_id: ctx.owner_id, block_id: blockId, title, due_date: due, position: Date.now() % 100000, space_id: undefined as unknown as string, ...extra })
+    .insert({ owner_id: ctx.owner_id, block_id: blockId, title, due_date: due, position: nextPosition(), space_id: undefined as unknown as string, ...extra })
     .select("id")
     .single();
   if (error) throw error;

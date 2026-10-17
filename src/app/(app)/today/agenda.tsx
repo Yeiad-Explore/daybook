@@ -57,17 +57,19 @@ export function Agenda({ data: serverData }: { data: TodayData }) {
     </ul>
   );
 
-  const byDay = Map.groupBy(data.next_7, (r) => r.due_date);
+  // Checked rows leave Overdue and Next 7 days at once (Due today keeps them, struck through).
+  const overdue = data.overdue.filter((r) => !r.done);
+  const byDay = Map.groupBy(data.next_7.filter((r) => !r.done), (r) => r.due_date);
 
   return (
     <div className="flex flex-col gap-5">
-      {data.overdue.length > 0 && (
+      {overdue.length > 0 && (
         <section aria-labelledby="overdue" className="overflow-hidden rounded-lg bg-surface shadow-card">
           <h2 id="overdue" className="type-heading flex items-center gap-2 bg-signal-wash px-6 py-3 text-ink">
             <span aria-hidden className="size-2 rounded-pill bg-signal" />
-            Overdue <span className="type-number text-signal-ink">{data.overdue.length}</span>
+            Overdue <span className="type-number text-signal-ink">{overdue.length}</span>
           </h2>
-          <div className="px-4 py-2 tablet:px-6">{rows(data.overdue, true)}</div>
+          <div className="px-4 py-2 tablet:px-6">{rows(overdue, true)}</div>
         </section>
       )}
 

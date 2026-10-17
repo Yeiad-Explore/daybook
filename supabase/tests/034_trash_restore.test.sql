@@ -68,7 +68,7 @@ update public.blocks set deleted_at = now() - interval '1 minute' where title = 
 update public.pages set deleted_at = now() where title = 'Extra';
 select is(
   public.restore_item('blocks', (select id from public.blocks where title = 'Spare list')) ->> 'moved_to_page',
-  (select id::text from public.pages where space_id = (select id from public.spaces where name = 'Health') and deleted_at is null order by position, created_at limit 1),
+  (select id::text from public.pages where space_id = (select id from public.spaces where name = 'Health') and deleted_at is null order by position, created_at, id limit 1),
   'SET-3: the block moves to the space''s first page because its own page is in Trash'
 );
 select is((select deleted_at from public.blocks where title = 'Spare list'), null, 'SET-3: and it is live there');

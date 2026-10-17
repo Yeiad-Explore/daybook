@@ -1,6 +1,7 @@
 "use client";
 
 import type { TablesInsert, TablesUpdate } from "@/lib/database.types";
+import { DERIVED_SPACE_ID } from "@/lib/derived";
 import type { Task } from "@/lib/space-page";
 import { createClient } from "@/lib/supabase/client";
 import { useSave } from "@/lib/use-save";
@@ -54,8 +55,7 @@ export function useTaskList(serverTasks: Task[]) {
       const previous = tasks;
       setTasks([...tasks, temp]);
       try {
-        // space_id is derived by the database from the block (DB-2); the insert type still asks for it.
-        await save.mutateAsync({ request: () => tasksTable().insert({ ...row, position, space_id: undefined as unknown as string }), rollback: () => setTasks(previous) });
+        await save.mutateAsync({ request: () => tasksTable().insert({ ...row, position, space_id: DERIVED_SPACE_ID }), rollback: () => setTasks(previous) });
         return true;
       } catch {
         return false;

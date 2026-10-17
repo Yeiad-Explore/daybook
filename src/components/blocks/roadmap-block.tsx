@@ -65,7 +65,7 @@ export function RoadmapBlock({
   }
 
   const trashTask = (t: Task) =>
-    trash({ table: "tasks", id: t.id, name: t.title, onTrashed: () => list.setTasks(list.tasks.filter((x) => x.id !== t.id)) });
+    trash({ table: "tasks", id: t.id, name: t.title, onTrashed: () => list.setTasks((all) => all.filter((x) => x.id !== t.id)), onUndone: () => list.setTasks((all) => [...all, t]) });
 
   // RM-2: a step's sub-steps are due by its deadline (the database says so too).
   const addUnder = (parent: Task) => (

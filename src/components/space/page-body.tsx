@@ -17,6 +17,7 @@ import type { Json, TablesUpdate } from "@/lib/database.types";
 import { moveItem } from "@/lib/move-item";
 import { reorderRequest } from "@/lib/reorder";
 import type { Block, SpacePageData } from "@/lib/space-page";
+import { DERIVED_SPACE_ID } from "@/lib/derived";
 import { createClient } from "@/lib/supabase/client";
 import { useSave } from "@/lib/use-save";
 import { useServerState } from "@/lib/use-server-state";
@@ -74,22 +75,14 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
     save.mutate({ request: () => reorderRequest("blocks", blocks[from].id, before, after), rollback: () => setBlocks(previous) });
   }
 
-  async function addBlock(type: BlockType) {
+  function addBlock(type: BlockType) {
     const t = BLOCK_TYPES[type];
     const position = Math.max(0, ...blocks.map((b) => b.position)) + 1;
-    const supabase = createClient();
-    await save.mutateAsync({
-      request: async () => {
-        const inserted = await supabase
-          .from("blocks")
-          .insert({ page_id: data.page.id, type, title: t.name, span: t.span, position, space_id: undefined as unknown as string })
-          .select("id")
-          .single();
-        if (!inserted.error && type === "notes") return supabase.from("notes").insert({ block_id: inserted.data.id });
-        return inserted;
-      },
-    });
-    if (params.get("add")) router.replace(`/s/${space.id}/${data.page.id}`, { scroll: false });
+    // A Notes block gets its notes row on the first save (NotesBlock upserts it).
+    save.mutate(
+      { request: () => createClient().from("blocks").insert({ page_id: data.page.id, type, title: t.name, span: t.span, position, space_id: DERIVED_SPACE_ID }) },
+      { onSuccess: () => params.get("add") && router.replace(`/s/${space.id}/${data.page.id}`, { scroll: false }) },
+    );
   }
 
   const actions = (block: Block, index: number): BlockActions => ({
@@ -97,7 +90,9 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
     setCollapsed: (collapsed) => patch(block.id, { collapsed }),
     setSpan: (span) => patch(block.id, { span }),
     move: (direction) => reorder(index, index + direction),
-    trash: () => trash({ table: "blocks", id: block.id, name: block.title, onTrashed: () => setBlocks(blocks.filter((b) => b.id !== block.id)) }),
+    trash: () => trash({ table: "blocks", id: block.id, name: block.title, onTrashed: () => setBlocks((all) => all.filter((b) => b.id !== block.id)),
+      onUndone: () => setBlocks((all) => [...all, block].sort((a, b) => a.position - b.position)),
+    }),
   });
 
   const render = (block: Block, drag: DragHandle) => {
@@ -141,7 +136,7 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
             const t = BLOCK_TYPES[type];
             const Icon = t.icon;
             return (
-              <DropdownMenuItem key={type} onClick={() => void addBlock(type)} className="items-start py-2">
+              <DropdownMenuItem key={type} onClick={() => addBlock(type)} className="items-start py-2">
                 <span aria-hidden className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-pill bg-canvas-2">
                   <Icon size={14} strokeWidth={1.5} />
                 </span>

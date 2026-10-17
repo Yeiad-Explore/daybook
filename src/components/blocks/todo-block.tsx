@@ -9,6 +9,7 @@ import { moveItem } from "@/lib/move-item";
 import { reorderRequest } from "@/lib/reorder";
 import type { Block, Task } from "@/lib/space-page";
 import { AddTask } from "./add-task";
+import { sortTodos } from "./todo-sort";
 import { BlockFrame, type BlockActions } from "./block-frame";
 import type { DragHandle } from "@/components/ui/sortable";
 import { TaskItem } from "./task-item";
@@ -20,14 +21,6 @@ const SORTS = [
   { value: "deadline", label: "By date" },
   { value: "manual", label: "Manual" },
 ] as const;
-
-/** TODO-3: unfinished by deadline, then time, then manual position; finished at the bottom. */
-export function sortTodos(tasks: Task[], sort: TodoConfig["sort"]) {
-  const byDeadline = (a: Task, b: Task) =>
-    (a.due_date ?? "9999").localeCompare(b.due_date ?? "9999") || (a.due_time ?? "99").localeCompare(b.due_time ?? "99") || a.position - b.position;
-  const order = sort === "manual" ? (a: Task, b: Task) => a.position - b.position : byDeadline;
-  return [...tasks.filter((t) => !t.done).sort(order), ...tasks.filter((t) => t.done).sort(order)];
-}
 
 /** PRD §6.5 To-do list block (TODO-1..6). */
 export function TodoBlock({
@@ -67,7 +60,7 @@ export function TodoBlock({
       task={task}
       list={list}
       maxDue={goal ? space.deadline : null}
-      onTrash={() => trash({ table: "tasks", id: task.id, name: task.title, onTrashed: () => list.setTasks(list.tasks.filter((t) => t.id !== task.id)) })}
+      onTrash={() => trash({ table: "tasks", id: task.id, name: task.title, onTrashed: () => list.setTasks((all) => all.filter((t) => t.id !== task.id)), onUndone: () => list.setTasks((all) => [...all, task]) })}
       drag={drag}
     />
   );

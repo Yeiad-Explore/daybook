@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Field, inputClass } from "@/components/ui/field";
 import { useToast } from "@/components/ui/toast";
 import { errorMessage } from "@/lib/db-error";
+import { DERIVED_SPACE_ID } from "@/lib/derived";
 import { createClient } from "@/lib/supabase/client";
 import type { Task } from "@/lib/space-page";
 
@@ -36,7 +37,10 @@ export function BookTimeDialog({ task, open, onOpenChange }: { task: Task; open:
 
   async function book() {
     setProblem(null);
+    if (!day || !start || !end) return setProblem("Pick a day, a start and an end.");
     if (end <= start) return setProblem("The end time needs to be after the start time.");
+    const startsAt = instant(day, start, timezone);
+    const endsAt = instant(day, end, timezone);
     setBusy(true);
     const supabase = createClient();
     try {
@@ -45,7 +49,7 @@ export function BookTimeDialog({ task, open, onOpenChange }: { task: Task; open:
         const position = Math.max(0, ...blocks.map((b) => b.position)) + 1;
         const { data, error } = await supabase
           .from("blocks")
-          .insert({ page_id: pageId, type: "timeblock", title: "Time block", span: 6, position, space_id: undefined as unknown as string })
+          .insert({ page_id: pageId, type: "timeblock", title: "Time block", span: 6, position, space_id: DERIVED_SPACE_ID })
           .select("id")
           .single();
         if (error) throw error;
@@ -55,9 +59,9 @@ export function BookTimeDialog({ task, open, onOpenChange }: { task: Task; open:
         block_id: blockId,
         task_id: task.id,
         title: task.title,
-        starts_at: instant(day, start, timezone),
-        ends_at: instant(day, end, timezone),
-        space_id: undefined as unknown as string,
+        starts_at: startsAt,
+        ends_at: endsAt,
+        space_id: DERIVED_SPACE_ID,
       });
       if (error) throw error;
       toast.success("Time booked.");

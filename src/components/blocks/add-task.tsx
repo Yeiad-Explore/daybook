@@ -29,13 +29,17 @@ export function AddTask({
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [problem, setProblem] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   async function submit() {
+    if (busy) return;
     if (!title.trim()) return setProblem("Give it a title.");
     if (dateRequired && !date) return setProblem("A goal needs a deadline for every task.");
     if (max && date > max) return setProblem(maxMessage ?? null);
     setProblem(null);
+    setBusy(true);
     const added = await onAdd({ title: title.trim(), due_date: date || null, due_time: time || null });
+    setBusy(false);
     if (added) {
       setTitle("");
       setTime("");
@@ -80,6 +84,7 @@ export function AddTask({
         )}
         <button
           type="submit"
+          disabled={busy}
           aria-label={`Add: ${title || label}`}
           className={cx("type-button grid size-9 place-items-center rounded-pill bg-surface-dark text-on-dark pointer-coarse:size-11")}
         >

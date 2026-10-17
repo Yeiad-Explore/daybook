@@ -213,3 +213,74 @@ test("The space page passes layout and accessibility checks in both themes", asy
   await seedBlock(s, "notes", "Python notes", 6);
   await checkScreen(page, `/s/${s.spaceId}/${s.pageId}`);
 });
+
+test("TODO-4/5/6: edit title and note inline, flag a milestone, book time on a task", async ({ page }) => {
+  const s = await seedSpace({ name: unique("Fitness"), deadline: day(60) });
+  await seedBlock(s, "todo", "Training plan", 6);
+  const block = (await db().from("blocks").select("id").eq("page_id", s.pageId).single()).data!.id;
+  const id = await seedTask(s, block, "Stretch", day(3));
+  await page.goto(`/s/${s.spaceId}/${s.pageId}`);
+  await hydrated(page, 'input[aria-label="Add a task"]');
+
+  await row(page, "Stretch").getByLabel("Task title").fill("Stretch for ten minutes"); // TODO-4
+  await row(page, "Stretch").getByLabel("Task title").press("Enter");
+  await expect.poll(async () => (await db().from("tasks").select("title").eq("id", id).single()).data?.title).toBe("Stretch for ten minutes");
+
+  const title = "Stretch for ten minutes";
+  await openTaskMenu(page, title);
+  await page.getByRole("menuitem", { name: "Add a note" }).click();
+  await page.getByLabel(`Note for ${title}`).fill("Hamstrings first");
+  await page.getByLabel(`Note for ${title}`).press("Tab");
+  await expect.poll(async () => (await db().from("tasks").select("note").eq("id", id).single()).data?.note).toBe("Hamstrings first");
+
+  await openTaskMenu(page, title);
+  await page.getByRole("menuitem", { name: "Show on Deadline Rail" }).click(); // TODO-5
+  await expect(row(page, title).getByRole("img", { name: "On the Deadline Rail" })).toBeVisible();
+  await expect(page.getByRole("img", { name: new RegExp(`^${title}, due .+ · upcoming$`) })).toBeAttached(); // its node on the Deadline Rail (SPC-8 AC1)
+  await expect.poll(async () => (await db().from("tasks").select("is_milestone").eq("id", id).single()).data?.is_milestone).toBe(true);
+
+  await openTaskMenu(page, title);
+  await page.getByRole("menuitem", { name: "Book time" }).click(); // TODO-6
+  const dialog = page.getByRole("dialog", { name: "Book time" });
+  await dialog.getByLabel("Starts").fill("18:00");
+  await dialog.getByLabel("Ends").fill("18:30");
+  await dialog.getByRole("button", { name: "Book it" }).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.getByRole("region", { name: "Time block" })).toContainText("18:00 to 18:30");
+  const { data: slots } = await db().from("time_blocks").select("title, task_id").eq("task_id", id);
+  expect(slots).toEqual([{ title, task_id: id }]);
+});
+
+test("RM-3/RM-5/RM-6: stages complete through their steps, collapse persists, a refused move rolls back", async ({ page }) => {
+  const [stageA, stageB, step] = [unique("Learn Python"), unique("Learn Git"), unique("Loops")];
+  const s = await seedSpace({ name: unique("AI Engineering"), mark: "slate" });
+  const roadmap = await seedBlock(s, "roadmap", "Roadmap");
+  const a = await seedTask(s, roadmap, stageA, day(20));
+  const leaf = await seedTask(s, roadmap, step, day(10), { parent_id: a });
+  await seedTask(s, roadmap, stageB, day(5));
+  await page.goto(`/s/${s.spaceId}/${s.pageId}`);
+  await hydrated(page, 'input[aria-label="Add a stage"]');
+
+  await expect(page.getByRole("checkbox", { name: `Done: ${stageA}`, exact: true })).toHaveCount(0); // RM-3: no checkbox on a parent
+  await expect(page.getByRole("checkbox", { name: `Done: ${stageB}`, exact: true })).toBeVisible(); // a stage without steps is a leaf
+  await row(page, step).getByRole("checkbox").check();
+  await expect.poll(async () => (await db().from("tasks").select("done").eq("id", a).single()).data?.done).toBe(true); // RM-3
+
+  await page.getByRole("button", { name: "Hide steps" }).click(); // RM-5
+  await expect(row(page, step)).toHaveCount(0);
+  await page.reload();
+  await expect(row(page, step)).toHaveCount(0);
+  await page.getByRole("button", { name: "Show 1 steps" }).click();
+  await expect(row(page, step)).toBeVisible();
+
+  // RM-6: moving the step under a stage that ends earlier breaks DL-2; the move is undone (NFR-5).
+  await hydrated(page, 'input[aria-label="Add a stage"]');
+  await openTaskMenu(page, step);
+  await page.getByRole("menuitem", { name: "Move under…" }).click();
+  const dialog = page.getByRole("dialog", { name: "Move under…" });
+  await dialog.getByLabel("New place").selectOption({ label: stageB });
+  await dialog.getByRole("button", { name: "Move" }).click();
+  await expect(page.getByRole("region", { name: "Notifications" }).getByText(new RegExp(`Can't move '${step}': it is due after '${stageB}'`))).toBeVisible();
+  await expect(row(page, step)).toBeVisible();
+  expect((await db().from("tasks").select("parent_id").eq("id", leaf).single()).data?.parent_id).toBe(a);
+});

@@ -16,10 +16,20 @@ export async function applyTheme(page: Page, theme: "light" | "dark" | "system")
 }
 
 export async function expectNoHorizontalScroll(page: Page, view = "") {
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
-  );
-  expect(overflow, `page scrolls sideways ${view}`).toBeLessThanOrEqual(0);
+  const { overflow, culprits } = await page.evaluate(() => {
+    const vw = document.documentElement.clientWidth;
+    // Elements past the right edge that no scrolling or clipping ancestor contains: the cause, not its parents.
+    const contained = (el: Element) => {
+      for (let p = el.parentElement; p; p = p.parentElement) if (getComputedStyle(p).overflowX !== "visible") return true;
+      return false;
+    };
+    const culprits = [...document.querySelectorAll("body *")]
+      .filter((el) => el.getBoundingClientRect().right > vw + 1 && !contained(el))
+      .slice(-3)
+      .map((el) => `<${el.tagName.toLowerCase()} class="${el.getAttribute("class")?.slice(0, 80)}"> "${el.textContent?.trim().slice(0, 50)}"`);
+    return { overflow: document.documentElement.scrollWidth - vw, culprits };
+  });
+  expect(overflow, `page scrolls sideways ${view}: ${culprits.join(" | ")}`).toBeLessThanOrEqual(0);
 }
 
 export async function expectNoSeriousA11yViolations(page: Page, view = "") {
@@ -47,7 +57,7 @@ export async function expectNoSeriousA11yViolations(page: Page, view = "") {
 export async function checkScreen(page: Page, url: string) {
   for (const theme of themes) {
     for (const width of widths) {
-      const view = `${theme} ${width}px`;
+      const view = `${url} ${theme} ${width}px`;
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme: theme });
       await page.goto(url);

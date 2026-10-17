@@ -52,6 +52,7 @@ export function TaskItem({
   const titleSlot = (
     <input
       aria-label="Task title"
+      readOnly={!saved}
       defaultValue={task.title}
       key={task.title}
       maxLength={200}

@@ -29,6 +29,8 @@ export function useSave() {
     onError: (error, { rollback }) => {
       rollback?.();
       toast.error(errorMessage(error));
+      // The snapshot may predate another write's refresh; the saved rows decide what is shown (NFR-5).
+      router.refresh();
     },
     onSuccess: () => router.refresh(),
   });

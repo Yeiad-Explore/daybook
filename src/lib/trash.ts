@@ -19,6 +19,8 @@ export async function loadTrash(): Promise<TrashEntry[]> {
     supabase.from("blocks").select("id, title, deleted_at, pages(title, deleted_at), spaces(name)").not("deleted_at", "is", null),
     supabase.from("tasks").select("id, title, parent_id, deleted_at, blocks(title, deleted_at), spaces(name)").not("deleted_at", "is", null),
   ]);
+  const failed = [spaces, pages, blocks, tasks].find((r) => r.error);
+  if (failed) throw failed.error;
   const trashedTask = new Map((tasks.data ?? []).map((t) => [t.id, t.deleted_at]));
 
   const entries: TrashEntry[] = [

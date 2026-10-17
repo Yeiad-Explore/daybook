@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import type { Tables } from "@/lib/database.types";
 import type { SpaceSummary } from "@/lib/deadlines";
 import { isUuid } from "@/lib/space";
@@ -17,7 +18,7 @@ export type Note = Pick<Tables<"notes">, "block_id" | "body">;
 const TASK_COLUMNS = "id, block_id, parent_id, depth, title, note, due_date, due_time, done, completed_at, is_milestone, reschedule_count, position";
 
 /** Everything the space page (PRD §5.4) renders, for one page of one live space. 404 otherwise. */
-export async function loadSpacePage(spaceId: string, pageId: string) {
+export const loadSpacePage = cache(async (spaceId: string, pageId: string) => {
   if (!isUuid(spaceId) || !isUuid(pageId)) notFound();
   const supabase = await createClient();
 
@@ -46,6 +47,6 @@ export async function loadSpacePage(spaceId: string, pageId: string) {
     slots: (slots ?? []) as Slot[],
     summary: summary as unknown as SpaceSummary,
   };
-}
+});
 
 export type SpacePageData = Awaited<ReturnType<typeof loadSpacePage>>;

@@ -56,7 +56,7 @@ test("DL-10 / TODAY-3: a late task leaves Overdue only when done or rescheduled,
   await page.goto("/today");
   await hydrated(page, `input[aria-label="Done: ${shoesTitle}"]`);
 
-  await row(page, matTitle).getByRole("checkbox").check();
+  await row(page, matTitle).getByRole("checkbox").click(); // click, not check(): the row leaves Overdue at once
   await expect(section(page, "Overdue").getByRole("checkbox", { name: `Done: ${matTitle}` })).toHaveCount(0);
   await expect.poll(async () => (await db().from("tasks").select("done").eq("id", mat).single()).data?.done).toBe(true);
 
