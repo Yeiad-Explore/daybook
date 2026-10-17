@@ -8,7 +8,8 @@ import { BLOCK_TYPES, type BlockType } from "@/components/blocks/block-types";
 import type { BlockActions } from "@/components/blocks/block-frame";
 import { NotesBlock } from "@/components/blocks/notes-block";
 import { RoadmapBlock } from "@/components/blocks/roadmap-block";
-import { LaterBlock, SlotsBlock } from "@/components/blocks/simple-blocks";
+import { RoutineBlock } from "@/components/blocks/routine-block";
+import { TimeBlock } from "@/components/blocks/time-block";
 import { TableBlock } from "@/components/blocks/table-block";
 import { TodoBlock } from "@/components/blocks/todo-block";
 import { TrackerBlock } from "@/components/blocks/tracker-block";
@@ -46,6 +47,11 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
   const fieldsByBlock = useMemo(() => Map.groupBy(data.trackerFields, (f) => f.block_id), [data.trackerFields]);
   const columnsByBlock = useMemo(() => Map.groupBy(data.columns, (c) => c.block_id), [data.columns]);
   const rowsByBlock = useMemo(() => Map.groupBy(data.rows, (r) => r.block_id), [data.rows]);
+  const stepsByBlock = useMemo(() => Map.groupBy(data.steps, (s) => s.block_id), [data.steps]);
+  const checkedByBlock = useMemo(() => {
+    const blockOf = new Map(data.steps.map((s) => [s.id, s.block_id]));
+    return Map.groupBy(data.checkedToday.filter((id) => blockOf.has(id)), (id) => blockOf.get(id)!);
+  }, [data.steps, data.checkedToday]);
   const slotsByBlock = useMemo(() => Map.groupBy(data.slots, (s) => s.block_id), [data.slots]);
 
   useEffect(() => {
@@ -112,6 +118,10 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
         return <RoadmapBlock {...common} tasks={tasks} setConfig={setConfig} />;
       case "notes":
         return <NotesBlock {...common} body={(data.notes.find((n) => n.block_id === block.id)?.body ?? null) as JSONContent | null} />;
+      case "routine": {
+        const steps = stepsByBlock.get(block.id) ?? NONE;
+        return <RoutineBlock {...common} setConfig={setConfig} steps={steps} checkedIds={checkedByBlock.get(block.id) ?? NONE} streak={data.streaks[block.id]} />;
+      }
       case "table":
         return <TableBlock {...common} setConfig={setConfig} columns={columnsByBlock.get(block.id) ?? NONE} rows={rowsByBlock.get(block.id) ?? NONE} />;
       case "tracker":
@@ -119,9 +129,7 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
           <TrackerBlock {...common} setConfig={setConfig} fields={fieldsByBlock.get(block.id) ?? NONE} series={data.series} />
         );
       case "timeblock":
-        return <SlotsBlock {...common} slots={slotsByBlock.get(block.id) ?? NONE} />;
-      default:
-        return <LaterBlock {...common} />;
+        return <TimeBlock {...common} setConfig={setConfig} slots={slotsByBlock.get(block.id) ?? NONE} />;
     }
   };
 

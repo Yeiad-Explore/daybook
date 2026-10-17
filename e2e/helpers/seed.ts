@@ -60,10 +60,10 @@ export async function seedSpace(opts: {
   return { owner_id, spaceId: space.id, pageId: page!.id };
 }
 
-export async function seedBlock(ctx: { owner_id: string; pageId: string }, type: Enums<"block_type">, title: string, span = 12) {
+export async function seedBlock(ctx: { owner_id: string; pageId: string }, type: Enums<"block_type">, title: string, span = 12, extra: Partial<TablesInsert<"blocks">> = {}) {
   const { data, error } = await admin()
     .from("blocks")
-    .insert({ owner_id: ctx.owner_id, page_id: ctx.pageId, type, title, span, position: nextPosition(), space_id: undefined as unknown as string })
+    .insert({ owner_id: ctx.owner_id, page_id: ctx.pageId, type, title, span, position: nextPosition(), space_id: undefined as unknown as string, ...extra })
     .select("id")
     .single();
   if (error) throw error;
@@ -136,12 +136,17 @@ export async function seedCheck(ctx: Ctx, blockId: string, stepId: string, check
   if (error) throw error;
 }
 
-export async function seedSlot(ctx: Ctx, blockId: string, title: string, startsAt: string, endsAt: string) {
-  const { error } = await admin().from("time_blocks").insert({ owner_id: ctx.owner_id, block_id: blockId, title, starts_at: startsAt, ends_at: endsAt, space_id: undefined as unknown as string });
+export async function seedSlot(ctx: Ctx, blockId: string, title: string, startsAt: string, endsAt: string, extra: Partial<TablesInsert<"time_blocks">> = {}) {
+  const { error } = await admin().from("time_blocks").insert({ owner_id: ctx.owner_id, block_id: blockId, title, starts_at: startsAt, ends_at: endsAt, space_id: undefined as unknown as string, ...extra });
   if (error) throw error;
 }
 
 /** Reads rows back for assertions that the database (not just the screen) changed. */
 export function db() {
   return admin();
+}
+
+/** An ISO instant for a local Asia/Dhaka day ("YYYY-MM-DD") and time ("HH:mm"). */
+export function at(dayText: string, time: string) {
+  return new TZDate(`${dayText}T${time}:00`, "Asia/Dhaka").toISOString();
 }
