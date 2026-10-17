@@ -15,14 +15,14 @@ create function pg_temp.rpcs() returns table (name text, args text[], phase int)
     ('reorder', array['text', 'uuid', 'uuid', 'uuid'], 1),
     ('duplicate_page', array['uuid', 'boolean'], 4),
     ('duplicate_block', array['uuid', 'boolean'], 4),
-    ('routine_streak', array['uuid', 'date'], 2),
-    ('tracker_series', array['uuid', 'integer'], 2),
+    ('routine_streak', array['uuid', 'date'], 1),
+    ('tracker_series', array['uuid', 'integer'], 1),
     ('week_review', array['date'], 4),
     ('restore_item', array['text', 'uuid'], 1),
     ('search_all', array['text', 'integer'], 4)
 $$;
 
-select plan(16 * 3 + 8 + 10);
+select plan(16 * 3 + 6 + 10);
 
 -- Signature, grants and stub error for every client-facing RPC.
 select has_function('public', name, args, name || ' exists with the §10.7 signature') from pg_temp.rpcs();

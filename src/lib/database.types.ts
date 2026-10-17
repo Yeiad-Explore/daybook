@@ -392,10 +392,13 @@ isOneToOne: false
 { Args: { "p_id": string,"p_table": string }; Returns: Json
                            },
 "routine_streak":
-{ Args: { "p_block_id": string,"p_today"?: string }; Returns: number
+{ Args: { "p_block_id": string,"p_today"?: string }; Returns: Json
                            },
 "search_all":
 { Args: { "p_limit"?: number,"p_query": string }; Returns: Json
+                           },
+"seed_owner":
+{ Args: { "p_examples"?: boolean,"p_owner": string,"p_today"?: string }; Returns: Json
                            },
 "set_calendar_prefs":
 { Args: { "p_auto_sync": boolean,"p_calendar_id": string,"p_push_deadlines": boolean }; Returns: undefined
