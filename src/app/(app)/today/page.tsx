@@ -1,5 +1,5 @@
 import { format, parseISO } from "date-fns";
-import { AlertCircle, CalendarCheck } from "lucide-react";
+import { AlertCircle, CalendarCheck, CalendarClock, Repeat } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuraCard } from "@/components/ui/aura-card";
@@ -10,13 +10,16 @@ import { getProfile } from "@/lib/profile";
 import { createClient } from "@/lib/supabase/server";
 import { getToday } from "@/lib/today-data";
 import { Agenda } from "./agenda";
+import { DayTimetable } from "./day-timetable";
 import { MidnightRefresh } from "./midnight-refresh";
+import { RoutineCard } from "./routine-card";
+import { TrackersCard } from "./trackers-card";
 
 export const metadata = { title: "Today · Daybook" };
 
 const icon = { size: 16, strokeWidth: 1.5 } as const;
 
-// PRD §5.3 Today, Phase 1 part: headline, KPI row, goals strip and the agenda column (D-P1-10).
+// PRD §5.3 Today: headline, KPI row, goals strip, the agenda column and the right column (timetable, routines, trackers).
 export default async function TodayPage() {
   const profile = await getProfile();
   if (!profile) redirect("/login");
@@ -28,6 +31,7 @@ export default async function TodayPage() {
   );
 
   const dueToday = agenda.due_today.filter((t) => !t.done).length;
+  const routineSteps = agenda.routines.flatMap((r) => r.steps);
   const statement = dueToday === 0 ? "Nothing left for today." : `${dueToday} ${dueToday === 1 ? "thing" : "things"} due today.`;
 
   return (
@@ -45,6 +49,8 @@ export default async function TodayPage() {
         <div className="flex flex-wrap gap-6">
           <KpiItem icon={<AlertCircle {...icon} />} value={agenda.late_count} caption="Late" />
           <KpiItem icon={<CalendarCheck {...icon} />} value={dueToday} caption="Due today" />
+          <KpiItem icon={<CalendarClock {...icon} />} value={agenda.slots.length} caption="Time blocks" />
+          <KpiItem icon={<Repeat {...icon} />} value={`${routineSteps.filter((s) => s.checked).length}/${routineSteps.length}`} caption="Routine steps" />
         </div>
       </header>
 
@@ -84,8 +90,15 @@ export default async function TodayPage() {
         </section>
       )}
 
-      <div className="max-w-document">
-        <Agenda data={agenda} />
+      <div className="grid gap-8 desktop:grid-cols-12">
+        <div className="min-w-0 desktop:col-span-8">
+          <Agenda data={agenda} />
+        </div>
+        <aside aria-label="Today's schedule and logging" className="flex min-w-0 flex-col gap-4 desktop:col-span-4">
+          <DayTimetable slots={agenda.slots} timezone={profile.timezone} />
+          <RoutineCard routines={agenda.routines} today={agenda.today} />
+          <TrackersCard trackers={agenda.trackers} today={agenda.today} />
+        </aside>
       </div>
     </div>
   );

@@ -30,7 +30,29 @@ export type AgendaRow = {
   source: string;
 };
 
-export type TodayData = { today: string; late_count: number; overdue: AgendaRow[]; due_today: AgendaRow[]; next_7: AgendaRow[] };
+type Source = { block_id: string; page_id: string; space_id: string; space_name: string; mark: Enums<"mark_color"> };
+
+/** A slot on today's timetable (Appendix A). */
+export type TodaySlot = Source & { id: string; title: string; starts_at: string; ends_at: string; task_id: string | null; task_title: string | null; sync_status: Enums<"sync_status"> };
+/** A routine scheduled today, with today's checks and the streak including today when complete (Appendix A). */
+export type TodayRoutine = Source & { title: string; streak: number; complete: boolean; steps: { id: string; label: string; position: number; checked: boolean }[] };
+/** A tracker with today's values (null where nothing is logged yet). */
+export type TodayTracker = Source & {
+  title: string;
+  logged: boolean;
+  fields: { id: string; label: string; unit: string | null; decimals: number; target_value: number | null; target_kind: Enums<"target_kind"> | null; today_value: number | null }[];
+};
+
+export type TodayData = {
+  today: string;
+  late_count: number;
+  overdue: AgendaRow[];
+  due_today: AgendaRow[];
+  next_7: AgendaRow[];
+  slots: TodaySlot[];
+  routines: TodayRoutine[];
+  trackers: TodayTracker[];
+};
 
 export type Milestone = { id: string; title: string; due_date: string; done: boolean; state: "done" | "late" | "upcoming" };
 
