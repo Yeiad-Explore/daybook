@@ -198,7 +198,7 @@ update public.spaces set deleted_at = '2026-10-16 09:00+06'
 where id = tests.row_id('spaces', 'owner@test.local', 'name = ''AI Agency''');
 select is(
   (select count(*)::int from public.pages p where p.space_id = tests.row_id('spaces', 'owner@test.local', 'name = ''AI Agency''') and p.deleted_at = '2026-10-16 09:00+06'),
-  2, 'C-TRG-13: deleting a space deletes its pages'
+  3, 'C-TRG-13: deleting a space deletes its pages (Marketing, the page added above, Overview from C-PG-01)'
 );
 select is(
   (select deleted_at from public.tasks where title = 'Send proposal follow-up to Bayside Café' and owner_id = tests.uid('owner@test.local')),

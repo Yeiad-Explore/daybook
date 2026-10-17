@@ -1,5 +1,5 @@
--- RPC surface (PRD §10.7): signatures, grants, stub behaviour (CONSTRAINTS.md E1) and the two
--- calendar functions implemented in Phase 0 (C-RLS-07).
+-- RPC surface (PRD §10.7): signatures, grants, stub behaviour for RPCs of later phases (CONSTRAINTS.md
+-- E1; Phase 1's are implemented and tested in 032..034) and the calendar functions (C-RLS-07).
 begin;
 
 create function pg_temp.rpcs() returns table (name text, args text[], phase int) language sql as $$
@@ -7,7 +7,7 @@ create function pg_temp.rpcs() returns table (name text, args text[], phase int)
     ('get_today', array['date'], 1),
     ('space_summary', array['uuid', 'date'], 1),
     ('reschedule_task', array['uuid', 'date', 'text', 'boolean'], 1),
-    ('reschedule_space', array['uuid', 'date', 'text'], 1),
+    ('reschedule_space', array['uuid', 'date', 'text', 'boolean'], 1),
     ('delete_task', array['uuid', 'text'], 1),
     ('set_task_done', array['uuid', 'boolean'], 1),
     ('move_page', array['uuid', 'uuid'], 4),
@@ -22,7 +22,7 @@ create function pg_temp.rpcs() returns table (name text, args text[], phase int)
     ('search_all', array['text', 'integer'], 4)
 $$;
 
-select plan(16 * 4 + 10);
+select plan(16 * 3 + 8 + 10);
 
 -- Signature, grants and stub error for every client-facing RPC.
 select has_function('public', name, args, name || ' exists with the §10.7 signature') from pg_temp.rpcs();
@@ -33,7 +33,7 @@ create function pg_temp.stub_errors() returns setof text language plpgsql as $$
 declare
   r record;
 begin
-  for r in select * from pg_temp.rpcs() loop
+  for r in select * from pg_temp.rpcs() where phase > 1 loop
     return next throws_ok(
       format('select public.%I(%s)', r.name, array_to_string(array(select 'null::' || a from unnest(r.args) a), ', ')),
       '0A000', format('%s is not available until Phase %s.', r.name, r.phase),

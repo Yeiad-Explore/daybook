@@ -386,7 +386,7 @@ isOneToOne: false
 { Args: { "p_after": string,"p_before": string,"p_id": string,"p_table": string }; Returns: number
                            },
 "reschedule_space":
-{ Args: { "p_new_deadline": string,"p_reason": string,"p_space_id": string }; Returns: Json
+{ Args: { "p_cascade_tasks"?: boolean,"p_new_deadline": string,"p_reason": string,"p_space_id": string }; Returns: Json
                            },
 "reschedule_task":
 { Args: { "p_cascade_children"?: boolean,"p_new_due": string,"p_reason": string,"p_task_id": string }; Returns: Json
