@@ -9,7 +9,7 @@ import { Sortable, type DragHandle } from "@/components/ui/sortable";
 import { Tag } from "@/components/ui/tag";
 import { cx } from "@/lib/cx";
 import { shortDate } from "@/lib/dates";
-import { moveItem } from "@/lib/move-item";
+import { moveItem, positionBetween } from "@/lib/move-item";
 import { reorderRequest } from "@/lib/reorder";
 import type { Block, Task } from "@/lib/space-page";
 import { createClient } from "@/lib/supabase/client";
@@ -58,9 +58,7 @@ export function RoadmapBlock({
   function reorder(siblings: Task[], from: number, to: number) {
     const { before, after } = moveItem(siblings, from, to);
     const id = siblings[from].id;
-    const lo = siblings.find((t) => t.id === before)?.position;
-    const hi = siblings.find((t) => t.id === after)?.position;
-    const position = lo !== undefined && hi !== undefined ? (lo + hi) / 2 : lo !== undefined ? lo + 1 : (hi ?? 0) - 1;
+    const position = positionBetween(siblings, before, after);
     list.move(id, { position }, () => reorderRequest("tasks", id, before, after));
   }
 

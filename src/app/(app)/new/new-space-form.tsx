@@ -6,11 +6,10 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { MarkPicker } from "@/components/ui/mark-picker";
 import { Panel } from "@/components/ui/panel";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useToast } from "@/components/ui/toast";
-import { cx } from "@/lib/cx";
-import { Constants } from "@/lib/database.types";
 import { errorMessage } from "@/lib/db-error";
 import { newSpace, spaceRow, type NewSpace } from "@/lib/space-schema";
 import { createClient } from "@/lib/supabase/client";
@@ -66,25 +65,7 @@ export function NewSpaceForm({ today, initialKind }: { today: string; initialKin
           <input id="name" className={inputClass} maxLength={60} autoComplete="off" aria-invalid={!!errors.name} aria-describedby={describedBy("name")} {...form.register("name")} />
         </Field>
 
-        <fieldset className="flex flex-col gap-1.5">
-          <legend className="type-heading pb-1.5">Colour</legend>
-          <div className="flex flex-wrap gap-2">
-            {Constants.public.Enums.mark_color.map((m) => (
-              <label key={m} className="cursor-pointer">
-                <input type="radio" value={m} className="peer sr-only" {...form.register("mark")} />
-                <span
-                  className={cx(
-                    "type-button flex min-h-9 items-center gap-2 rounded-pill bg-canvas-2 py-1.5 pr-3.5 pl-1.5 capitalize ring-1 ring-inset ring-control-edge peer-focus-visible:outline peer-focus-visible:outline-ink pointer-coarse:min-h-11",
-                    mark === m && "bg-surface shadow-card ring-ink",
-                  )}
-                >
-                  <span aria-hidden data-mark={m} className="aura size-6 rounded-pill" />
-                  {m}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
+        <MarkPicker value={mark} onChange={(m) => form.setValue("mark", m)} />
 
         {kind === "goal" ? (
           <>

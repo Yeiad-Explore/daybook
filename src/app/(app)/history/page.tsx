@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
 import { Panel } from "@/components/ui/panel";
 import { cx } from "@/lib/cx";
-import { longDate, shortDate } from "@/lib/dates";
+import { addDaysTo, longDate, shortDate } from "@/lib/dates";
 import { getProfile } from "@/lib/profile";
 import { isUuid } from "@/lib/space";
 import { createClient } from "@/lib/supabase/server";
-import { todayIn } from "@/lib/today";
+import { todayIn, zonedInstant } from "@/lib/today";
 
 export const metadata = { title: "Deadline history · Daybook" };
 
@@ -32,10 +32,6 @@ export default async function HistoryPage({ searchParams }: PageProps<"/history"
   const to = DAY.test(one(params.to) ?? "") ? one(params.to)! : "";
   const tz = profile.timezone;
   const today = todayIn(tz);
-  const instant = (day: string, end = false) => {
-    const [y, m, d] = day.split("-").map(Number);
-    return new TZDate(y, m - 1, d + (end ? 1 : 0), tz).toISOString();
-  };
 
   const supabase = await createClient();
   let query = supabase
@@ -44,13 +40,13 @@ export default async function HistoryPage({ searchParams }: PageProps<"/history"
     .order("changed_at", { ascending: false })
     .limit(500);
   if (space) query = query.eq("space_id", space);
-  if (from) query = query.gte("changed_at", instant(from));
-  if (to) query = query.lt("changed_at", instant(to, true));
+  if (from) query = query.gte("changed_at", zonedInstant(from, tz));
+  if (to) query = query.lt("changed_at", zonedInstant(addDaysTo(to, 1), tz));
   const monthStart = format(startOfMonth(parseISO(today)), "yyyy-MM-dd");
   const [{ data: rows }, { data: spaces }, { data: month }] = await Promise.all([
     query,
     supabase.from("spaces").select("id, name").is("deleted_at", null).order("kind").order("position"),
-    supabase.from("deadline_changes").select("space_id, old_due, new_due, spaces(name)").eq("kind", "reschedule").gte("changed_at", instant(monthStart)),
+    supabase.from("deadline_changes").select("space_id, old_due, new_due, spaces(name)").eq("kind", "reschedule").gte("changed_at", zonedInstant(monthStart, tz)),
   ]);
 
   const moved = (r: { old_due: string | null; new_due: string | null }) =>

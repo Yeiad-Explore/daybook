@@ -9,6 +9,8 @@ export default defineConfig({
   testDir: "e2e",
   globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
+  // One dev server serves every worker; more than 4 locally makes it queue requests for seconds.
+  workers: process.env.CI ? undefined : 4,
   // A dev server compiling routes under parallel workers can take over 5 s for a server round trip;
   // the app's own budget (NFR-1) is met by optimistic updates, which the assertions see at once.
   expect: { timeout: 10_000 },

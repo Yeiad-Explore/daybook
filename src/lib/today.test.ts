@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysLeft, todayIn } from "./today";
+import { daysLeft, todayIn, zonedInstant } from "./today";
 
 describe("todayIn (TODAY-1: today in the profile timezone)", () => {
   it("uses the owner's local date, not UTC", () => {
@@ -23,5 +23,12 @@ describe("daysLeft (SPC-6 countdown)", () => {
   it("the deadline day counts as 0 and past deadlines are negative", () => {
     expect(daysLeft("2026-10-16", "2026-10-16")).toBe(0);
     expect(daysLeft("2026-10-14", "2026-10-16")).toBe(-2);
+  });
+});
+
+describe("zonedInstant (NFR-6)", () => {
+  it("reads a local Dhaka time as the right instant (UTC+6)", () => {
+    expect(new Date(zonedInstant("2026-10-16", "Asia/Dhaka", "20:00")).toISOString()).toBe("2026-10-16T14:00:00.000Z");
+    expect(new Date(zonedInstant("2026-10-16", "Asia/Dhaka")).toISOString()).toBe("2026-10-15T18:00:00.000Z"); // local midnight
   });
 });

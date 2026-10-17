@@ -1,6 +1,5 @@
 "use client";
 
-import { TZDate } from "@date-fns/tz";
 import { ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -13,13 +12,7 @@ import { errorMessage } from "@/lib/db-error";
 import { DERIVED_SPACE_ID } from "@/lib/derived";
 import { createClient } from "@/lib/supabase/client";
 import type { Task } from "@/lib/space-page";
-
-/** Local date + time in the owner's timezone, as an instant (NFR-6). */
-const instant = (day: string, time: string, timezone: string) => {
-  const [y, m, d] = day.split("-").map(Number);
-  const [h, min] = time.split(":").map(Number);
-  return new TZDate(y, m - 1, d, h, min, timezone).toISOString();
-};
+import { zonedInstant } from "@/lib/today";
 
 /**
  * TODO-6 "Book time": a time slot linked to the task, in the first Time block on this page (one is
@@ -39,8 +32,8 @@ export function BookTimeDialog({ task, open, onOpenChange }: { task: Task; open:
     setProblem(null);
     if (!day || !start || !end) return setProblem("Pick a day, a start and an end.");
     if (end <= start) return setProblem("The end time needs to be after the start time.");
-    const startsAt = instant(day, start, timezone);
-    const endsAt = instant(day, end, timezone);
+    const startsAt = zonedInstant(day, timezone, start);
+    const endsAt = zonedInstant(day, timezone, end);
     setBusy(true);
     const supabase = createClient();
     try {

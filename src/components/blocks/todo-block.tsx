@@ -5,7 +5,7 @@ import { useSpace } from "@/components/space/space-context";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Sortable } from "@/components/ui/sortable";
 import { shortDate } from "@/lib/dates";
-import { moveItem } from "@/lib/move-item";
+import { moveItem, positionBetween } from "@/lib/move-item";
 import { reorderRequest } from "@/lib/reorder";
 import type { Block, Task } from "@/lib/space-page";
 import { AddTask } from "./add-task";
@@ -48,9 +48,7 @@ export function TodoBlock({
   function moveTo(from: number, to: number) {
     const { before, after } = moveItem(open, from, to);
     const id = open[from].id;
-    const lo = open.find((t) => t.id === before)?.position;
-    const hi = open.find((t) => t.id === after)?.position;
-    const position = lo !== undefined && hi !== undefined ? (lo + hi) / 2 : lo !== undefined ? lo + 1 : (hi ?? 0) - 1;
+    const position = positionBetween(open, before, after);
     list.move(id, { position }, () => reorderRequest("tasks", id, before, after));
   }
 

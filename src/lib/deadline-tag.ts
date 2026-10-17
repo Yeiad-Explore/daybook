@@ -1,4 +1,5 @@
-import { differenceInCalendarDays, format, parseISO } from "date-fns";
+import { differenceInCalendarDays, parseISO } from "date-fns";
+import { longDate, shortDate } from "@/lib/dates";
 
 export type DeadlineState = "done" | "late" | "today" | "soon" | "future";
 
@@ -17,11 +18,9 @@ export function deadlineTag({
   done: boolean;
   today: string;
 }): { text: string; state: DeadlineState; full: string } {
-  const dueDate = parseISO(due);
-  const days = differenceInCalendarDays(dueDate, parseISO(today));
-  const sameYear = due.slice(0, 4) === today.slice(0, 4);
-  const date = format(dueDate, sameYear ? "d MMM" : "d MMM yyyy");
-  const full = format(dueDate, "EEE d MMM yyyy");
+  const days = differenceInCalendarDays(parseISO(due), parseISO(today));
+  const date = shortDate(due, today);
+  const full = longDate(due);
 
   if (done) return { text: date, state: "done", full };
   if (days < 0) return { text: `${-days}d late`, state: "late", full };

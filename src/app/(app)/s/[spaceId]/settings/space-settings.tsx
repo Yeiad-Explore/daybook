@@ -7,9 +7,9 @@ import { useTrash } from "@/components/deadlines/use-trash";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Field, inputClass } from "@/components/ui/field";
+import { MarkPicker } from "@/components/ui/mark-picker";
 import { Panel } from "@/components/ui/panel";
-import { cx } from "@/lib/cx";
-import { Constants, type Tables, type TablesUpdate } from "@/lib/database.types";
+import type { Tables, TablesUpdate } from "@/lib/database.types";
 import { shortDate } from "@/lib/dates";
 import { errorMessage } from "@/lib/db-error";
 import { createClient } from "@/lib/supabase/client";
@@ -65,26 +65,7 @@ export function SpaceSettings({ space: serverSpace, today }: { space: Space; tod
     <div className="flex max-w-document flex-col gap-6">
       <Panel className="flex flex-col gap-6">
         {text("name", "Name", 60)}
-        <fieldset className="flex flex-col gap-1.5">
-          <legend className="type-heading pb-1.5">Colour</legend>
-          <div className="flex flex-wrap gap-2">
-            {Constants.public.Enums.mark_color.map((m) => (
-              <button
-                key={m}
-                type="button"
-                aria-pressed={space.mark === m}
-                onClick={() => patch({ mark: m })}
-                className={cx(
-                  "type-button flex min-h-9 items-center gap-2 rounded-pill bg-canvas-2 py-1.5 pr-3.5 pl-1.5 capitalize ring-1 ring-inset ring-control-edge pointer-coarse:min-h-11",
-                  space.mark === m && "bg-surface shadow-card ring-ink",
-                )}
-              >
-                <span aria-hidden data-mark={m} className="aura size-6 rounded-pill" />
-                {m}
-              </button>
-            ))}
-          </div>
-        </fieldset>
+        <MarkPicker value={space.mark} onChange={(mark) => patch({ mark })} />
         {goal ? text("end_goal", "End goal", 200, "One sentence: what does done look like?") : text("description", "Description", 200, "Optional. One line about what lives here.")}
       </Panel>
 
