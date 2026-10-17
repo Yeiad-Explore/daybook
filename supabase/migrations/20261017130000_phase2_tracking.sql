@@ -181,7 +181,7 @@ declare
   cfg jsonb;
   fld public.tracker_fields;
   col public.table_columns;
-  v_start numeric; v_target numeric; v_latest numeric; v_percent int; v_n int; v_opt jsonb; v_manual numeric;
+  v_start numeric; v_target numeric; v_latest numeric; v_percent int; v_n int; v_opt jsonb; v_manual numeric; v_page uuid;
 begin
   begin
     if p_space.metric = 'tracker' then
@@ -191,6 +191,7 @@ begin
         join public.pages pg on pg.id = b.page_id and pg.deleted_at is null
        where f.id = (cfg ->> 'field_id')::uuid and b.space_id = p_space.id;
       if not found then return null; end if;
+      select b.page_id into v_page from public.blocks b where b.id = fld.block_id;
       v_start := (cfg ->> 'start')::numeric;
       v_target := (cfg ->> 'target')::numeric;
       select value into v_latest from public.tracker_entries
@@ -198,7 +199,8 @@ begin
       v_percent := case when v_latest is null then 0
                         when v_start = v_target then case when v_latest = v_target then 100 else 0 end
                         else round(100 * greatest(0, least(1, (v_start - v_latest) / (v_start - v_target)))) end;
-      return jsonb_build_object('metric', 'tracker', 'percent', v_percent, 'field_id', fld.id, 'unit', fld.unit,
+      return jsonb_build_object('metric', 'tracker', 'percent', v_percent, 'field_id', fld.id, 'field_label', fld.label,
+        'block_id', fld.block_id, 'page_id', v_page, 'unit', fld.unit,
         'latest', v_latest, 'start', v_start, 'target', v_target,
         'label', case when v_latest is null
                       then format('No entries yet · started %s · target %s', trim_scale(v_start), trim_scale(v_target))

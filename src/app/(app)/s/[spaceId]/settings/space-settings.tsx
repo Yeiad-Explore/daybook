@@ -15,15 +15,32 @@ import { errorMessage } from "@/lib/db-error";
 import { createClient } from "@/lib/supabase/client";
 import { useSave } from "@/lib/use-save";
 import { useServerState } from "@/lib/use-server-state";
+import type { SpaceSummary } from "@/lib/deadlines";
+import { CoverSettings } from "./cover-settings";
+import { MetricSettings, type ColumnChoice, type TrackerChoice } from "./metric-settings";
 
 type Space = Tables<"spaces">;
 
 /**
- * PRD §5.5 (Phase 1 part, D-P1-6): name, colour, end goal or description, start date, the deadline
+ * PRD §5.5: name, colour, cover photo, progress metric (SPC-7), end goal or description, start date, the deadline
  * (only through Reschedule, SPC-2 AC1), kind (goal ↔ area, SPC-9 checked by the database), status
  * (SPC-4) and Trash (SPC-5). Text fields save when you leave them.
  */
-export function SpaceSettings({ space: serverSpace, today }: { space: Space; today: string }) {
+export function SpaceSettings({
+  space: serverSpace,
+  today,
+  coverUrl,
+  progress,
+  fields,
+  columns,
+}: {
+  space: Space;
+  today: string;
+  coverUrl: string | null;
+  progress: SpaceSummary["progress"];
+  fields: TrackerChoice[];
+  columns: ColumnChoice[];
+}) {
   const router = useRouter();
   const save = useSave();
   const { trash, dialog } = useTrash(today);
@@ -69,6 +86,8 @@ export function SpaceSettings({ space: serverSpace, today }: { space: Space; tod
         {goal ? text("end_goal", "End goal", 200, "One sentence: what does done look like?") : text("description", "Description", 200, "Optional. One line about what lives here.")}
       </Panel>
 
+      <CoverSettings space={space} coverUrl={coverUrl} />
+
       {goal && (
         <Panel className="grid gap-6 tablet:grid-cols-2">
           <Field id="start_date" label="Start">
@@ -92,6 +111,8 @@ export function SpaceSettings({ space: serverSpace, today }: { space: Space; tod
           </div>
         </Panel>
       )}
+
+      {goal && <MetricSettings key={`${space.metric}-${JSON.stringify(space.metric_config)}`} space={space} progress={progress} fields={fields} columns={columns} />}
 
       <Panel className="flex flex-col gap-4">
         <h2 className="type-heading">Kind and status</h2>

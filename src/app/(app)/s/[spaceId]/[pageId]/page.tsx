@@ -33,7 +33,7 @@ export default async function SpacePagePage({ params }: PageProps<"/s/[spaceId]/
   return (
     <SpaceProvider value={ctx}>
       <div className="flex flex-col gap-6 pt-2">
-        <SpaceHero space={space} summary={summary} />
+        <SpaceHero space={space} summary={summary} coverUrl={data.coverUrl} />
         {space.kind === "goal" && space.status === "active" && (summary.days_left ?? 0) < 0 && <DeadlinePassed space={space} today={summary.today} />}
         {space.kind === "goal" && <DeadlineRail summary={summary} weekStartsOn={profile.week_starts_on} />}
         <PageTabs pages={data.pages} />

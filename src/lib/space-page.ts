@@ -68,8 +68,12 @@ export const loadSpacePage = cache(async (spaceId: string, pageId: string) => {
     await Promise.all(ids(["routine"]).map(async (id) => [id, (await supabase.rpc("routine_streak", { p_block_id: id, p_today: today })).data as unknown as RoutineStreak] as const)),
   );
 
+  // SPC cover: a private bucket, so the browser gets a short-lived signed URL (NFR-3).
+  const coverUrl = space.cover_path ? ((await supabase.storage.from("covers").createSignedUrl(space.cover_path, 3600)).data?.signedUrl ?? null) : null;
+
   return {
     space,
+    coverUrl,
     pages: pages ?? [],
     page: pages!.find((p) => p.id === pageId)!,
     blocks: blocks ?? [],

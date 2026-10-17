@@ -65,7 +65,22 @@ export type SpaceSummary = {
   deadline: string | null;
   days_left: number | null;
   elapsed: number | null;
-  progress: { metric: "tasks"; done: number; total: number; percent: number; label: string } | null;
+  progress: {
+    metric: Enums<"goal_metric">;
+    percent: number;
+    label: string;
+    /** `tasks` only. */
+    done?: number;
+    total?: number;
+    /** The configured field, column or option is gone or in Trash, so tasks are shown (SPC-7 AC2). */
+    fallback?: boolean;
+    /** Set when the database fell back after a deletion: which metric it was. */
+    fell_back_from?: Enums<"goal_metric">;
+    /** `tracker` only: where to log. */
+    field_label?: string;
+    block_id?: string;
+    page_id?: string;
+  } | null;
   milestones: Milestone[];
   due_counts: { day: string; count: number }[];
 };

@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react";
+import Image from "next/image";
 import { LinkButton } from "@/components/ui/button";
 import { FloatingCard } from "@/components/ui/floating-card";
 import { cx } from "@/lib/cx";
@@ -12,7 +13,7 @@ import type { Space } from "@/lib/space-page";
  * with the progress line (SPC-7 `tasks`). Life areas show the eyebrow, name and description only.
  * Text sits on a dark scrim over the aura (DESIGN.md Accessibility: never small white text on an aura).
  */
-export function SpaceHero({ space, summary }: { space: Space; summary: SpaceSummary }) {
+export function SpaceHero({ space, summary, coverUrl }: { space: Space; summary: SpaceSummary; coverUrl?: string | null }) {
   const goal = space.kind === "goal";
   return (
     <section
@@ -20,6 +21,13 @@ export function SpaceHero({ space, summary }: { space: Space; summary: SpaceSumm
       data-mark={space.mark}
       className={cx("aura relative rounded-xl text-on-dark-fixed", goal ? "min-h-70 max-tablet:min-h-55" : "min-h-40", goal && "mb-6 tablet:mb-10")}
     >
+      {coverUrl && (
+        // A cover photo shows blurred 40px behind the same scrims (DESIGN.md "Aura recipe"); decorative, so no alt text.
+        <div aria-hidden className="absolute inset-0 overflow-hidden rounded-xl">
+          {/* unoptimized: a short-lived signed URL, which the image proxy must not cache */}
+          <Image src={coverUrl} alt="" fill unoptimized sizes="100vw" className="scale-110 object-cover blur-[40px]" />
+        </div>
+      )}
       <div aria-hidden className="absolute inset-0 rounded-xl bg-linear-to-r from-surface-dark-fixed/60 via-surface-dark-fixed/30 to-surface-dark-fixed/5" />
       <div className="relative flex flex-col gap-6 p-6 tablet:flex-row tablet:items-start tablet:justify-between tablet:p-7">
         <div className="flex min-w-0 flex-col gap-3">
@@ -57,9 +65,16 @@ export function SpaceHero({ space, summary }: { space: Space; summary: SpaceSumm
           >
             <div className="h-full rounded-pill bg-ink" style={{ width: `${summary.progress.percent}%` }} />
           </div>
-          <LinkButton href={`/history?space=${space.id}`} variant="primary" icon={<ArrowUpRight size={12} strokeWidth={2} />} className="self-start">
-            Deadline history
-          </LinkButton>
+          <div className="flex flex-wrap items-center gap-2">
+            {summary.progress.metric === "tracker" && summary.progress.block_id && summary.progress.page_id && (
+              <LinkButton href={`/s/${space.id}/${summary.progress.page_id}#block-${summary.progress.block_id}`} variant="primary" icon={<ArrowUpRight size={12} strokeWidth={2} />}>
+                Log {summary.progress.field_label?.toLowerCase()}
+              </LinkButton>
+            )}
+            <LinkButton href={`/history?space=${space.id}`} variant={summary.progress.metric === "tracker" ? "secondary" : "primary"} icon={summary.progress.metric === "tracker" ? undefined : <ArrowUpRight size={12} strokeWidth={2} />}>
+              Deadline history
+            </LinkButton>
+          </div>
         </FloatingCard>
       )}
     </section>
