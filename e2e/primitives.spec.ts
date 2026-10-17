@@ -106,3 +106,60 @@ test.describe("behaviour primitives (keyboard)", () => {
     await expect(undo).toBeHidden();
   });
 });
+
+// Found in a real-browser pass (dark theme): colours that pass text-contrast checks but hide state.
+test.describe("dark theme: overlays and highlights stay visible", () => {
+  // Relative luminance of a computed colour: rgb()/rgba(), or oklab()/oklch() from Tailwind's
+  // opacity modifiers (for neutral greys, luminance ≈ L³).
+  const lum = (css: string) => {
+    const n = (css.match(/-?[\d.]+/g) ?? []).map(Number);
+    if (/^okl(ab|ch)/.test(css)) return n[0] ** 3;
+    const [r, g, b] = n.slice(0, 3).map((v) => v / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a: string, b: string) => {
+    const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+
+  test.beforeEach(async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/dev/primitives");
+  });
+
+  test("the dialog backdrop dims the page instead of lightening it", async ({ page }) => {
+    await page.getByRole("button", { name: "Reschedule…" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    const backdrop = await page.evaluate(() => {
+      // The full-viewport fixed layer that actually paints a colour (alpha > 0).
+      const el = [...document.querySelectorAll("body *")].find((e) => {
+        const s = getComputedStyle(e);
+        const alpha = Number(s.backgroundColor.match(/[\d.]+/g)?.[3] ?? 1);
+        return s.position === "fixed" && s.inset === "0px" && s.backgroundColor !== "rgba(0, 0, 0, 0)" && alpha > 0;
+      });
+      return el ? getComputedStyle(el).backgroundColor : "none found";
+    });
+    expect(lum(backdrop), backdrop).toBeLessThan(0.05);
+  });
+
+  test("the highlighted menu item stands out from the menu (WCAG 2.4.7)", async ({ page }) => {
+    await page.getByRole("button", { name: "Block menu" }).focus();
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("ArrowDown");
+    const [item, menu] = await page.evaluate(() => {
+      const hi = document.querySelector("[role=menuitem][data-highlighted]")!;
+      return [getComputedStyle(hi).backgroundColor, getComputedStyle(hi.closest("[role=menu]")!).backgroundColor];
+    });
+    expect(ratio(item, menu)).toBeGreaterThanOrEqual(1.3);
+  });
+
+  test("the selected palette item stands out from the palette", async ({ page }) => {
+    await page.getByRole("button", { name: "Open command palette" }).click();
+    await page.keyboard.press("ArrowDown");
+    const [item, panel] = await page.evaluate(() => {
+      const sel = document.querySelector("[cmdk-item][data-selected=true]")!;
+      return [getComputedStyle(sel).backgroundColor, getComputedStyle(sel.closest("[role=dialog]")!).backgroundColor];
+    });
+    expect(ratio(item, panel)).toBeGreaterThanOrEqual(1.3);
+  });
+});

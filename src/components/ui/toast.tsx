@@ -31,7 +31,7 @@ function ToastList() {
       key={toast.id}
       toast={toast}
       className={cx(
-        "flex items-center gap-3 rounded-md bg-surface-dark-fixed py-2.5 pr-2 pl-4 text-on-dark-fixed shadow-float",
+        "flex items-center gap-3 rounded-md bg-surface-dark-fixed py-2.5 pr-2 pl-4 text-on-dark-fixed shadow-float ring-1 ring-on-dark-fixed/15",
         "transition-[opacity,transform] duration-200 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-2 data-[starting-style]:opacity-0",
       )}
     >

@@ -41,7 +41,7 @@ export function CommandInput({ className, ...props }: ComponentProps<typeof Comm
     <div className="flex items-center gap-2 border-b border-hairline px-4">
       <Search size={16} strokeWidth={1.5} aria-hidden className="text-ink-3-small" />
       <CommandPrimitive.Input
-        className={cx("type-body h-12 flex-1 bg-transparent outline-none placeholder:text-ink-3-small", className)}
+        className={cx("type-body my-2 h-10 flex-1 rounded-sm bg-transparent px-2 placeholder:text-ink-3-small", className)}
         {...props}
       />
     </div>
@@ -72,7 +72,7 @@ export function CommandItem({ className, ...props }: ComponentProps<typeof Comma
   return (
     <CommandPrimitive.Item
       className={cx(
-        "type-body-sm flex min-h-9 cursor-default items-center gap-2 rounded-sm px-2.5 select-none data-[selected=true]:bg-canvas-2 pointer-coarse:min-h-11",
+        "type-body-sm flex min-h-9 cursor-default items-center gap-2 rounded-sm px-2.5 select-none data-[selected=true]:bg-hairline-strong pointer-coarse:min-h-11",
         className,
       )}
       {...props}

@@ -33,7 +33,7 @@ export function DropdownMenuItem({ className, tone, ...props }: Omit<MenuPrimiti
     <MenuPrimitive.Item
       className={cx(
         "type-body-sm flex min-h-9 cursor-default items-center gap-2 rounded-sm px-2.5 outline-none select-none",
-        "data-[highlighted]:bg-canvas-2 data-[disabled]:opacity-50 pointer-coarse:min-h-11",
+        "data-[highlighted]:bg-hairline-strong data-[disabled]:opacity-50 pointer-coarse:min-h-11",
         tone === "danger" ? "text-signal-ink" : "text-ink",
         className,
       )}
