@@ -39,6 +39,24 @@ export default async function globalSetup() {
     : await admin.auth.admin.createUser({ email: OWNER_EMAIL, password, email_confirm: true });
   if (error) throw error;
 
+  // A little of the PRD §12 seed (only if missing), so the shell has a goal and a life area to show.
+  const ownerId = existing?.id ?? (await admin.auth.admin.listUsers()).data.users.find((u) => u.email === OWNER_EMAIL)!.id;
+  const { data: spaces } = await admin.from("spaces").select("name").eq("owner_id", ownerId).is("deleted_at", null);
+  if (!spaces?.some((s) => s.name === "Health")) {
+    const { data: health, error: e1 } = await admin
+      .from("spaces")
+      .insert({ owner_id: ownerId, kind: "goal", name: "Health", mark: "moss", end_goal: "Reach 72 kg and run a 5K without stopping", start_date: "2026-09-01", deadline: "2027-01-31", position: 1 })
+      .select("id")
+      .single();
+    if (e1) throw e1;
+    const { error: e2 } = await admin.from("pages").insert({ owner_id: ownerId, space_id: health.id, title: "Workouts", position: 1 });
+    if (e2) throw e2;
+  }
+  if (!spaces?.some((s) => s.name === "Finance")) {
+    const { error } = await admin.from("spaces").insert({ owner_id: ownerId, kind: "area", name: "Finance", mark: "teal", position: 1 });
+    if (error) throw error;
+  }
+
   const jar = new Map<string, { value: string; maxAge?: number }>();
   const supabase = createServerClient(url, publishable, {
     cookies: {

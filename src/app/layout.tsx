@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Inter_Tight } from "next/font/google";
 import "./globals.css";
+import { getProfile } from "@/lib/profile";
 import { Providers } from "./providers";
 
 // Self-hosted at build time by next/font: no request to Google from the browser (NFR-4).
@@ -13,9 +14,11 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // Light unless the owner chose dark or "system" (SET-1). Set on the server, so no flash on load.
+  const theme = (await getProfile())?.theme ?? "light";
   return (
-    <html lang="en" className={`${inter.variable} ${interTight.variable}`}>
+    <html lang="en" data-theme={theme} className={`${inter.variable} ${interTight.variable}`}>
       <body>
         <Providers>{children}</Providers>
       </body>

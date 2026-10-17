@@ -1,10 +1,17 @@
+import { TZDate } from "@date-fns/tz";
+import { format } from "date-fns";
+import { PageIntro } from "@/components/page-intro";
+import { getProfile } from "@/lib/profile";
+
 export const metadata = { title: "Today · Daybook" };
 
-// Placeholder until Phase 1 builds Today (PRD §5.3); T19–T20 put it inside the app shell.
-export default function TodayPage() {
+// PRD §5.3 is built in Phase 1 (agenda) and Phase 2 (timetable, routines, trackers).
+export default async function TodayPage() {
+  const profile = await getProfile();
+  const now = new TZDate(new Date(), profile?.timezone ?? "Asia/Dhaka");
   return (
-    <main>
-      <h1>Today</h1>
-    </main>
+    <PageIntro eyebrow="Today" context={format(now, "EEEE, d MMMM")} statement="Your agenda arrives in Phase 1.">
+      Overdue, due today and the next 7 days will gather here from every space.
+    </PageIntro>
   );
 }
