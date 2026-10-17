@@ -376,6 +376,9 @@ isOneToOne: false
 "purge_trash":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"remember_page":
+{ Args: { "p_page_id": string,"p_space_id": string }; Returns: undefined
+                           },
 "reorder":
 { Args: { "p_after": string,"p_before": string,"p_id": string,"p_table": string }; Returns: number
                            },

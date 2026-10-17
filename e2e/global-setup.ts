@@ -14,7 +14,7 @@ export const OWNER_STATE = "e2e/.auth/owner.json";
 /** A separate session, so the sign-out test cannot end the session the other tests share. */
 export const SIGN_OUT_STATE = "e2e/.auth/sign-out.json";
 
-function localStack() {
+export function localStack() {
   const lines = execSync("pnpm exec supabase status -o env", { encoding: "utf8" }).split(/\r?\n/);
   const vars = Object.fromEntries(
     lines.flatMap((line) => {
@@ -50,6 +50,11 @@ export default async function globalSetup(config: FullConfig) {
     .update({ display_name: null, timezone: "Asia/Dhaka", week_starts_on: 6, currency: "BDT", theme: "light" })
     .eq("id", ownerId);
   if (profileError) throw profileError;
+
+  // Spaces the specs created in earlier runs go (deleted for good by trusted code; the Health and
+  // Finance fixtures below stay), so the Index and Today only show this run's data.
+  const { error: cleanError } = await admin.from("spaces").delete().eq("owner_id", ownerId).not("name", "in", "(Health,Finance)");
+  if (cleanError) throw cleanError;
 
   // A little of the PRD §12 seed (only if missing), so the shell has a goal and a life area to show.
   const { data: spaces } = await admin.from("spaces").select("name").eq("owner_id", ownerId).is("deleted_at", null);

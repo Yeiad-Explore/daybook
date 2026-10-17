@@ -1,7 +1,7 @@
 -- Trash, restore, pages, status and order: C-DL-17 (DL-11), C-DL-20 (DL-13 restore), C-TRASH-01
 -- (SET-3, purge), C-PG-01, C-SPC-03, C-ORD-01. Fixtures: PRD §12 subset, today = 2026-10-16.
 begin;
-select plan(47);
+select plan(50);
 
 select tests.create_user('owner@test.local');
 select tests.create_user('other@test.local');
@@ -143,6 +143,20 @@ select throws_ok(
      select id, 'Invented', '2026-10-01', '2026-10-02', 'Never happened', false from public.spaces where name = 'Health' $$,
   '42501', null, 'C-RLS-06: the owner cannot write deadline history directly; only the RPCs do'
 );
+
+-- PG AC: the last opened page per space, merged atomically; only live pages of that space.
+select public.remember_page((select id from public.spaces where name = 'Health'), (select id from public.pages where title = 'Workouts'));
+select public.remember_page((select id from public.spaces where name = 'Finance'), (select id from public.pages where title = 'Ledger'));
+select is(
+  (select last_page_by_space from public.profiles where id = tests.uid('owner@test.local')),
+  jsonb_build_object((select id::text from public.spaces where name = 'Health'), (select id from public.pages where title = 'Workouts'),
+                     (select id::text from public.spaces where name = 'Finance'), (select id from public.pages where title = 'Ledger')),
+  'PG AC: each space keeps its own last opened page'
+);
+select public.remember_page((select id from public.spaces where name = 'Health'), (select id from public.pages where title = 'Ledger'));
+select is((select last_page_by_space ->> (select id::text from public.spaces where name = 'Health') from public.profiles where id = tests.uid('owner@test.local')),
+  (select id::text from public.pages where title = 'Workouts'), 'PG AC: a page of another space is ignored');
+select function_privs_are('public', 'remember_page', array['uuid', 'uuid'], 'anon', array[]::text[], 'remember_page: anon cannot call it');
 
 ------------------------------------------------------------------------------------------------
 -- C-SPC-03: status_changed_at follows status (SPC-4 AC1).

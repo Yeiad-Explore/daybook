@@ -1,19 +1,42 @@
-import { notFound } from "next/navigation";
-import { PageIntro } from "@/components/page-intro";
-import { getSpaceOr404, isUuid } from "@/lib/space";
-import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { DeadlinePassed } from "@/components/space/deadline-passed";
+import { DeadlineRail } from "@/components/space/deadline-rail";
+import { PageBody } from "@/components/space/page-body";
+import { PageTabs } from "@/components/space/page-tabs";
+import { SpaceProvider } from "@/components/space/space-context";
+import { SpaceHero } from "@/components/space/space-hero";
+import { getProfile } from "@/lib/profile";
+import { loadSpacePage } from "@/lib/space-page";
 
-// PRD §5.4 (space header, page tabs, blocks) is built in Phase 1.
+export async function generateMetadata({ params }: PageProps<"/s/[spaceId]/[pageId]">) {
+  const { spaceId, pageId } = await params;
+  const { space, page } = await loadSpacePage(spaceId, pageId);
+  return { title: `${page.title} · ${space.name} · Daybook` };
+}
+
+// PRD §5.4: space header (hero, Deadline Rail), page tabs, then the page's blocks.
 export default async function SpacePagePage({ params }: PageProps<"/s/[spaceId]/[pageId]">) {
   const { spaceId, pageId } = await params;
-  const space = await getSpaceOr404(spaceId);
-  if (!isUuid(pageId)) notFound();
-  const supabase = await createClient();
-  const { data: page } = await supabase.from("pages").select("title").eq("id", pageId).eq("space_id", space.id).is("deleted_at", null).maybeSingle();
-  if (!page) notFound();
+  const [data, profile] = await Promise.all([loadSpacePage(spaceId, pageId), getProfile()]);
+  if (!profile) redirect("/login");
+  const { space, summary } = data;
+  const ctx = {
+    space: { id: space.id, kind: space.kind, name: space.name, deadline: space.deadline, mark: space.mark },
+    pageId,
+    today: summary.today,
+    timezone: profile.timezone,
+    blocks: data.blocks,
+  };
+
   return (
-    <PageIntro eyebrow={space.kind === "goal" ? "Goal" : "Life area"} context={space.name} statement={page.title}>
-      The space header, page tabs and blocks are built in Phase 1.
-    </PageIntro>
+    <SpaceProvider value={ctx}>
+      <div className="flex flex-col gap-6 pt-2">
+        <SpaceHero space={space} summary={summary} />
+        {space.kind === "goal" && space.status === "active" && (summary.days_left ?? 0) < 0 && <DeadlinePassed space={space} today={summary.today} />}
+        {space.kind === "goal" && <DeadlineRail summary={summary} weekStartsOn={profile.week_starts_on} />}
+        <PageTabs pages={data.pages} />
+        <PageBody data={data} lastPage={profile.last_page_by_space[space.id]} />
+      </div>
+    </SpaceProvider>
   );
 }

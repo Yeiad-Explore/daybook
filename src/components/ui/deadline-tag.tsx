@@ -17,22 +17,26 @@ export function DeadlineTag({
   done,
   today,
   movedCount = 0,
+  doneLate = false,
 }: {
   due: string;
   dueTime?: string | null;
   done: boolean;
+  /** TODO-2: done after its deadline date; said on hover and to screen readers. */
+  doneLate?: boolean;
   today: string;
   movedCount?: number;
 }) {
   const { text, state, full } = deadlineTag({ due, dueTime, done, today });
+  const hover = state === "done" && doneLate ? `Done late · was due ${full}` : full;
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5">
       <span className={cx("type-number inline-flex items-center gap-1 rounded-pill px-2 py-[3px] text-[12px]", STATES[state])}>
         {state === "late" && <span aria-hidden className="size-1.5 rounded-pill bg-signal" />}
-        <time dateTime={due} title={full}>
+        <time dateTime={due} title={hover}>
           {text}
         </time>
-        <span className="sr-only">{state === "done" ? `, done, was due ${full}` : `, due ${full}`}</span>
+        <span className="sr-only">{state === "done" ? `, done${doneLate ? " late" : ""}, was due ${full}` : `, due ${full}`}</span>
       </span>
       {movedCount > 0 && <Tag>moved {movedCount}×</Tag>}
     </span>

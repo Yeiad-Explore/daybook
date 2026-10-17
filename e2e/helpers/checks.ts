@@ -57,3 +57,11 @@ export async function checkScreen(page: Page, url: string) {
     }
   }
 }
+
+/** Interactions before React hydrates are lost; wait until the element has React's props attached. */
+export async function hydrated(page: Page, selector = "main") {
+  await page.waitForFunction((s) => {
+    const el = document.querySelector(s);
+    return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps"));
+  }, selector);
+}

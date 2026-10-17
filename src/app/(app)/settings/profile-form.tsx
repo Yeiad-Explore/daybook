@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { Field, inputClass } from "@/components/ui/field";
 import { Panel } from "@/components/ui/panel";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useToast } from "@/components/ui/toast";
@@ -20,26 +21,6 @@ const THEMES = [
   { value: "dark", label: "Dark" },
   { value: "system", label: "System" },
 ] as const;
-
-const inputClass =
-  "type-body w-full rounded-sm border border-ink-3 bg-surface px-3 py-2.5 text-ink placeholder:text-ink-3-small";
-
-function Field({ id, label, hint, error, children }: { id: string; label: string; hint?: string; error?: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="type-heading">
-        {label}
-      </label>
-      {children}
-      {hint && !error && <p id={`${id}-hint`} className="type-caption text-ink-3-small">{hint}</p>}
-      {error && (
-        <p id={`${id}-error`} role="alert" className="type-caption text-signal-ink">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-}
 
 const formValues = (p: Profile): ProfileFields => ({
   display_name: p.display_name ?? "",

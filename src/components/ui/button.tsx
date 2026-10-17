@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { cx } from "@/lib/cx";
 
@@ -17,24 +18,30 @@ type ButtonProps = ComponentProps<"button"> & {
   icon?: ReactNode;
 };
 
+const base = "type-button inline-flex min-h-9 items-center gap-2 rounded-pill transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 pointer-coarse:min-h-11";
+
+const trailing = (variant: Variant, icon: ReactNode) =>
+  variant === "primary" && (
+    <span aria-hidden className="grid size-5 place-items-center rounded-pill bg-on-dark text-surface-dark">
+      {icon}
+    </span>
+  );
+
 export function Button({ variant = "secondary", icon, className, children, type = "button", ...props }: ButtonProps) {
   return (
-    <button
-      type={type}
-      className={cx(
-        "type-button inline-flex min-h-9 items-center gap-2 rounded-pill transition-transform duration-150",
-        "active:scale-[0.98] disabled:opacity-50 pointer-coarse:min-h-11",
-        VARIANTS[variant],
-        className,
-      )}
-      {...props}
-    >
+    <button type={type} className={cx(base, VARIANTS[variant], className)} {...props}>
       {children}
-      {variant === "primary" && (
-        <span aria-hidden className="grid size-5 place-items-center rounded-pill bg-on-dark text-surface-dark">
-          {icon}
-        </span>
-      )}
+      {trailing(variant, icon)}
     </button>
+  );
+}
+
+/** A pill that navigates (a link styled as a Button). */
+export function LinkButton({ variant = "secondary", icon, className, children, ...props }: ComponentProps<typeof Link> & { variant?: Variant; icon?: ReactNode }) {
+  return (
+    <Link className={cx(base, VARIANTS[variant], className)} {...props}>
+      {children}
+      {trailing(variant, icon)}
+    </Link>
   );
 }

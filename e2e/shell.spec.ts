@@ -22,20 +22,22 @@ for (const route of routes) {
 test("the Index lists goals with days left and life areas (PRD §5.2)", async ({ page }) => {
   await page.goto("/today");
   const index = page.getByRole("navigation", { name: "Index" });
-  await expect(index.getByRole("region", { name: "Goals" }).getByRole("link", { name: /Health/ })).toContainText(/\d+/);
+  await expect(index.getByRole("region", { name: "Goals" }).getByRole("link", { name: /^Health \d+ days left$/ })).toBeVisible();
   await expect(index.getByRole("region", { name: "Goals" })).toContainText("days left");
-  await expect(index.getByRole("region", { name: "Life areas" }).getByRole("link", { name: /Finance/ })).toBeVisible();
+  await expect(index.getByRole("region", { name: "Life areas" }).getByRole("link", { name: "Finance", exact: true })).toBeVisible();
   await expect(index.getByRole("link", { name: "Today" })).toHaveAttribute("aria-current", "page");
 });
 
-test("a space opens on its first page; a space without pages says so", async ({ page }) => {
+test("a space opens on its last opened page, else its first; every space has one (PG AC, C-PG-01)", async ({ page }) => {
   await page.goto("/today");
-  await page.getByRole("navigation", { name: "Index" }).getByRole("link", { name: /Health/ }).click();
+  await page.getByRole("navigation", { name: "Index" }).getByRole("link", { name: /^Health \d+ days left$/ }).click();
   await expect(page).toHaveURL(/\/s\/[0-9a-f-]{36}\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Workouts");
-  await page.getByRole("navigation", { name: "Index" }).getByRole("link", { name: /Finance/ }).click();
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Finance");
-  await expect(page.getByText("This space has no pages yet.")).toBeVisible();
+  await page.getByRole("navigation", { name: "Pages" }).getByRole("link", { name: "Workouts" }).click();
+  await expect(page.getByLabel("Page title")).toHaveValue("Workouts");
+  await page.getByRole("navigation", { name: "Index" }).getByRole("link", { name: "Finance", exact: true }).click();
+  await expect(page.getByLabel("Page title")).toHaveValue("Overview");
+  await page.getByRole("navigation", { name: "Index" }).getByRole("link", { name: /^Health \d+ days left$/ }).click();
+  await expect(page.getByLabel("Page title")).toHaveValue("Workouts"); // remembered
 });
 
 test("unknown pages, foreign or malformed ids and bad dates show the not-found page", async ({ page }) => {
@@ -59,6 +61,7 @@ test("narrow screens: the Index is a drawer that closes after navigating", async
 });
 
 test("Today and Settings pass layout and accessibility checks in both themes", async ({ page }) => {
+  test.setTimeout(120_000); // 12 page loads with axe runs
   await checkScreen(page, "/today");
   await checkScreen(page, "/settings");
   await checkScreen(page, "/settings/calendar");
