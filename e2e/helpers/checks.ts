@@ -5,6 +5,11 @@ import { expect, type Page } from "@playwright/test";
 export const widths = [400, 1440] as const;
 export const themes = ["light", "dark"] as const;
 
+/** Applies a theme the way the saved profile setting will (data-theme on <html>). */
+export async function applyTheme(page: Page, theme: "light" | "dark" | "system") {
+  await page.evaluate((t) => (document.documentElement.dataset.theme = t), theme);
+}
+
 export async function expectNoHorizontalScroll(page: Page, view = "") {
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -41,6 +46,7 @@ export async function checkScreen(page: Page, url: string) {
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme: theme });
       await page.goto(url);
+      await applyTheme(page, theme);
       await expectNoHorizontalScroll(page, view);
       await expectNoSeriousA11yViolations(page, view);
     }

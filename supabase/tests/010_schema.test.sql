@@ -7,8 +7,8 @@ select tests.create_user('owner@test.local');
 -- C-DB-01 (DB-1): a profile with the §10.3 defaults exists for the new user.
 select results_eq(
   $$ select timezone, week_starts_on, currency, theme::text from public.profiles where id = tests.uid('owner@test.local') $$,
-  $$ values ('Asia/Dhaka'::text, 6::smallint, 'BDT'::text, 'system'::text) $$,
-  'C-DB-01: new user gets a profile with the default timezone, week start, currency and theme'
+  $$ values ('Asia/Dhaka'::text, 6::smallint, 'BDT'::text, 'light'::text) $$,
+  'C-DB-01: new user gets a profile with the default timezone, week start, currency and theme (light)'
 );
 
 -- C-DL-01: a goal needs end goal, start date and deadline.

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { OWNER_STATE } from "./global-setup";
-import { checkScreen } from "./helpers/checks";
+import { applyTheme, checkScreen } from "./helpers/checks";
 
 // DEV-1 gallery (development only). Every primitive is checked in light/dark at 400 and 1440px.
 test.use({ storageState: OWNER_STATE });
@@ -125,6 +125,7 @@ test.describe("dark theme: overlays and highlights stay visible", () => {
   test.beforeEach(async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/dev/primitives");
+    await applyTheme(page, "dark");
   });
 
   test("the dialog backdrop dims the page instead of lightening it", async ({ page }) => {

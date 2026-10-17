@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, test, type Page } from "@playwright/test";
 import { parse } from "yaml";
+import { applyTheme } from "./helpers/checks";
 
 // Expected values come from DESIGN.md itself, the single source of the tokens.
 const design = parse(readFileSync("DESIGN.md", "utf8").split(/^---$/m)[1]);
@@ -12,24 +13,28 @@ const LIGHT = rgb(design.colors.canvas);
 const DARK = rgb(design["colors-dark"].canvas);
 
 const canvas = (page: Page) => page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor);
-const setTheme = (page: Page, theme: string | null) =>
-  page.evaluate((t) => (t ? (document.documentElement.dataset.theme = t) : delete document.documentElement.dataset.theme), theme);
 
-test("follows the system theme when no theme is chosen", async ({ page }) => {
-  await page.emulateMedia({ colorScheme: "light" });
+test("light is the default, even when the computer is set to dark", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "dark" });
   await page.goto("/login");
   expect(await canvas(page)).toBe(LIGHT);
-  await page.emulateMedia({ colorScheme: "dark" });
-  expect(await canvas(page)).toBe(DARK);
 });
 
-test("a chosen theme overrides the system, without a reload", async ({ page }) => {
-  await page.emulateMedia({ colorScheme: "dark" });
-  await page.goto("/login");
-  await setTheme(page, "light");
-  expect(await canvas(page)).toBe(LIGHT);
+test("dark is used when chosen, without a reload", async ({ page }) => {
   await page.emulateMedia({ colorScheme: "light" });
-  await setTheme(page, "dark");
+  await page.goto("/login");
+  await applyTheme(page, "dark");
+  expect(await canvas(page)).toBe(DARK);
+  await applyTheme(page, "light");
+  expect(await canvas(page)).toBe(LIGHT);
+});
+
+test("'follow my system' tracks the computer's setting", async ({ page }) => {
+  await page.emulateMedia({ colorScheme: "light" });
+  await page.goto("/login");
+  await applyTheme(page, "system");
+  expect(await canvas(page)).toBe(LIGHT);
+  await page.emulateMedia({ colorScheme: "dark" });
   expect(await canvas(page)).toBe(DARK);
 });
 

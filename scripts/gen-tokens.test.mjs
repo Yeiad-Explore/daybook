@@ -28,9 +28,10 @@ describe("design tokens (DESIGN.md is the source, ADR 0002)", () => {
     for (const [name, value] of Object.entries(design["colors-dark"])) expect(dark).toContain(`--${name}: ${value};`);
   });
 
-  it("dark applies both when chosen and when the system is dark, unless light is chosen", () => {
+  it("light is the default; dark applies when chosen, or when 'system' is chosen and the system is dark", () => {
     expect(css).toContain(':root[data-theme="dark"] {');
-    expect(css).toContain('@media (prefers-color-scheme: dark) {\n  :root:not([data-theme="light"]) {');
+    expect(css).toContain('@media (prefers-color-scheme: dark) {\n  :root[data-theme="system"] {');
+    expect(css).not.toContain(":not([data-theme");
   });
 
   it("removes Tailwind's default palette so only DESIGN.md colours exist", () => {

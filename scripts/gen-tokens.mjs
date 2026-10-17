@@ -81,7 +81,7 @@ export function generateTokensCss(design) {
   const darkLines = ["color-scheme: dark;", ...colorVars(dark)];
   const darkCss = [
     block(':root[data-theme="dark"]', darkLines),
-    `@media (prefers-color-scheme: dark) {\n${block(':root:not([data-theme="light"])', darkLines).replace(/^/gm, "  ")}\n}`,
+    `@media (prefers-color-scheme: dark) {\n${block(':root[data-theme="system"]', darkLines).replace(/^/gm, "  ")}\n}`,
   ].join("\n\n");
 
   const marks = auras
