@@ -33,6 +33,20 @@ export type Note = Pick<Tables<"notes">, "block_id" | "body">;
 const TRACKER_FIELD_COLUMNS = "id, block_id, label, unit, decimals, target_value, target_kind, position, archived_at";
 const TASK_COLUMNS = "id, block_id, parent_id, depth, title, note, due_date, due_time, done, completed_at, is_milestone, reschedule_count, position";
 
+/** Space header shared by every page in the space: it stays mounted while tabs change. */
+export const loadSpaceShell = cache(async (spaceId: string) => {
+  if (!isUuid(spaceId)) notFound();
+  const supabase = await createClient();
+  const [{ data: space }, { data: pages }, { data: summary }] = await Promise.all([
+    supabase.from("spaces").select("*").eq("id", spaceId).is("deleted_at", null).maybeSingle(),
+    supabase.from("pages").select("id, title, position").eq("space_id", spaceId).is("deleted_at", null).order("position").order("created_at").order("id"),
+    supabase.rpc("space_summary", { p_space_id: spaceId }),
+  ]);
+  if (!space || !pages?.length) notFound();
+  const coverUrl = space.cover_path ? ((await supabase.storage.from("covers").createSignedUrl(space.cover_path, 3600)).data?.signedUrl ?? null) : null;
+  return { space, pages, coverUrl, summary: summary as unknown as SpaceSummary };
+});
+
 /** Everything the space page (PRD §5.4) renders, for one page of one live space. 404 otherwise. */
 export const loadSpacePage = cache(async (spaceId: string, pageId: string) => {
   if (!isUuid(spaceId) || !isUuid(pageId)) notFound();

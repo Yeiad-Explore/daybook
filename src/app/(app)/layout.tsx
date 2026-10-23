@@ -37,6 +37,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     spaces,
     lateCount: agenda.late_count,
     dueTodayCount: agenda.due_today.filter((t) => !t.done).length,
+    today,
   };
 
   return (

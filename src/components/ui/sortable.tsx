@@ -8,6 +8,7 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import {
   horizontalListSortingStrategy,
@@ -42,18 +43,27 @@ export function Sortable<T extends { id: string }>({
   id,
   items,
   strategy = "vertical",
+  activation = { distance: 6 },
   onMove,
+  onDragActive,
   render,
 }: {
   /** Stable id: dnd-kit's describedby ids must match between server and client renders. */
   id: string;
   items: T[];
   strategy?: keyof typeof STRATEGIES;
+  /**
+   * Distance: a small move starts a drag and cancels the click (lists).
+   * Delay: a quick click always lands; holding still starts a drag (links, like page tabs).
+   */
+  activation?: { distance: number } | { delay: number; tolerance: number };
   onMove: (from: number, to: number) => void;
+  /** The id being dragged, or null once it is dropped or cancelled. */
+  onDragActive?: (id: string | null) => void;
   render: (item: T, drag: DragHandle) => ReactNode;
 }) {
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(PointerSensor, { activationConstraint: activation }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -61,15 +71,32 @@ export function Sortable<T extends { id: string }>({
   // inline on the server and the first client render, so hydration matches.
   const announcer = useSyncExternalStore(noSubscription, () => document.body, () => undefined);
 
+  function onDragStart({ active }: DragStartEvent) {
+    onDragActive?.(String(active.id));
+  }
+
   function onDragEnd({ active, over }: DragEndEvent) {
+    onDragActive?.(null);
     if (!over || active.id === over.id) return;
     const from = items.findIndex((i) => i.id === active.id);
     const to = items.findIndex((i) => i.id === over.id);
     if (from >= 0 && to >= 0) onMove(from, to);
   }
 
+  function onDragCancel() {
+    onDragActive?.(null);
+  }
+
   return (
-    <DndContext id={id} sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd} accessibility={{ container: announcer }}>
+    <DndContext
+      id={id}
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragCancel={onDragCancel}
+      accessibility={{ container: announcer }}
+    >
       <SortableContext items={items.map((i) => i.id)} strategy={STRATEGIES[strategy]}>
         {items.map((item) => (
           <Item key={item.id} id={item.id}>

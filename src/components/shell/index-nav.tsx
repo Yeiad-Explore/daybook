@@ -1,10 +1,11 @@
 "use client";
 
-import { CalendarCheck, GripVertical, History, NotebookPen, Plus, Settings } from "lucide-react";
+import { CalendarCheck, GripVertical, History, NotebookPen, Plus, Settings, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useQuickCapture } from "@/components/capture/capture";
+import { useTrash } from "@/components/deadlines/use-trash";
 import { Sortable } from "@/components/ui/sortable";
 import { cx } from "@/lib/cx";
 import type { Enums } from "@/lib/database.types";
@@ -34,15 +35,19 @@ export function IndexNav({
   spaces: serverSpaces,
   lateCount,
   dueTodayCount,
+  today,
   onNavigate,
 }: {
   name: string;
   spaces: IndexSpace[];
   lateCount: number;
   dueTodayCount: number;
+  today: string;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { trash, dialog: trashDialog } = useTrash(today);
   const capture = useQuickCapture();
   const [spaces, setSpaces] = useServerState(serverSpaces);
   const save = useSave();
@@ -110,6 +115,16 @@ export function IndexNav({
                 className="grid size-7 shrink-0 cursor-grab place-items-center rounded-pill opacity-0 group-hover/space:opacity-100 focus-visible:opacity-100 pointer-coarse:hidden"
               >
                 <GripVertical size={14} strokeWidth={1.5} aria-hidden />
+              </button>
+              <button
+                type="button"
+                aria-label={`Move ${s.name} to Trash`}
+                onClick={() =>
+                  trash({ table: "spaces", id: s.id, name: s.name, onTrashed: () => pathname.startsWith(`/s/${s.id}`) && router.push("/today") })
+                }
+                className="grid size-7 shrink-0 place-items-center rounded-pill opacity-0 group-hover/space:opacity-100 focus-visible:opacity-100 pointer-coarse:opacity-100"
+              >
+                <Trash2 size={14} strokeWidth={1.5} aria-hidden />
               </button>
             </div>
           )}
@@ -191,6 +206,7 @@ export function IndexNav({
           <Plus {...icon} /> New space
         </Link>
       </div>
+      {trashDialog}
     </nav>
   );
 }

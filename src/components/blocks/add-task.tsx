@@ -5,8 +5,9 @@ import { useState } from "react";
 import { cx } from "@/lib/cx";
 
 /**
- * DESIGN.md "Inputs": an inline add form is one pill row at the bottom of a block: the title field, a
- * date pill and a black pill button. The date is required where the rules need it (§7.1); its max is
+ * DESIGN.md "Inputs": an inline add form at the bottom of a block: the title field, a date pill and a
+ * black pill button. A time field shares their row. The panel stays rounded when that row wraps, so it
+ * does not stretch into an ellipse. The date is required where the rules need it (§7.1); its max is
  * the goal's or the parent's deadline, with that rule's own sentence when it is exceeded (TODO-1 AC1,
  * RM-2 AC1). The database checks again either way.
  */
@@ -55,7 +56,7 @@ export function AddTask({
       }}
       className="mt-2 flex flex-col gap-1.5"
     >
-      <div className="flex flex-wrap items-center gap-1.5 rounded-pill bg-canvas p-1 ring-1 ring-inset ring-ink-3 focus-within:ring-ink max-tablet:rounded-md">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-lg bg-canvas p-1.5 ring-1 ring-inset ring-ink-3 focus-within:ring-ink">
         <input
           aria-label={label}
           placeholder={`+ ${label}`}
@@ -64,32 +65,34 @@ export function AddTask({
           onChange={(e) => setTitle(e.target.value)}
           className="type-body min-w-40 flex-1 rounded-pill bg-transparent px-3 py-1.5 placeholder:text-ink-3-small focus-visible:shadow-none focus-visible:outline-none"
         />
-        <input
-          aria-label="Deadline"
-          type="date"
-          value={date}
-          max={max ?? undefined}
-          required={dateRequired}
-          onChange={(e) => setDate(e.target.value)}
-          className="type-number min-h-9 rounded-pill bg-surface px-3 text-ink ring-1 ring-inset ring-ink-3 pointer-coarse:min-h-11"
-        />
-        {withTime && (
+        <div className="flex flex-wrap items-center gap-1.5">
           <input
-            aria-label="Time (optional)"
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
+            aria-label="Deadline"
+            type="date"
+            value={date}
+            max={max ?? undefined}
+            required={dateRequired}
+            onChange={(e) => setDate(e.target.value)}
             className="type-number min-h-9 rounded-pill bg-surface px-3 text-ink ring-1 ring-inset ring-ink-3 pointer-coarse:min-h-11"
           />
-        )}
-        <button
-          type="submit"
-          disabled={busy}
-          aria-label={`Add: ${title || label}`}
-          className={cx("type-button grid size-9 place-items-center rounded-pill bg-surface-dark text-on-dark pointer-coarse:size-11")}
-        >
-          <Plus size={16} strokeWidth={1.75} aria-hidden />
-        </button>
+          {withTime && (
+            <input
+              aria-label="Time (optional)"
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="type-number min-h-9 rounded-pill bg-surface px-3 text-ink ring-1 ring-inset ring-ink-3 pointer-coarse:min-h-11"
+            />
+          )}
+          <button
+            type="submit"
+            disabled={busy}
+            aria-label={`Add: ${title || label}`}
+            className={cx("type-button grid size-9 place-items-center rounded-pill bg-surface-dark text-on-dark pointer-coarse:size-11")}
+          >
+            <Plus size={16} strokeWidth={1.75} aria-hidden />
+          </button>
+        </div>
       </div>
       {problem && (
         <p role="alert" className="type-caption px-3 text-signal-ink">
