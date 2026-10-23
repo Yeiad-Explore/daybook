@@ -142,40 +142,44 @@ export function IndexNav({
     ) : undefined;
 
   return (
-    <nav aria-label="Index" className="glass glass-dark flex h-full flex-col gap-6 overflow-y-auto rounded-lg p-3">
-      <div className="flex items-center gap-2.5 px-1 pt-1">
-        <span aria-hidden className="type-heading grid size-8 place-items-center rounded-pill bg-on-dark-fixed/14">
-          {name.slice(0, 1).toUpperCase()}
-        </span>
-        <span className="type-body-sm truncate font-medium">{name}</span>
+    <nav aria-label="Index" className="glass glass-dark flex h-full min-h-0 flex-col gap-6 overflow-hidden rounded-lg p-3">
+      <div className="flex shrink-0 flex-col gap-6">
+        <div className="flex items-center gap-2.5 px-1 pt-1">
+          <span aria-hidden className="type-heading grid size-8 place-items-center rounded-pill bg-on-dark-fixed/14">
+            {name.slice(0, 1).toUpperCase()}
+          </span>
+          <span className="type-body-sm truncate font-medium">{name}</span>
+        </div>
+
+        <div className="flex flex-col gap-0.5">
+          <div className="flex">{item("/today", "Today", { leading: <CalendarCheck {...icon} />, trailing: badge })}</div>
+          <button
+            type="button"
+            aria-keyshortcuts="N"
+            onClick={() => {
+              onNavigate?.();
+              capture.open();
+            }}
+            className="type-body-sm flex min-h-9 items-center gap-2.5 rounded-pill px-3 text-left hover:bg-on-dark-fixed/8 pointer-coarse:min-h-11"
+          >
+            <Plus {...icon} />
+            <span className="flex-1">New task</span>
+            <kbd className="type-caption rounded-xs bg-on-dark-fixed/14 px-1.5">N</kbd>
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-0.5">
-        <div className="flex">{item("/today", "Today", { leading: <CalendarCheck {...icon} />, trailing: badge })}</div>
-        <button
-          type="button"
-          aria-keyshortcuts="N"
-          onClick={() => {
-            onNavigate?.();
-            capture.open();
-          }}
-          className="type-body-sm flex min-h-9 items-center gap-2.5 rounded-pill px-3 text-left hover:bg-on-dark-fixed/8 pointer-coarse:min-h-11"
-        >
-          <Plus {...icon} />
-          <span className="flex-1">New task</span>
-          <kbd className="type-caption rounded-xs bg-on-dark-fixed/14 px-1.5">N</kbd>
-        </button>
+      <div className="index-scroll flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain">
+        <div className="flex flex-col gap-1">
+          {group("Goals", "goal", "No goals yet.")}
+          {folded("Achieved", spaces.filter((s) => s.status === "achieved"))}
+          {folded("Missed", spaces.filter((s) => s.status === "missed"))}
+        </div>
+        {group("Life areas", "area", "No life areas yet.")}
+        {folded("Archived", spaces.filter((s) => s.status === "archived"))}
       </div>
 
-      <div className="flex flex-col gap-1">
-        {group("Goals", "goal", "No goals yet.")}
-        {folded("Achieved", spaces.filter((s) => s.status === "achieved"))}
-        {folded("Missed", spaces.filter((s) => s.status === "missed"))}
-      </div>
-      {group("Life areas", "area", "No life areas yet.")}
-      {folded("Archived", spaces.filter((s) => s.status === "archived"))}
-
-      <div className="mt-auto flex flex-col gap-0.5">
+      <div className="flex shrink-0 flex-col gap-0.5">
         <div className="flex">{item("/review", "Review", { exact: false, leading: <NotebookPen {...icon} /> })}</div>
         <div className="flex">{item("/history", "Deadline history", { leading: <History {...icon} /> })}</div>
         <div className="flex">{item("/settings", "Settings", { exact: false, leading: <Settings {...icon} /> })}</div>

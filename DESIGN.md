@@ -255,7 +255,7 @@ What makes the look recognisable (keep all of these):
 2. **Aura cards.** Rounded 28px cards with blurred nature backgrounds (moss green, sky blue, warm sand) and either a frosted-glass panel or a dark gradient panel inside. They carry the hero numbers.
 3. **Frosted glass, used over imagery only.** Glass panels (white at 62% + 24px blur) and a dark-glass sidebar sit over auras or photos, never over flat white.
 4. **Two-tone light headlines.** First phrase in `{colors.ink-3}`, second phrase in `{colors.ink}`, weight 400, tight tracking: "Friday, 16 October / 3 things due today."
-5. **Big numbers.** Values like `77.2 kg`, `107 days`, `৳75,000` set large in Inter Tight 500 with tabular figures, next to a small grey trend tag (`↗ 1.2 kg`).
+5. **Big numbers.** Values like `77.2 kg`, `107 days`, `Tk 75,000` set large in Inter Tight 500 with tabular figures, next to a small grey trend tag (`↗ 1.2 kg`).
 6. **Electric lime, scarce.** `{colors.lime}` #E9FF6A for the NOW marker, live dots, trend arrows on dark cards, and at most one lime CTA per screen. Pale `{colors.lime-soft}` #E8E9C7 for one highlighted card (the Routine card).
 7. **Pills everywhere for controls.** Black pill primary button with a small white circular icon at its end; grey pill secondary; pill tags; pill segmented controls (`7D 30D 90D All`).
 8. **Delicate data graphics.** Dense "barcode" charts made of 1px vertical bars; dotted line charts with circular nodes, a diagonally hatched band and a white value bubble; thin connector lines with nodes.
@@ -342,7 +342,7 @@ Light is the default theme (owner, 17 Oct 2026). Dark is an option the owner cho
 
 ### Rules
 - **Two-tone headlines**: split the sentence into a context phrase (ink-3) and a statement phrase (ink). Use on Today, space hero, Review. Not on block titles.
-- Big numbers use a smaller unit or currency symbol beside them (`77.2` + `kg` at body-sm ink-3; `$`-style prefix `৳` at 60% size).
+- Big numbers use a smaller unit or currency symbol beside them (`77.2` + `kg` at body-sm ink-3; `$`-style prefix `Tk` at 60% size).
 - Eyebrows are the only uppercase text. Keep them short (1–3 words).
 - Bracket indices `[1] [2] [3]` in caption ink-3 above feature-like items: Roadmap stages, Review sections.
 - Body text 400; never bold body paragraphs.
@@ -477,7 +477,7 @@ Inside a panel or aura card:
 Stages as a vertical list of white panels, each with a bracket index `[1]`, title (heading), a progress tag `3/7`, a thin progress bar (ink on canvas-2, pill ends), the stage deadline tag, and child steps as task rows with a hairline tree line. A thin connector line with nodes may link stages vertically (like the "intelligence layers" diagram).
 
 ### Table
-White panel; header in eyebrow style on a canvas-2 band; rows 44px with hairlines; numbers right-aligned with tabular figures; status cells as tags with a leading dot (lime-ink dot for active states like "Client", ink-3 dot for early states, ember only if a date column is overdue). Money: `৳` prefix at 70% size. Summary footer row in 600 weight. **Board view** columns are canvas-2 lanes with white cards (rounded md, card shadow).
+White panel; header in eyebrow style on a canvas-2 band; rows 44px with hairlines; numbers right-aligned with tabular figures; status cells as tags with a leading dot (lime-ink dot for active states like "Client", ink-3 dot for early states, ember only if a date column is overdue). Money: `Tk` prefix at 70% size. Summary footer row in 600 weight. **Board view** columns are canvas-2 lanes with white cards (rounded md, card shadow).
 
 ### Time slot and Day Timetable
 - **Time slot row**: time range (number) · title · Google Calendar status (tag "On calendar ✓" in lime-ink, or secondary pill "Add to Google Calendar").
