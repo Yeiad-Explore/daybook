@@ -17,6 +17,7 @@
     "db:reset": "supabase db reset",
     "test:db": "supabase test db",
     "seed": "node scripts/seed.mjs",
+    "functions:e2e": "supabase functions serve --env-file supabase/functions/e2e.env.example",
     "db:types": "supabase gen types --local --lang typescript --schema public > src/lib/database.types.ts",
     "tokens": "node scripts/gen-tokens.mjs",
     "check:no-dev-routes": "node scripts/check-no-dev-routes.mjs",

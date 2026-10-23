@@ -5,20 +5,15 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Panel } from "@/components/ui/panel";
+import { SlotSync } from "@/components/blocks/slot-sync";
+import { useCalendarSync } from "@/components/blocks/use-calendar-sync";
 import { Tag } from "@/components/ui/tag";
+import type { CalendarStatus } from "@/lib/calendar";
 import { blockHref, type TodaySlot } from "@/lib/deadlines";
 import { DAY_START, HOURS, layoutSlots, minutesOfDay } from "@/lib/timetable";
 
 const HOUR_PX = 36;
 const LABEL_W = 44; // px: hour labels
-
-const SYNC: Record<TodaySlot["sync_status"], string> = {
-  not_synced: "Not on calendar",
-  pending: "Syncing",
-  synced: "On calendar",
-  failed: "Sync failed",
-  delete_pending: "Syncing",
-};
 
 const hhmm = (minutes: number) => `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
@@ -27,7 +22,8 @@ const hhmm = (minutes: number) => `${String(Math.floor(minutes / 60)).padStart(2
  * their real times with a 3px edge in the space's aura, overlapping slots side by side with an
  * "Overlaps" note, a NOW line with a lime pill, and the list of slots with their calendar status below.
  */
-export function DayTimetable({ slots, timezone }: { slots: TodaySlot[]; timezone: string }) {
+export function DayTimetable({ slots, timezone, today, calendar }: { slots: TodaySlot[]; timezone: string; today: string; calendar: CalendarStatus }) {
+  const sync = useCalendarSync();
   // The clock is read after mount: the server's "now" would not match the browser's at hydration.
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
@@ -89,7 +85,7 @@ export function DayTimetable({ slots, timezone }: { slots: TodaySlot[]; timezone
                   {local(s.starts_at)} to {local(s.ends_at)}
                 </span>
                 {overlapping.has(s.id) && <Tag>Overlaps</Tag>}
-                <Tag variant="outlined">{SYNC[s.sync_status]}</Tag>
+                <SlotSync status={s.sync_status} day={today} connection={calendar.status} busy={sync.busy === s.id} showReason={false} onAdd={() => void sync.add(s.id)} onRetry={() => void sync.retry(s.id)} />
               </div>
               <Link href={blockHref(s)} prefetch={false} className="type-body break-words underline-offset-4 hover:underline">
                 {s.title}

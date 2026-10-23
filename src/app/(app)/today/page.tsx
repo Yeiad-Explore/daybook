@@ -3,7 +3,9 @@ import { AlertCircle, CalendarCheck, CalendarClock, Repeat } from "lucide-react"
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuraCard } from "@/components/ui/aura-card";
+import { LinkButton } from "@/components/ui/button";
 import { KpiItem } from "@/components/ui/kpi-item";
+import { parseCalendarStatus } from "@/lib/calendar";
 import { shortDate } from "@/lib/dates";
 import type { SpaceSummary } from "@/lib/deadlines";
 import { getProfile } from "@/lib/profile";
@@ -25,6 +27,7 @@ export default async function TodayPage() {
   if (!profile) redirect("/login");
   const agenda = await getToday();
   const supabase = await createClient();
+  const calendar = parseCalendarStatus((await supabase.rpc("get_calendar_status")).data);
   const { data: goals } = await supabase.from("spaces").select("id, name, mark").eq("kind", "goal").eq("status", "active").is("deleted_at", null).order("position");
   const summaries = await Promise.all(
     (goals ?? []).map(async (g) => ({ goal: g, summary: (await supabase.rpc("space_summary", { p_space_id: g.id })).data as unknown as SpaceSummary })),
@@ -52,6 +55,17 @@ export default async function TodayPage() {
           <KpiItem icon={<Repeat {...icon} />} value={`${routineSteps.filter((s) => s.checked).length}/${routineSteps.length}`} caption="Routine steps" />
         </div>
       </header>
+
+      {calendar.status === "needs_reconnect" && (
+        // GC-10: no sync runs until the owner signs in with Google again.
+        <section aria-label="Google Calendar" className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-surface p-4 shadow-card">
+          <p className="type-body-sm flex items-center gap-2 text-ink">
+            <span aria-hidden className="size-2 shrink-0 rounded-pill bg-signal" />
+            Google no longer accepts the saved sign-in. Slots stay in Daybook and sync again once you reconnect.
+          </p>
+          <LinkButton href="/settings/calendar">Reconnect Google Calendar</LinkButton>
+        </section>
+      )}
 
       {summaries.length > 0 && (
         <section aria-label="Goals" className="-mx-1 flex snap-x gap-4 overflow-x-auto px-1 pb-2">
@@ -95,7 +109,7 @@ export default async function TodayPage() {
           <TodayCapture today={agenda.today} />
         </div>
         <aside aria-label="Today's schedule and logging" className="flex min-w-0 flex-col gap-4 desktop:col-span-4">
-          <DayTimetable slots={agenda.slots} timezone={profile.timezone} />
+          <DayTimetable slots={agenda.slots} timezone={profile.timezone} today={agenda.today} calendar={calendar} />
           <RoutineCard routines={agenda.routines} today={agenda.today} />
           <TrackersCard trackers={agenda.trackers} today={agenda.today} />
         </aside>

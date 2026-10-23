@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import type { Tables } from "@/lib/database.types";
+import { parseCalendarStatus } from "@/lib/calendar";
 import type { SpaceSummary } from "@/lib/deadlines";
 import type { Column, Row, SelectOption } from "@/lib/table-logic";
 import type { Series } from "@/lib/tracker-logic";
@@ -14,7 +15,7 @@ export type Task = Pick<
   Tables<"tasks">,
   "id" | "block_id" | "parent_id" | "depth" | "title" | "note" | "due_date" | "due_time" | "done" | "completed_at" | "is_milestone" | "reschedule_count" | "position"
 >;
-export type Slot = Pick<Tables<"time_blocks">, "id" | "block_id" | "task_id" | "title" | "starts_at" | "ends_at"> & {
+export type Slot = Pick<Tables<"time_blocks">, "id" | "block_id" | "task_id" | "title" | "starts_at" | "ends_at" | "gcal_event_id" | "sync_status" | "sync_error"> & {
   /** TB-6: the linked task's title and deadline. */
   task: { title: string; due_date: string | null } | null;
 };
@@ -47,15 +48,16 @@ export const loadSpacePage = cache(async (spaceId: string, pageId: string) => {
 
   const ids = (types: Block["type"][]) => (blocks ?? []).filter((b) => types.includes(b.type)).map((b) => b.id);
   const today = (summary as unknown as SpaceSummary).today;
-  const [{ data: tasks }, { data: notes }, { data: slots }, { data: fields }, { data: columns }, { data: rows }, { data: steps }, { data: checks }] = await Promise.all([
+  const [{ data: tasks }, { data: notes }, { data: slots }, { data: fields }, { data: columns }, { data: rows }, { data: steps }, { data: checks }, { data: calendar }] = await Promise.all([
     supabase.from("tasks").select(TASK_COLUMNS).in("block_id", ids(["todo", "roadmap"])).is("deleted_at", null).order("position").order("created_at"),
     supabase.from("notes").select("block_id, body").in("block_id", ids(["notes"])),
-    supabase.from("time_blocks").select("id, block_id, task_id, title, starts_at, ends_at, task:tasks(title, due_date)").in("block_id", ids(["timeblock"])).is("deleted_at", null).order("starts_at"),
+    supabase.from("time_blocks").select("id, block_id, task_id, title, starts_at, ends_at, gcal_event_id, sync_status, sync_error, task:tasks(title, due_date)").in("block_id", ids(["timeblock"])).is("deleted_at", null).order("starts_at"),
     supabase.from("tracker_fields").select(TRACKER_FIELD_COLUMNS).in("block_id", ids(["tracker"])).order("position").order("created_at"),
     supabase.from("table_columns").select("id, block_id, name, kind, options, signed, summary, position").in("block_id", ids(["table"])).order("position").order("created_at"),
     supabase.from("table_rows").select("id, block_id, cells, position").in("block_id", ids(["table"])).is("deleted_at", null).order("position").order("created_at"),
     supabase.from("routine_steps").select("id, block_id, label, position, archived_at").in("block_id", ids(["routine"])).is("archived_at", null).order("position").order("created_at"),
     supabase.from("routine_checks").select("step_id").in("block_id", ids(["routine"])).eq("check_date", today),
+    supabase.rpc("get_calendar_status"), // TB-3: whether slots can offer "Add to Google Calendar"
   ]);
 
   // TRK-3: one 90-day series per live field; the block slices it for 7D / 30D / 90D.
@@ -92,6 +94,7 @@ export const loadSpacePage = cache(async (spaceId: string, pageId: string) => {
     tasks: (tasks ?? []) as Task[],
     notes: (notes ?? []) as Note[],
     slots: (slots ?? []) as unknown as Slot[],
+    calendar: parseCalendarStatus(calendar),
     trackerFields: (fields ?? []) as TrackerField[],
     series,
     columns: (columns ?? []).map((c) => ({ ...c, options: c.options as unknown as SelectOption[] })) as (Column & { block_id: string })[],

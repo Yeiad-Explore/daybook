@@ -399,6 +399,14 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+[functions.calendar-sync]
+# Off because the 10-minute cron job authenticates with the secret key, not a user JWT. The function
+# checks the caller itself (secret key for sweeps, a signed-in user's JWT for their own rows).
+verify_jwt = false
+
+[functions.store-google-token]
+verify_jwt = true
+
 [analytics]
 enabled = true
 port = 54327

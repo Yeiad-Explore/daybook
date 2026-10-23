@@ -19,7 +19,7 @@ function admin() {
   return cached;
 }
 
-async function ownerId() {
+export async function ownerId() {
   const { data } = await admin().auth.admin.listUsers();
   return data.users.find((u) => u.email === OWNER_EMAIL)!.id;
 }

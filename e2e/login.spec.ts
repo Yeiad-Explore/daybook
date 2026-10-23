@@ -18,7 +18,7 @@ test.describe("signed out", () => {
     await page.goto("/login");
     await page.getByRole("button", { name: "Continue with Google" }).click();
     await expect.poll(() => authorize?.searchParams.get("provider")).toBe("google");
-    expect(authorize?.searchParams.get("scopes")).toBe("https://www.googleapis.com/auth/calendar.events");
+    expect(authorize?.searchParams.get("scopes")).toBe("https://www.googleapis.com/auth/calendar.events.owned");
     expect(authorize?.searchParams.get("access_type")).toBe("offline");
     expect(authorize?.searchParams.get("prompt")).toBe("consent");
     expect(authorize?.searchParams.get("redirect_to")).toMatch(/\/auth\/callback$/);

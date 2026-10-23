@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/compone
 import { Field, inputClass } from "@/components/ui/field";
 import type { DragHandle } from "@/components/ui/sortable";
 import { useToast } from "@/components/ui/toast";
+import type { CalendarStatus } from "@/lib/calendar";
 import { cx } from "@/lib/cx";
 import { shortDate } from "@/lib/dates";
 import { errorMessage } from "@/lib/db-error";
@@ -21,20 +22,25 @@ import { zonedInstant } from "@/lib/today";
 import { useSave } from "@/lib/use-save";
 import { useServerState } from "@/lib/use-server-state";
 import { BlockFrame, type BlockActions } from "./block-frame";
+import { SlotSync } from "./slot-sync";
+import { useCalendarSync } from "./use-calendar-sync";
 
 export type TimeConfig = { auto_sync?: boolean; show_past?: boolean };
 
 const END_AFTER_START = "The end time needs to be after the start time.";
 
-/** PRD §6.9 Time block (TB-1, TB-2, TB-6): book slots, a date-ordered list with past slots dimmed, linked tasks. Calendar sync is Phase 3. */
-export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig }: { block: Block; slots: Slot[]; actions: BlockActions; drag: DragHandle; setConfig: (config: TimeConfig) => void }) {
+/** PRD §6.9 Time block (TB-1 to TB-6): book slots, a date-ordered list with past slots dimmed, linked tasks, and each slot's Google Calendar state. */
+export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig, calendar }: { block: Block; slots: Slot[]; actions: BlockActions; drag: DragHandle; setConfig: (config: TimeConfig) => void; calendar: CalendarStatus }) {
   const { today, timezone } = useSpace();
   const save = useSave();
   const toast = useToast();
   const router = useRouter();
+  const sync = useCalendarSync();
+  const connected = calendar.status === "connected";
   const [slots, setSlots] = useServerState(serverSlots);
   const [editing, setEditing] = useState<Slot | null>(null);
   const config = block.config as TimeConfig;
+  const auto = config.auto_sync ?? calendar.auto_sync_new_blocks ?? true; // the block's own setting, else the connection default (GC-4)
   const local = (iso: string) => new TZDate(new Date(iso), timezone);
   const dayOf = (iso: string) => format(local(iso), "yyyy-MM-dd");
   const isPast = (s: Slot) => dayOf(s.starts_at) < today;
@@ -46,10 +52,13 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
     const row = { title: fields.title, starts_at: zonedInstant(fields.day, timezone, fields.start), ends_at: zonedInstant(fields.day, timezone, fields.end) };
     const previous = slots;
     const temp = `new-${crypto.randomUUID()}`;
-    setSlots([...slots, { id: temp, block_id: block.id, task_id: null, task: null, ...row }]);
+    // TB-4: a new slot is queued for Calendar when connected and this block's auto-add is on (the database decides; this mirrors it).
+    const queued = connected && auto;
+    setSlots([...slots, { id: temp, block_id: block.id, task_id: null, task: null, gcal_event_id: null, sync_status: queued ? "pending" : "not_synced", sync_error: null, ...row }]);
     try {
       const saved = (await save.mutateAsync({ request: () => createClient().from("time_blocks").insert({ block_id: block.id, space_id: DERIVED_SPACE_ID, ...row }).select("id").single(), rollback: () => setSlots(previous) })) as { id: string };
       setSlots((all) => all.map((s) => (s.id === temp ? { ...s, id: saved.id } : s)));
+      if (queued) void sync.push("time_block", saved.id); // GC-6: push now; cron retries if this misses
       return true;
     } catch {
       return false;
@@ -59,9 +68,10 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
   async function update(slot: Slot, fields: { title: string; day: string; start: string; end: string }) {
     const row = { title: fields.title, starts_at: zonedInstant(fields.day, timezone, fields.start), ends_at: zonedInstant(fields.day, timezone, fields.end) };
     const previous = slots;
-    setSlots(slots.map((s) => (s.id === slot.id ? { ...s, ...row } : s)));
+    setSlots(slots.map((s) => (s.id === slot.id ? { ...s, ...row, sync_status: slot.gcal_event_id && connected ? "pending" : s.sync_status } : s)));
     try {
       await save.mutateAsync({ request: () => createClient().from("time_blocks").update(row).eq("id", slot.id), rollback: () => setSlots(previous) });
+      if (connected && slot.gcal_event_id) void sync.push("time_block", slot.id); // TB-5: same event, new times
       return true;
     } catch {
       return false;
@@ -75,10 +85,14 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
     if (error) return toast.error(errorMessage(error));
     setSlots((all) => all.filter((s) => s.id !== slot.id));
     router.refresh();
+    if (connected && slot.gcal_event_id) void sync.push("time_block", slot.id); // TB-5: the event goes too
     toast.undoable(`${slot.title} moved to Trash.`, async () => {
       const { error: undoError } = await supabase.rpc("restore_item", { p_table: "time_blocks", p_id: slot.id });
       if (undoError) toast.error(errorMessage(undoError));
-      else setSlots((all) => [...all, slot]);
+      else {
+        setSlots((all) => [...all, slot]);
+        if (connected && slot.gcal_event_id) void sync.push("time_block", slot.id);
+      }
       router.refresh();
     });
   }
@@ -89,11 +103,18 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
       actions={actions}
       drag={drag}
       controls={
-        pastCount > 0 && (
+        <>
+        {connected && (
+          <button type="button" aria-pressed={auto} onClick={() => setConfig({ ...config, auto_sync: !auto })} className="type-button min-h-8 rounded-pill px-2.5 text-[12px] text-ink-2 hover:bg-canvas-2 aria-pressed:bg-canvas-2 aria-pressed:text-ink pointer-coarse:min-h-11">
+            {auto ? "Auto-add: on" : "Auto-add: off"}
+          </button>
+        )}
+        {pastCount > 0 && (
           <button type="button" aria-pressed={!!config.show_past} onClick={() => setConfig({ ...config, show_past: !config.show_past })} className="type-button min-h-8 rounded-pill px-2.5 text-[12px] text-ink-2 hover:bg-canvas-2 pointer-coarse:min-h-11">
             {config.show_past ? "Hide past" : `Show past (${pastCount})`}
           </button>
-        )
+        )}
+        </>
       }
     >
       {shown.length === 0 && <p className="type-body-sm px-1 pb-2 text-ink-2">{slots.length === 0 ? "No time booked yet. Add a slot below, or use “Book time” on a task." : "Nothing coming up. Show past slots, or add a new one below."}</p>}
@@ -111,6 +132,11 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
                 <p className="type-caption text-ink-3-small">
                   For “{s.task.title}”{s.task.due_date ? ` · due ${shortDate(s.task.due_date, today)}` : ""}
                 </p>
+              )}
+              {!s.id.startsWith("new-") && (
+                <div className="mt-1">
+                  <SlotSync status={s.sync_status} error={s.sync_error} day={dayOf(s.starts_at)} connection={calendar.status} busy={sync.busy === s.id} onAdd={() => void sync.add(s.id)} onRetry={() => void sync.retry(s.id)} />
+                </div>
               )}
             </div>
             <div className="flex items-center">

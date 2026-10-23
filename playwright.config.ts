@@ -18,13 +18,24 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: { baseURL: external ?? `http://localhost:${port}`, trace: "retain-on-failure" },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: external
-    ? undefined
-    : {
-    command: `pnpm dev --port ${port}`,
-    url: `http://localhost:${port}/login`, // a public page: "/" redirects
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  projects: [
+    { name: "chromium", testIgnore: /calendar\.spec\.ts/, use: { ...devices["Desktop Chrome"] } },
+    // Phase 3: the owner's calendar is connected for the whole file, which other specs must not see, so it
+    // runs alone after everything else. It needs the edge functions served (`pnpm functions:e2e`).
+    { name: "calendar", testMatch: /calendar\.spec\.ts/, dependencies: ["chromium"], fullyParallel: false, use: { ...devices["Desktop Chrome"] } },
+  ],
+  webServer: [
+    // A stand-in for Google (OAuth, tokeninfo, Calendar events), so calendar sync is tested without Google.
+    { command: "node e2e/fake-google/server.mjs", url: "http://localhost:4010/__state", reuseExistingServer: true },
+    ...(external
+      ? []
+      : [
+          {
+            command: `pnpm dev --port ${port}`,
+            url: `http://localhost:${port}/login`, // a public page: "/" redirects
+            reuseExistingServer: !process.env.CI,
+            timeout: 120_000,
+          },
+        ]),
+  ],
 });

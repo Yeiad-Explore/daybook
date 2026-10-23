@@ -61,6 +61,17 @@ jobs:
           eval "$(pnpm exec supabase status -o env | grep -E '^(API_URL|PUBLISHABLE_KEY|ANON_KEY)=')"
           printf 'NEXT_PUBLIC_SUPABASE_URL=%s\nNEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=%s\n' "$API_URL" "${PUBLISHABLE_KEY:-$ANON_KEY}" > .env.local
       - run: pnpm exec playwright install --with-deps chromium
+      # Phase 3: calendar.spec.ts runs the real Edge Functions against a fake Google (e2e/fake-google).
+      - name: Serve Edge Functions
+        run: |
+          pnpm functions:e2e > functions.log 2>&1 &
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST http://127.0.0.1:54321/functions/v1/calendar-sync -d '{}' || true)
+            [ "$code" = "401" ] && exit 0
+            sleep 2
+          done
+          cat functions.log
+          exit 1
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

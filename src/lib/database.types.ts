@@ -31,6 +31,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"calendar_sync_log": {
+                  Row: {
+                    "action": string,"at": string,"http_status": number | null,"id": number,"kind": string,"outcome": string,"owner_id": string,"reason": string | null,"target_id": string | null,"target_title": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"at"?: string,"http_status"?: number | null,"id"?: never,"kind": string,"outcome": string,"owner_id": string,"reason"?: string | null,"target_id"?: string | null,"target_title"?: string | null
+                  }
+                  Update: {
+                    "action"?: string,"at"?: string,"http_status"?: number | null,"id"?: never,"kind"?: string,"outcome"?: string,"owner_id"?: string,"reason"?: string | null,"target_id"?: string | null,"target_title"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"deadline_changes": {
                   Row: {
                     "changed_at": string,"created_at": string,"id": string,"item_title": string,"kind": Database["public"]['Enums']["deadline_change_kind"],"new_due": string | null,"old_due": string | null,"owner_id": string,"reason": string,"space_id": string,"task_id": string | null,"was_late": boolean
@@ -235,14 +249,14 @@ isOneToOne: false
                   ]
                 },"tasks": {
                   Row: {
-                    "block_id": string,"completed_at": string | null,"created_at": string,"deleted_at": string | null,"depth": number,"done": boolean,"due_date": string | null,"due_time": string | null,"gcal_event_id": string | null,"id": string,"is_milestone": boolean,"note": string | null,"owner_id": string,"parent_id": string | null,"position": number,"repeat_rule": Json | null,"reschedule_count": number,"space_id": string,"sync_status": Database["public"]['Enums']["sync_status"],"title": string,"updated_at": string
+                    "block_id": string,"completed_at": string | null,"created_at": string,"deleted_at": string | null,"depth": number,"done": boolean,"due_date": string | null,"due_time": string | null,"gcal_event_id": string | null,"id": string,"is_milestone": boolean,"last_synced_at": string | null,"next_sync_at": string | null,"note": string | null,"owner_id": string,"parent_id": string | null,"position": number,"repeat_rule": Json | null,"reschedule_count": number,"space_id": string,"sync_attempts": number,"sync_error": string | null,"sync_status": Database["public"]['Enums']["sync_status"],"title": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "block_id": string,"completed_at"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"depth"?: number,"done"?: boolean,"due_date"?: string | null,"due_time"?: string | null,"gcal_event_id"?: string | null,"id"?: string,"is_milestone"?: boolean,"note"?: string | null,"owner_id"?: string,"parent_id"?: string | null,"position": number,"repeat_rule"?: Json | null,"reschedule_count"?: number,"space_id": string,"sync_status"?: Database["public"]['Enums']["sync_status"],"title": string,"updated_at"?: string
+                    "block_id": string,"completed_at"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"depth"?: number,"done"?: boolean,"due_date"?: string | null,"due_time"?: string | null,"gcal_event_id"?: string | null,"id"?: string,"is_milestone"?: boolean,"last_synced_at"?: string | null,"next_sync_at"?: string | null,"note"?: string | null,"owner_id"?: string,"parent_id"?: string | null,"position": number,"repeat_rule"?: Json | null,"reschedule_count"?: number,"space_id": string,"sync_attempts"?: number,"sync_error"?: string | null,"sync_status"?: Database["public"]['Enums']["sync_status"],"title": string,"updated_at"?: string
                   }
                   Update: {
-                    "block_id"?: string,"completed_at"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"depth"?: number,"done"?: boolean,"due_date"?: string | null,"due_time"?: string | null,"gcal_event_id"?: string | null,"id"?: string,"is_milestone"?: boolean,"note"?: string | null,"owner_id"?: string,"parent_id"?: string | null,"position"?: number,"repeat_rule"?: Json | null,"reschedule_count"?: number,"space_id"?: string,"sync_status"?: Database["public"]['Enums']["sync_status"],"title"?: string,"updated_at"?: string
+                    "block_id"?: string,"completed_at"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"depth"?: number,"done"?: boolean,"due_date"?: string | null,"due_time"?: string | null,"gcal_event_id"?: string | null,"id"?: string,"is_milestone"?: boolean,"last_synced_at"?: string | null,"next_sync_at"?: string | null,"note"?: string | null,"owner_id"?: string,"parent_id"?: string | null,"position"?: number,"repeat_rule"?: Json | null,"reschedule_count"?: number,"space_id"?: string,"sync_attempts"?: number,"sync_error"?: string | null,"sync_status"?: Database["public"]['Enums']["sync_status"],"title"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -349,14 +363,29 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "delete_task":
+            "claim_sync_rows":
+{ Args: { "p_id": string,"p_kind": string,"p_limit": number,"p_owner": string }; Returns: Json
+                           },
+"connect_google_account":
+{ Args: { "p_email": string,"p_owner": string,"p_scopes": (string)[],"p_token": string }; Returns: undefined
+                           },
+"delete_task":
 { Args: { "p_reason"?: string,"p_task_id": string }; Returns: undefined
+                           },
+"disconnect_google_account":
+{ Args: { "p_owner": string }; Returns: undefined
                            },
 "duplicate_block":
 { Args: { "p_block_id": string,"p_include_content": boolean }; Returns: string
                            },
 "duplicate_page":
 { Args: { "p_include_content": boolean,"p_page_id": string }; Returns: string
+                           },
+"finish_sync_row":
+{ Args: { "p_attempts": number,"p_clear_event": boolean,"p_error": string,"p_event_id": string,"p_id": string,"p_kind": string,"p_lease": string,"p_next": string,"p_status": Database["public"]['Enums']["sync_status"] }; Returns: boolean
+                           },
+"get_calendar_log":
+{ Args: { "p_limit"?: number }; Returns: Json
                            },
 "get_calendar_status":
 { Args: Record<PropertyKey, never>; Returns: Json
@@ -376,11 +405,17 @@ isOneToOne: false
 "purge_trash":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"read_google_refresh_token":
+{ Args: { "p_owner": string }; Returns: string
+                           },
 "remember_page":
 { Args: { "p_page_id": string,"p_space_id": string }; Returns: undefined
                            },
 "reorder":
 { Args: { "p_after": string,"p_before": string,"p_id": string,"p_table": string }; Returns: number
+                           },
+"request_calendar_sync":
+{ Args: { "p_time_block_id": string }; Returns: undefined
                            },
 "reschedule_space":
 { Args: { "p_cascade_tasks"?: boolean,"p_new_deadline": string,"p_reason": string,"p_space_id": string }; Returns: Json
@@ -390,6 +425,9 @@ isOneToOne: false
                            },
 "restore_item":
 { Args: { "p_id": string,"p_table": string }; Returns: Json
+                           },
+"retry_calendar_sync":
+{ Args: { "p_id"?: string }; Returns: number
                            },
 "routine_streak":
 { Args: { "p_block_id": string,"p_today"?: string }; Returns: Json

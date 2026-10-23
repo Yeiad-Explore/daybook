@@ -129,7 +129,7 @@ export function PageBody({ data, lastPage }: { data: SpacePageData; lastPage: st
           <TrackerBlock {...common} setConfig={setConfig} fields={fieldsByBlock.get(block.id) ?? NONE} series={data.series} />
         );
       case "timeblock":
-        return <TimeBlock {...common} setConfig={setConfig} slots={slotsByBlock.get(block.id) ?? NONE} />;
+        return <TimeBlock {...common} setConfig={setConfig} slots={slotsByBlock.get(block.id) ?? NONE} calendar={data.calendar} />;
     }
   };
 
