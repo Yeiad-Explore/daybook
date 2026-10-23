@@ -105,10 +105,10 @@ export function TrackerBlock({
             value={`${days}`}
             onChange={(v) => setConfig({ ...config, range_days: Number(v) as Range })}
           />
-          <Button variant="ghost" onClick={() => setHistory(true)}>
+          <Button variant="ghost" className="whitespace-nowrap" onClick={() => setHistory(true)}>
             All entries
           </Button>
-          <Button variant="ghost" onClick={() => setManage(true)}>
+          <Button variant="ghost" className="whitespace-nowrap" onClick={() => setManage(true)}>
             Fields
           </Button>
         </>

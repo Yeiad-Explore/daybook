@@ -1,12 +1,13 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { shortDate } from "@/lib/dates";
 import { formatNumber } from "@/lib/money";
 import { chartGeometry, type Entry, type Series } from "@/lib/tracker-logic";
 
-const W = 600;
 const H = 190;
+// Drawn at the width it is shown at, so labels stay 11px instead of scaling with the container.
+const DEFAULT_W = 600;
 
 /**
  * DESIGN.md "Tracker chart": a 1.5px line over circular nodes, a diagonally hatched band under it, a
@@ -15,6 +16,18 @@ const H = 190;
  */
 export function TrackerChart({ field, entries, days, today }: { field: Series["field"]; entries: Entry[]; days: number; today: string }) {
   const hatch = useId();
+  const box = useRef<HTMLDivElement>(null);
+  const [W, setW] = useState(DEFAULT_W);
+  const hasPoints = entries.length > 0;
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const measure = () => setW(Math.max(280, Math.round(el.clientWidth)) || DEFAULT_W);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [hasPoints]);
   const g = chartGeometry(entries, days, today, W, H, field.target_value);
   const fmt = (v: number) => formatNumber(v, field.decimals);
   const last = g.points.at(-1);
@@ -24,6 +37,7 @@ export function TrackerChart({ field, entries, days, today }: { field: Series["f
 
   const bubbleX = Math.min(Math.max(last.x, 34), W - 34);
   return (
+    <div ref={box} className="w-full">
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary} className="h-auto w-full overflow-visible">
       <defs>
         <pattern id={hatch} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -71,5 +85,6 @@ export function TrackerChart({ field, entries, days, today }: { field: Series["f
         </text>
       ))}
     </svg>
+    </div>
   );
 }

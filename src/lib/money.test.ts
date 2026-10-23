@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { currencySymbol, formatMoney, formatNumber } from "./money";
+import { currencySymbol, formatMoney, formatNumber, readNumber } from "./money";
 
 describe("money", () => {
   it("uses Western thousands separators, not lakh grouping (TBL-3)", () => {
@@ -21,5 +21,18 @@ describe("money", () => {
   });
   it("falls back to the code for unknown currencies", () => {
     expect(currencySymbol("CHF")).toBe("CHF");
+  });
+  it("reads a comma only as a thousands separator, never as a decimal comma", () => {
+    expect(readNumber("1,250,000")).toBe(1250000);
+    expect(readNumber("-1,250.5")).toBe(-1250.5);
+    expect(readNumber("77.2")).toBe(77.2);
+    expect(readNumber("77,2")).toBeNull();
+    expect(readNumber("12,5")).toBeNull();
+    expect(readNumber("1,25")).toBeNull();
+    expect(readNumber("1e3")).toBeNull();
+    expect(readNumber(".5")).toBeNull();
+  });
+  it("never shows a negative zero", () => {
+    expect(formatNumber(-0.004)).toBe("0");
   });
 });

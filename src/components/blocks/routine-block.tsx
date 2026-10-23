@@ -96,7 +96,7 @@ export function RoutineBlock({
     const saving = step.id.startsWith("new-"); // not saved yet: nothing can be written against its id
     return (
     <li key={step.id} ref={handle.ref as never} style={handle.style} className={cx("group/step flex items-center gap-1 border-t border-hairline first:border-t-0", handle.dragging && "rounded-md bg-surface shadow-float")}>
-      <button type="button" aria-label={`Move ${step.label} (drag, or Space and arrow keys)`} {...handle.handle} className="grid h-8 w-6 shrink-0 cursor-grab place-items-center rounded-sm text-ink-3-small opacity-0 group-hover/step:opacity-100 focus-visible:opacity-100 pointer-coarse:hidden">
+      <button type="button" disabled={saving} aria-label={`Move ${step.label} (drag, or Space and arrow keys)`} {...handle.handle} className="grid h-8 w-6 shrink-0 cursor-grab place-items-center rounded-sm text-ink-3-small opacity-0 group-hover/step:opacity-100 focus-visible:opacity-100 pointer-coarse:hidden">
         <GripVertical size={14} strokeWidth={1.5} aria-hidden />
       </button>
       <input

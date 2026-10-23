@@ -38,7 +38,7 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig 
   const local = (iso: string) => new TZDate(new Date(iso), timezone);
   const dayOf = (iso: string) => format(local(iso), "yyyy-MM-dd");
   const isPast = (s: Slot) => dayOf(s.starts_at) < today;
-  const sorted = [...slots].sort((a, b) => a.starts_at.localeCompare(b.starts_at));
+  const sorted = [...slots].sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at));
   const pastCount = sorted.filter(isPast).length;
   const shown = config.show_past ? sorted : sorted.filter((s) => !isPast(s));
 
@@ -164,7 +164,7 @@ function AddSlot({ today, onAdd }: { today: string; onAdd: (fields: { title: str
       }}
       className="mt-2 flex flex-col gap-1.5"
     >
-      <div className="flex flex-wrap items-center gap-1.5 rounded-pill bg-canvas p-1 ring-1 ring-inset ring-ink-3 focus-within:ring-ink max-tablet:rounded-md">
+      <div className="flex flex-wrap items-center gap-1.5 rounded-md bg-canvas p-1 ring-1 ring-inset ring-ink-3 focus-within:ring-ink">
         <input aria-label="Slot title" placeholder="+ Add a time slot" value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} className="type-body min-w-40 flex-1 rounded-pill bg-transparent px-3 py-1.5 placeholder:text-ink-3-small focus-visible:shadow-none focus-visible:outline-none" />
         <input aria-label="Day" type="date" value={day} onChange={(e) => setDay(e.target.value)} className={time} />
         <input aria-label="Starts" type="time" value={start} onChange={(e) => setStart(e.target.value)} className={time} />

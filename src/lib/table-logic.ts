@@ -1,5 +1,6 @@
 import { addDays, format, getDay, isValid, parseISO } from "date-fns";
 import type { Enums, Json } from "@/lib/database.types";
+import { readNumber } from "@/lib/money";
 
 // Pure table maths for the Table block (TBL-1..5, TBL-7). The database validates every cell again
 // (C-TRG-10); this file gives the friendly messages and does the display work.
@@ -24,7 +25,6 @@ export type TableConfig = { view?: "table" | "board"; board_column_id?: string |
 
 export type CellResult = { value: Json | null } | { error: string };
 
-const NUMBER = /^-?\d+(\.\d+)?$/;
 
 /** TBL-2 AC1: text typed into a cell becomes the typed value, or a message saying what is wrong. Empty clears the cell. */
 export function parseCell(column: Pick<Column, "kind" | "options">, raw: string | boolean): CellResult {
@@ -36,11 +36,11 @@ export function parseCell(column: Pick<Column, "kind" | "options">, raw: string 
       return { value: text };
     case "number":
     case "money": {
-      const cleaned = text.replace(/tk/gi, "").replace(/[,\s৳$€£₹]/g, "").replace(/^−/, "-");
-      if (!NUMBER.test(cleaned)) {
+      const value = readNumber(text.replace(/tk/gi, "").replace(/[\s৳$€£₹]/g, "").replace(/^−/, "-"));
+      if (value === null) {
         return { error: column.kind === "money" ? "Enter an amount, like 1250 or -450." : "Enter a number, like 2 or 12.5." };
       }
-      return { value: Number(cleaned) };
+      return { value };
     }
     case "date": {
       const real = /^\d{4}-\d{2}-\d{2}$/.test(text) && isValid(parseISO(text)) && format(parseISO(text), "yyyy-MM-dd") === text;

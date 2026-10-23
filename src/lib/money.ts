@@ -3,9 +3,19 @@ const SYMBOLS: Record<string, string> = { BDT: "Tk", USD: "$", EUR: "€", GBP: 
 /** The symbol for an ISO 4217 code; unknown codes show as the code itself. */
 export const currencySymbol = (currency: string) => SYMBOLS[currency] ?? currency;
 
+const PLAIN_NUMBER = /^-?\d+(\.\d+)?$/;
+const GROUPED_NUMBER = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/;
+
+/** Reads a typed number: "77.2", "-450", "1,250,000". A comma is a thousands separator only in groups of three, so "77,2" is refused instead of becoming 772. */
+export function readNumber(text: string): number | null {
+  const t = text.trim();
+  if (!PLAIN_NUMBER.test(t) && !GROUPED_NUMBER.test(t)) return null;
+  return Number(t.replace(/,/g, ""));
+}
+
 /** "1,250,000" (Western thousands separators, PRD TBL-3; not lakh grouping). Decimals only when needed. */
 export function formatNumber(value: number, decimals?: number): string {
-  const rounded = Math.round(value * 100) / 100;
+  const rounded = Math.round(value * 100) / 100 || 0; // || 0 turns -0 into 0
   return new Intl.NumberFormat("en-US", {
     minimumFractionDigits: decimals ?? 0,
     maximumFractionDigits: decimals ?? (Number.isInteger(rounded) ? 0 : 2),

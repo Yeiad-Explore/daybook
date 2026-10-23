@@ -65,6 +65,9 @@ describe("chartGeometry (DESIGN.md Tracker chart)", () => {
 });
 
 describe("entriesToLog (TRK-2)", () => {
+  it("refuses a decimal comma instead of logging 772 for 77,2", () => {
+    expect(entriesToLog([{ id: "w", label: "Weight" }], () => "77,2", "b", "2026-10-16")).toEqual({ error: "Weight: enter a number, like 77.2." });
+  });
   const fields = [{ id: "w", label: "Weight" }, { id: "c", label: "Calories" }];
   it("keeps only the fields with a number typed, so empty inputs write and clear nothing", () => {
     expect(entriesToLog(fields, (id) => ({ w: "77.2", c: "  " })[id as "w" | "c"], "b", "2026-10-16")).toEqual({ rows: [{ field_id: "w", block_id: "b", entry_date: "2026-10-16", value: 77.2 }] });

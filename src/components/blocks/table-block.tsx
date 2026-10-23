@@ -137,7 +137,7 @@ export function TableBlock({
   const renderRow = (row: Row, handle?: DragHandle) => (
     <tr key={row.id} ref={handle?.ref as never} style={handle?.style} className={cx("group/row border-t border-hairline hover:bg-canvas/60", handle?.dragging && "bg-surface shadow-float")}>
       <td className="w-8 px-1">
-        {manualOrder && handle && (
+        {manualOrder && handle && !row.id.startsWith("new-") && (
           <button type="button" aria-label="Move row (drag, or Space and arrow keys)" {...handle.handle} className="grid size-8 cursor-grab place-items-center rounded-sm text-ink-3-small opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100 pointer-coarse:hidden">
             <GripVertical size={14} strokeWidth={1.5} aria-hidden />
           </button>

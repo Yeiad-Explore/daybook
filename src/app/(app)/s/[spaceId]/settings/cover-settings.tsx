@@ -105,8 +105,9 @@ function CropDialog({ file, space, onClose }: { file: File; space: Tables<"space
       const path = `${space.owner_id}/${space.id}/cover.${ext}`;
       const { error } = await createClient().storage.from("covers").upload(path, blob, { upsert: true, contentType: blob.type });
       if (error) throw error;
-      if (space.cover_path && space.cover_path !== path) await createClient().storage.from("covers").remove([space.cover_path]);
       await save.mutateAsync({ request: () => createClient().from("spaces").update({ cover_path: path }).eq("id", space.id) });
+      // After the update, so a failed save never leaves cover_path pointing at a deleted file.
+      if (space.cover_path && space.cover_path !== path) await createClient().storage.from("covers").remove([space.cover_path]);
       toast.success("Cover saved.");
       close();
     } catch (error) {

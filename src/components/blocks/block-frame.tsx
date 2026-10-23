@@ -94,7 +94,7 @@ export function BlockFrame({
           className="type-heading min-w-0 flex-[1_1_10rem] rounded-sm bg-transparent px-1 py-1 text-ink hover:bg-canvas"
         />
         <Tag>{type.name}</Tag>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-1">
           {controls}
           <button
             type="button"

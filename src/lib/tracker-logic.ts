@@ -2,7 +2,7 @@ import { differenceInCalendarDays, parseISO } from "date-fns";
 import { scaleLinear } from "d3-scale";
 import { addDaysTo } from "@/lib/dates";
 import type { Enums } from "@/lib/database.types";
-import { formatNumber } from "@/lib/money";
+import { formatNumber, readNumber } from "@/lib/money";
 
 // Tracker maths shared by the block, the chart and Today's Trackers card (TRK-2, TRK-3).
 
@@ -107,10 +107,10 @@ export function entriesToLog(
 ): { rows: EntryRow[] } | { error: string } {
   const rows: EntryRow[] = [];
   for (const f of fields) {
-    const text = typed(f.id).trim().replace(/,/g, "");
+    const text = typed(f.id).trim();
     if (text === "") continue;
-    const value = Number(text);
-    if (!Number.isFinite(value)) return { error: `${f.label}: enter a number, like 77.2.` };
+    const value = readNumber(text);
+    if (value === null) return { error: `${f.label}: enter a number, like 77.2.` };
     rows.push({ field_id: f.id, block_id: blockId, entry_date: date, value });
   }
   return rows.length === 0 ? { error: "Enter at least one value to log." } : { rows };
