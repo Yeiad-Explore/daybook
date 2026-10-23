@@ -253,7 +253,7 @@ begin
       jsonb_build_object('id', 'opt_proposal', 'label', 'Proposal sent', 'tone', 'neutral'),
       jsonb_build_object('id', 'opt_client', 'label', 'Client', 'tone', 'active'),
       jsonb_build_object('id', 'opt_lost', 'label', 'Lost', 'tone', 'closed'))),
-    jsonb_build_object('name', 'Value ৳/mo', 'kind', 'money', 'summary', 'sum'),
+    jsonb_build_object('name', 'Value Tk/mo', 'kind', 'money', 'summary', 'sum'),
     jsonb_build_object('name', 'Next step', 'kind', 'text'),
     jsonb_build_object('name', 'Next step date', 'kind', 'date')));
   update public.blocks set config = jsonb_build_object('view', 'table', 'board_column_id', v_cols ->> 'Status') where id = v_blk;
@@ -261,9 +261,9 @@ begin
     metric_config = jsonb_build_object('table_count', jsonb_build_object('column_id', v_cols ->> 'Status', 'option_id', 'opt_client', 'target', 5))
    where id = v_agency;
   if p_examples then
-    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Bayside Café', 'Status', 'opt_proposal', 'Value ৳/mo', 20000, 'Next step', 'Follow up on the proposal', 'Next step date', v_today - 1), 1);
-    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Northwind Studio', 'Status', 'opt_client', 'Value ৳/mo', 25000, 'Next step', 'Monthly report', 'Next step date', v_today + 12), 2);
-    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Harbor Dental', 'Status', 'opt_client', 'Value ৳/mo', 18000, 'Next step', 'Review chatbot answers', 'Next step date', v_today + 6), 3);
+    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Bayside Café', 'Status', 'opt_proposal', 'Value Tk/mo', 20000, 'Next step', 'Follow up on the proposal', 'Next step date', v_today - 1), 1);
+    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Northwind Studio', 'Status', 'opt_client', 'Value Tk/mo', 25000, 'Next step', 'Monthly report', 'Next step date', v_today + 12), 2);
+    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Harbor Dental', 'Status', 'opt_client', 'Value Tk/mo', 18000, 'Next step', 'Review chatbot answers', 'Next step date', v_today + 6), 3);
     perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Lumen Foods', 'Status', 'opt_lead', 'Next step', 'Send intro email'), 4);
     perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Client', 'Orchid Spa', 'Status', 'opt_contacted', 'Next step', 'Book a demo call', 'Next step date', v_today + 3), 5);
   end if;
@@ -273,13 +273,13 @@ begin
   v_cols := private.seed_columns(p_owner, v_blk, jsonb_build_array(
     jsonb_build_object('name', 'Product', 'kind', 'text'),
     jsonb_build_object('name', 'What it does', 'kind', 'text'),
-    jsonb_build_object('name', 'Price ৳', 'kind', 'money'),
+    jsonb_build_object('name', 'Price Tk', 'kind', 'money'),
     jsonb_build_object('name', 'Billing', 'kind', 'select', 'options', jsonb_build_array(
       jsonb_build_object('id', 'opt_once', 'label', 'One-time', 'tone', 'neutral'),
       jsonb_build_object('id', 'opt_monthly', 'label', 'Monthly', 'tone', 'active')))));
   if p_examples then
-    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Product', 'Support chatbot', 'What it does', 'Answers customer questions around the clock', 'Price ৳', 15000, 'Billing', 'opt_monthly'), 1);
-    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Product', 'Workflow setup', 'What it does', 'Connects the tools a team already uses', 'Price ৳', 40000, 'Billing', 'opt_once'), 2);
+    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Product', 'Support chatbot', 'What it does', 'Answers customer questions around the clock', 'Price Tk', 15000, 'Billing', 'opt_monthly'), 1);
+    perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Product', 'Workflow setup', 'What it does', 'Connects the tools a team already uses', 'Price Tk', 40000, 'Billing', 'opt_once'), 2);
   end if;
 
   v_page := private.seed_page(p_owner, v_agency, 'Marketing', 3);
@@ -306,7 +306,7 @@ begin
       jsonb_build_object('id', 'opt_health', 'label', 'Health', 'tone', 'neutral'),
       jsonb_build_object('id', 'opt_personal', 'label', 'Personal', 'tone', 'neutral'),
       jsonb_build_object('id', 'opt_other', 'label', 'Other', 'tone', 'neutral'))),
-    jsonb_build_object('name', 'Amount ৳', 'kind', 'money', 'signed', true, 'summary', 'sum')));
+    jsonb_build_object('name', 'Amount Tk', 'kind', 'money', 'signed', true, 'summary', 'sum')));
   update public.blocks set config = jsonb_build_object('view', 'table', 'group_by_month_column_id', v_cols ->> 'Date',
       'sort', jsonb_build_object('column_id', v_cols ->> 'Date', 'dir', 'desc'))
    where id = v_blk;
@@ -315,11 +315,11 @@ begin
       perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Date', date_trunc('month', v_today)::date + d, 'Item',
         (array['Retainer: Northwind Studio', 'Rent', 'Groceries', 'Internet bill', 'Online course', 'Retainer: Harbor Dental', 'Pharmacy'])[d + 1],
         'Category', (array['opt_income', 'opt_home', 'opt_food', 'opt_bills', 'opt_learning', 'opt_income', 'opt_health'])[d + 1],
-        'Amount ৳', (array[25000, -12000, -3400, -1200, -2500, 18000, -850])[d + 1]), d + 1);
+        'Amount Tk', (array[25000, -12000, -3400, -1200, -2500, 18000, -850])[d + 1]), d + 1);
       perform private.seed_row(p_owner, v_blk, v_cols, jsonb_build_object('Date', (date_trunc('month', v_today) - interval '1 month')::date + d + 2, 'Item',
         (array['Retainer: Northwind Studio', 'Rent', 'Groceries', 'Electricity bill', 'Books', 'Retainer: Harbor Dental', 'Dinner out'])[d + 1],
         'Category', (array['opt_income', 'opt_home', 'opt_food', 'opt_bills', 'opt_learning', 'opt_income', 'opt_personal'])[d + 1],
-        'Amount ৳', (array[25000, -12000, -3900, -1650, -1800, 18000, -1400])[d + 1]), 20 + d);
+        'Amount Tk', (array[25000, -12000, -3900, -1650, -1800, 18000, -1400])[d + 1]), 20 + d);
     end loop;
   end if;
 

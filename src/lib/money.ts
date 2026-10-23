@@ -1,4 +1,4 @@
-const SYMBOLS: Record<string, string> = { BDT: "৳", USD: "$", EUR: "€", GBP: "£", INR: "₹" };
+const SYMBOLS: Record<string, string> = { BDT: "Tk", USD: "$", EUR: "€", GBP: "£", INR: "₹" };
 
 /** The symbol for an ISO 4217 code; unknown codes show as the code itself. */
 export const currencySymbol = (currency: string) => SYMBOLS[currency] ?? currency;
@@ -12,7 +12,8 @@ export function formatNumber(value: number, decimals?: number): string {
   }).format(decimals === undefined ? rounded : value);
 }
 
-/** "৳1,250,000"; negatives read "−৳1,200" with a real minus sign (TBL-3). */
+/** "Tk 1,250,000" (taka is written Tk, as in Bangladesh); negatives read "−Tk 1,200" with a real minus sign (TBL-3). */
 export function formatMoney(value: number, currency: string): string {
-  return `${value < 0 ? "−" : ""}${currencySymbol(currency)}${formatNumber(Math.abs(value))}`;
+  const symbol = currencySymbol(currency);
+  return `${value < 0 ? "−" : ""}${symbol}${/^[A-Za-z]/.test(symbol) ? " " : ""}${formatNumber(Math.abs(value))}`;
 }

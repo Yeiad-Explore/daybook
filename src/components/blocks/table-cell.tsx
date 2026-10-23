@@ -15,12 +15,12 @@ const DOT: Record<Tone, string> = {
   closed: "border border-ink-3 bg-transparent",
 };
 
-/** DESIGN.md "Table": ৳ prefix smaller than the figures (85%, not 70%: Inter has no taka glyph and the fallback becomes unreadable), tabular figures. */
+/** DESIGN.md "Table": the currency mark before the figures; taka is written Tk (Inter has no taka sign). */
 export function MoneyText({ value, currency }: { value: number; currency: string }) {
   return (
     <span className="type-number tabular-nums">
       {value < 0 && "−"}
-      <span className="text-[0.85em]">{currencySymbol(currency)}</span>
+      <span className="text-[0.85em]">{currencySymbol(currency)}</span>{/^[A-Za-z]/.test(currencySymbol(currency)) && " "}
       {formatNumber(Math.abs(value))}
     </span>
   );

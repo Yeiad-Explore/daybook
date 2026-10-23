@@ -8,6 +8,7 @@ describe("parseCell (TBL-2 AC1)", () => {
   const select = { kind: "select" as const, options: [{ id: "opt_a", label: "A", tone: "active" as const }] };
   it("accepts numbers and money, including commas and the currency sign", () => {
     expect(parseCell({ kind: "number", options: [] }, "12.5")).toEqual({ value: 12.5 });
+    expect(parseCell({ kind: "money", options: [] }, "Tk 1,250")).toEqual({ value: 1250 });
     expect(parseCell({ kind: "money", options: [] }, "৳1,250")).toEqual({ value: 1250 });
     expect(parseCell({ kind: "money", options: [] }, "−450")).toEqual({ value: -450 });
   });

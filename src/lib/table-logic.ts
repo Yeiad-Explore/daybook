@@ -36,7 +36,7 @@ export function parseCell(column: Pick<Column, "kind" | "options">, raw: string 
       return { value: text };
     case "number":
     case "money": {
-      const cleaned = text.replace(/[,\s৳$€£₹]/g, "").replace(/^−/, "-");
+      const cleaned = text.replace(/tk/gi, "").replace(/[,\s৳$€£₹]/g, "").replace(/^−/, "-");
       if (!NUMBER.test(cleaned)) {
         return { error: column.kind === "money" ? "Enter an amount, like 1250 or -450." : "Enter a number, like 2 or 12.5." };
       }

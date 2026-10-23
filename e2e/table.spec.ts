@@ -44,7 +44,7 @@ test("TBL-2 AC1: cells are validated by kind with a message; rows add, edit and 
   await page.getByRole("button", { name: "Add row" }).click();
   await expect(page.getByRole("alert").filter({ hasText: "Qty: Enter a number, like 2 or 12.5." })).toBeVisible();
   await page.getByLabel("New row: Qty").fill("3");
-  await page.getByLabel("New row: Amount").fill("৳1,250.50");
+  await page.getByLabel("New row: Amount").fill("Tk 1,250.50");
   await page.getByRole("button", { name: "Add row" }).click();
   await expect(page.getByRole("button", { name: /^Item, row 2/ })).toContainText("Lentils");
   await expect.poll(async () => (await db().from("table_rows").select("cells").eq("block_id", block)).data?.length).toBe(2);
@@ -77,9 +77,9 @@ test("TBL-3, TBL-4, TBL-7: ledger strip, summary footer and month groups with th
   await open(page, s);
   await hydrated(page, "#table-group");
   const strip = page.getByLabel("Income, expenses and net for the rows shown");
-  await expect(strip).toContainText("৳43,000");
-  await expect(strip).toContainText("৳15,400.5");
-  await expect(strip).toContainText("৳27,599.5");
+  await expect(strip).toContainText("Tk 43,000");
+  await expect(strip).toContainText("Tk 15,400.5");
+  await expect(strip).toContainText("Tk 27,599.5");
   await expect(page.locator("tfoot")).toContainText("27,599.5");
 
   await page.getByLabel("Group by month").selectOption({ label: "Group by month: Date" });
@@ -126,11 +126,11 @@ test("Table passes layout and accessibility checks in light and dark at 400 and 
   const cols = await seedColumns(s, block, [
     { name: "Client" },
     { name: "Status", kind: "select", options: [{ id: "opt_lead", label: "Lead", tone: "early" }, { id: "opt_client", label: "Client", tone: "active" }, { id: "opt_lost", label: "Lost", tone: "closed" }] },
-    { name: "Value ৳/mo", kind: "money", summary: "sum" },
+    { name: "Value Tk/mo", kind: "money", summary: "sum" },
     { name: "Paid", kind: "checkbox" },
     { name: "Site", kind: "url" },
   ]);
-  await seedRow(s, block, cols, { Client: "Bayside Café", Status: "opt_client", "Value ৳/mo": 20000, Paid: true, Site: "https://example.com" });
-  await seedRow(s, block, cols, { Client: "Lumen Foods", Status: "opt_lead", "Value ৳/mo": 15000, Paid: false });
+  await seedRow(s, block, cols, { Client: "Bayside Café", Status: "opt_client", "Value Tk/mo": 20000, Paid: true, Site: "https://example.com" });
+  await seedRow(s, block, cols, { Client: "Lumen Foods", Status: "opt_lead", "Value Tk/mo": 15000, Paid: false });
   await checkScreen(page, `/s/${s.spaceId}/${s.pageId}`);
 });

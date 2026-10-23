@@ -182,7 +182,7 @@ export default function PrimitivesPage() {
           <AuraCard variant="sand" mark="ochre">
             <p className="type-heading">AI Agency</p>
             <p className="type-number-xl">
-              <span className="text-[0.6em]">৳</span>75,000
+              <span className="text-[0.6em]">Tk </span>75,000
             </p>
             <p className="type-caption flex items-center gap-1.5">
               <span aria-hidden className="size-1.5 rounded-pill bg-lime" />2 of 5 retainer clients

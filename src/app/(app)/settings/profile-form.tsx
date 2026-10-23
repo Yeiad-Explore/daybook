@@ -124,7 +124,7 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
         />
       </div>
 
-      <Field id="currency" label="Currency" hint="Money amounts use this 3-letter code (BDT shows as ৳)." error={errors.currency?.message}>
+      <Field id="currency" label="Currency" hint="Money amounts use this 3-letter code (BDT shows as Tk)." error={errors.currency?.message}>
         <input
           id="currency"
           className={`${inputClass} max-w-32 uppercase`}
