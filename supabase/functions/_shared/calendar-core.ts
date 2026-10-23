@@ -181,7 +181,10 @@ async function syncOwner(deps: Deps, owner: string, rows: ClaimedRow[]): Promise
     access = await deps.google.accessToken(refreshToken);
   } catch (error) {
     if (error instanceof TokenRevokedError) return needsReconnect(deps, owner, rows, "Google no longer accepts the saved sign-in. Reconnect Google Calendar.");
-    return Promise.all(rows.map((row) => fail(deps, row, error)));
+    // The token endpoint answered with something other than invalid_grant (a bad client secret, an outage): say
+    // so, instead of blaming each event.
+    const status = error instanceof GoogleError ? error.status : null;
+    return Promise.all(rows.map((row) => fail(deps, row, error, { reason: "Couldn't sign in to Google, will retry.", status })));
   }
 
   const results: RowResult[] = [];
@@ -250,15 +253,18 @@ async function syncRow(deps: Deps, access: string, calendarId: string, row: Clai
   return { kind: row.kind, id: row.id, outcome: "synced", status: "synced" };
 }
 
-async function fail(deps: Deps, row: ClaimedRow, error: unknown): Promise<RowResult> {
-  const { reason, status } = reasonFor(error);
+async function fail(deps: Deps, row: ClaimedRow, error: unknown, override?: { reason: string; status: number | null }): Promise<RowResult> {
+  const { reason, status } = override ?? reasonFor(error);
+  // A delete that failed is still a delete: turning it into "failed" would make the next try PATCH the event of an
+  // item that is in the Trash or done, and it would never leave the calendar.
+  const stays = row.sync_status === "delete_pending";
   const attempts = row.sync_attempts + 1;
   const next = attempts >= MAX_ATTEMPTS ? null : new Date(deps.now().getTime() + BACKOFF_MINUTES[attempts - 1] * 60_000).toISOString();
-  await deps.store.finish(row, { status: "failed", attempts, error: reason, next });
+  await deps.store.finish(row, { status: stays ? "delete_pending" : "failed", attempts, error: reason, next });
   await deps.store.log({
     owner_id: row.owner_id, kind: row.kind, target_id: row.id, target_title: row.title,
     action: row.sync_status === "delete_pending" ? "delete" : row.gcal_event_id ? "update" : "create",
     outcome: "failed", http_status: status, reason,
   });
-  return { kind: row.kind, id: row.id, outcome: "failed", status: "failed", error: reason };
+  return { kind: row.kind, id: row.id, outcome: "failed", status: stays ? "delete_pending" : "failed", error: reason };
 }

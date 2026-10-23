@@ -45,7 +45,10 @@ export function googleClient(): GoogleClient | null {
   const clientId = env("GOOGLE_CLIENT_ID");
   const clientSecret = env("GOOGLE_CLIENT_SECRET");
   if (!clientId || !clientSecret) return null;
-  // The URL overrides exist for the local fake-Google run; production leaves them unset.
+  // The URL overrides exist for the local fake-Google run. With an https app address they would send real tokens to
+  // an arbitrary host, so that combination is refused.
+  const overridden = ["GOOGLE_TOKEN_URL", "GOOGLE_REVOKE_URL", "GOOGLE_TOKENINFO_URL", "GOOGLE_API_BASE"].some((n) => env(n));
+  if (overridden && env("APP_URL")?.startsWith("https://")) return null;
   return new GoogleClient({
     clientId,
     clientSecret,

@@ -20,6 +20,9 @@ export async function GET(request: NextRequest) {
         ? await handOverGoogleToken(data.session, { supabaseUrl: env.supabaseUrl, publishableKey: env.supabasePublishableKey })
         : "skipped";
       if (result === "failed") console.error("Google Calendar token hand-over failed; the owner can reconnect in Settings.");
+      // The code exchange put Google's provider tokens into the session cookie, which the browser can read. A refresh
+      // returns a session without them and rewrites the cookie, so the refresh token lives only in Vault (GC-2).
+      if (result !== "skipped" && (await supabase.auth.refreshSession()).error) console.error("Could not clear provider tokens from the session cookie.");
       return NextResponse.redirect(`${origin}${result === "failed" ? "/settings/calendar?connect=failed" : "/today"}`);
     }
     return NextResponse.redirect(`${origin}/login?error=${loginErrorFor(error.message)}`);

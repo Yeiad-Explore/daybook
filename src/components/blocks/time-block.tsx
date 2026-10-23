@@ -68,10 +68,12 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig,
   async function update(slot: Slot, fields: { title: string; day: string; start: string; end: string }) {
     const row = { title: fields.title, starts_at: zonedInstant(fields.day, timezone, fields.start), ends_at: zonedInstant(fields.day, timezone, fields.end) };
     const previous = slots;
-    setSlots(slots.map((s) => (s.id === slot.id ? { ...s, ...row, sync_status: slot.gcal_event_id && connected ? "pending" : s.sync_status } : s)));
+    // The database queues an edit when the calendar is linked and the slot has an event or auto-add is on; mirror that.
+    const queuedByEdit = connected && (!!slot.gcal_event_id || auto);
+    setSlots(slots.map((s) => (s.id === slot.id ? { ...s, ...row, sync_status: queuedByEdit ? "pending" : s.sync_status, sync_error: queuedByEdit ? null : s.sync_error } : s)));
     try {
       await save.mutateAsync({ request: () => createClient().from("time_blocks").update(row).eq("id", slot.id), rollback: () => setSlots(previous) });
-      if (connected && slot.gcal_event_id) void sync.push("time_block", slot.id); // TB-5: same event, new times
+      if (queuedByEdit) void sync.push("time_block", slot.id); // TB-5: same event, new times (or the first try, after a failure)
       return true;
     } catch {
       return false;
@@ -91,7 +93,7 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig,
       if (undoError) toast.error(errorMessage(undoError));
       else {
         setSlots((all) => [...all, slot]);
-        if (connected && slot.gcal_event_id) void sync.push("time_block", slot.id);
+        if (connected && (slot.gcal_event_id || auto)) void sync.push("time_block", slot.id);
       }
       router.refresh();
     });
@@ -135,7 +137,7 @@ export function TimeBlock({ block, slots: serverSlots, actions, drag, setConfig,
               )}
               {!s.id.startsWith("new-") && (
                 <div className="mt-1">
-                  <SlotSync status={s.sync_status} error={s.sync_error} day={dayOf(s.starts_at)} connection={calendar.status} busy={sync.busy === s.id} onAdd={() => void sync.add(s.id)} onRetry={() => void sync.retry(s.id)} />
+                  <SlotSync label={s.title} status={s.sync_status} error={s.sync_error} day={dayOf(s.starts_at)} connection={calendar.status} busy={sync.busy === s.id} onAdd={() => void sync.add(s.id)} onRetry={() => void sync.retry(s.id)} />
                 </div>
               )}
             </div>

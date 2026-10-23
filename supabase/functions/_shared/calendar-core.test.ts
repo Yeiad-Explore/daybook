@@ -72,6 +72,24 @@ describe("create, update, delete (GC-6, GC-8; AC1 to AC3)", () => {
   });
 });
 
+describe("a failed delete stays a delete (TB-5, GC-11)", () => {
+  it("keeps delete_pending when Google answers 503, so the retry deletes instead of patching", async () => {
+    const { google, store, deps } = setup();
+    await syncRows(deps, [slot()]);
+    const id = store.finished[0].result.eventId as string;
+    google.failures.remove = [new GoogleError(503)];
+    const [failed] = await syncRows(deps, [slot({ gcal_event_id: id, sync_status: "delete_pending" })]);
+    expect(failed).toMatchObject({ outcome: "failed", status: "delete_pending" });
+    expect(store.finished[1].result).toMatchObject({ status: "delete_pending", attempts: 1, error: "Google had a problem, will retry." });
+    expect(google.events.size).toBe(1); // still there
+
+    const [retried] = await syncRows(deps, [slot({ gcal_event_id: id, sync_status: "delete_pending", sync_attempts: 1 })]);
+    expect(retried.outcome).toBe("deleted");
+    expect(google.events.size).toBe(0);
+    expect(google.calls.filter((c) => c === "patch")).toHaveLength(0);
+  });
+});
+
 describe("idempotency (GC-8, GC-D6)", () => {
   it("404 on patch recreates the event and stores the new id", async () => {
     const { google, store, deps } = setup();
@@ -204,5 +222,12 @@ describe("token failure (GC-10)", () => {
     const [r] = await syncRows(deps, [slot()]);
     expect(r.outcome).toBe("failed");
     expect(store.conn?.status).toBe("connected");
+  });
+
+  it("a token-endpoint error says so, instead of blaming the event (bad client secret)", async () => {
+    const { google, deps } = setup();
+    google.tokenError = new GoogleError(401, "invalid_client");
+    const [r] = await syncRows(deps, [slot()]);
+    expect(r.error).toBe("Couldn't sign in to Google, will retry.");
   });
 });

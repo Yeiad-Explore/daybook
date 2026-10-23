@@ -38,7 +38,7 @@ async function addSlot(page: Page, title: string, d: string, start: string, end:
 }
 
 const row = (page: Page, title: string) => page.getByRole("listitem").filter({ hasText: title });
-const onCalendar = (page: Page, title: string) => row(page, title).getByRole("link", { name: /On Google Calendar/ });
+const onCalendar = (page: Page, title: string) => row(page, title).getByRole("link", { name: /^On calendar/ });
 const events = async () => Object.entries((await fake.state()).events);
 const ms = (iso: string | undefined) => Date.parse(iso ?? "");
 
@@ -105,6 +105,23 @@ test("GC-9, TB-3: a Google error shows 'Sync failed' with the reason, and Retry 
   expect(await events()).toHaveLength(1);
 });
 
+test("TB-5: a failed delete is retried as a delete, and the event leaves Google", async ({ page }) => {
+  await connectCalendar();
+  await setup(page);
+  await addSlot(page, "Short lived", day(1), "11:00", "12:00");
+  await expect(onCalendar(page, "Short lived")).toBeVisible({ timeout: 10_000 });
+  await fake.fail("DELETE", 503, "backendError", 1);
+  await page.getByRole("button", { name: "Delete Short lived" }).click();
+  await expect.poll(async () => (await db().from("time_blocks").select("sync_status, sync_error").eq("title", "Short lived").single()).data, { timeout: 10_000 }).toEqual({ sync_status: "delete_pending", sync_error: "Google had a problem, will retry." });
+  expect(await events()).toHaveLength(1); // still on Google
+
+  await page.goto("/settings/calendar"); // the failed delete shows as a failed sync with Retry all
+  await expect(page.getByRole("button", { name: "Retry all" })).toBeVisible();
+  await page.getByRole("button", { name: "Retry all" }).click();
+  await expect.poll(async () => (await events()).length, { timeout: 10_000 }).toBe(0);
+  expect((await db().from("time_blocks").select("sync_status, gcal_event_id").eq("title", "Short lived").single()).data).toEqual({ sync_status: "not_synced", gcal_event_id: null });
+});
+
 test("TB-3, TB-4: with auto-add off a slot offers 'Add to Google Calendar'", async ({ page }) => {
   await connectCalendar();
   await setup(page, { auto_sync: false });
@@ -164,7 +181,7 @@ test("GC-2, GC-1: store-google-token verifies with Google and keeps the token on
   expect(stored).toBe("my-refresh-token");
 });
 
-test("GC-2, §9.4: the owner's own session cannot read the token, the connection or the log, and cannot sweep", async () => {
+test("GC-2, §9.4: the owner's own session cannot read the token, the connection or the log, and the cron key cannot disconnect", async () => {
   await connectCalendar("super-secret-refresh");
   const jwt = await ownerJwt();
   const { url, publishable } = localStack();
@@ -187,9 +204,14 @@ test("GC-2, §9.4: the owner's own session cannot read the token, the connection
   expect(JSON.parse(text)).toMatchObject({ status: "connected" });
   expect(text).not.toMatch(/super-secret|secret_id|refresh/);
 
-  // A user JWT may not run the cron sweep.
-  const sweepRes = await fetch(`${functionsUrl()}/calendar-sync`, { method: "POST", headers: { Authorization: `Bearer ${jwt}`, "Content-Type": "application/json" }, body: JSON.stringify({ action: "sweep" }) });
-  expect(sweepRes.status).toBe(403);
+  // A user JWT may sweep (their own rows) but never disconnect through the cron key's path, and no request without
+  // credentials gets anywhere.
+  const anon = await fetch(`${functionsUrl()}/calendar-sync`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "sweep" }) });
+  expect(anon.status).toBe(401);
+  const wrongKey = await fetch(`${functionsUrl()}/calendar-sync`, { method: "POST", headers: { apikey: publishable, "Content-Type": "application/json" }, body: JSON.stringify({ action: "sweep" }) });
+  expect(wrongKey.status).toBe(401); // the publishable key is not the secret key
+  const cronDisconnect = await fetch(`${functionsUrl()}/calendar-sync`, { method: "POST", headers: { apikey: localStack().secret, "Content-Type": "application/json" }, body: JSON.stringify({ action: "disconnect" }) });
+  expect(cronDisconnect.status).toBe(403); // the cron key can sweep, not disconnect
 });
 
 test("GC-11: deadlines become all-day events when switched on, and leave when the task is done", async ({ page }) => {

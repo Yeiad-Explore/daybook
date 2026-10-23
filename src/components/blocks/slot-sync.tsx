@@ -22,6 +22,8 @@ export function SlotSync({
   onAdd,
   onRetry,
   showReason = true,
+  reconnectLink = true,
+  label,
 }: {
   status: Enums<"sync_status">;
   error?: string | null;
@@ -32,10 +34,14 @@ export function SlotSync({
   onAdd: () => void;
   onRetry: () => void;
   showReason?: boolean;
+  /** False where a banner already carries the Reconnect link (Today), so a list does not repeat it on every row. */
+  reconnectLink?: boolean;
+  /** The slot's title, so several identical buttons are told apart by screen readers. */
+  label?: string;
 }) {
   if (status === "synced") {
     return (
-      <a href={dayViewUrl(day)} target="_blank" rel="noreferrer" aria-label="On Google Calendar. Opens the day in Google Calendar." className="type-caption inline-flex items-center gap-1 rounded-pill bg-canvas-2 px-2 py-[3px] text-lime-ink hover:underline">
+      <a href={dayViewUrl(day)} target="_blank" rel="noreferrer" aria-label={`On calendar, on Google Calendar. Opens the day${label ? ` of ${label}` : ""} in Google Calendar.`} className="type-caption inline-flex items-center gap-1 rounded-pill bg-canvas-2 px-2 py-[3px] text-lime-ink hover:underline">
         On calendar
         <Check size={12} strokeWidth={2} aria-hidden />
       </a>
@@ -43,6 +49,7 @@ export function SlotSync({
   }
   // GC-10: while Google needs a new sign-in nothing syncs, so a waiting slot says what the owner has to do.
   if (connection === "needs_reconnect") {
+    if (!reconnectLink) return <Tag variant="outlined">Waiting for reconnect</Tag>;
     return (
       <Link href="/settings/calendar" className="type-caption text-ink-2 underline underline-offset-4">
         Reconnect Google Calendar
@@ -56,7 +63,7 @@ export function SlotSync({
         <Tag variant="outlined">Sync failed</Tag>
         {showReason && error && <span className="type-caption text-ink-3-small">{error}</span>}
         {connection === "connected" && (
-          <Button className={small} disabled={busy} onClick={onRetry}>
+          <Button className={small} disabled={busy} onClick={onRetry} aria-label={label ? `Retry: ${label}` : undefined}>
             Retry
           </Button>
         )}
@@ -65,7 +72,7 @@ export function SlotSync({
   }
   if (connection === "connected") {
     return (
-      <Button className={small} disabled={busy} onClick={onAdd}>
+      <Button className={small} disabled={busy} onClick={onAdd} aria-label={label ? `Add to Google Calendar: ${label}` : undefined}>
         Add to Google Calendar
       </Button>
     );

@@ -66,10 +66,13 @@ export function CalendarSettings({ calendar, log, timezone, connectFailed }: { c
     const previous = prefs;
     const merged = { push: next.push ?? prefs.push, auto: next.auto ?? prefs.auto };
     setPrefs(merged);
-    save.mutate({
-      request: () => createClient().rpc("set_calendar_prefs", { p_push_deadlines: merged.push, p_auto_sync: merged.auto, p_calendar_id: "" }),
-      rollback: () => setPrefs(previous),
-    });
+    save
+      .mutateAsync({
+        request: () => createClient().rpc("set_calendar_prefs", { p_push_deadlines: merged.push, p_auto_sync: merged.auto, p_calendar_id: "" }),
+        rollback: () => setPrefs(previous),
+      })
+      .then(() => (next.push === undefined ? undefined : sync.sweepMine())) // deadlines on or off: send the change now
+      .catch(() => undefined); // useSave already rolled back and showed the reason
   }
 
   async function disconnect() {
@@ -146,7 +149,7 @@ export function CalendarSettings({ calendar, log, timezone, connectFailed }: { c
       {calendar.status !== "disconnected" && (
         <Panel className="flex flex-col gap-3">
           <h2 className="type-heading">Disconnect</h2>
-          <p className="type-body-sm text-ink-2">Daybook asks Google to forget its access and deletes the saved sign-in. Every slot goes back to &ldquo;Not on calendar&rdquo;.</p>
+          <p className="type-body-sm text-ink-2">Daybook asks Google to forget its access and deletes the saved sign-in. Every slot goes back to &ldquo;Not on calendar&rdquo; and stays there until you add it again after reconnecting.</p>
           <div>
             <Button onClick={() => setConfirming(true)}>Disconnect Google Calendar</Button>
           </div>
@@ -177,7 +180,13 @@ export function CalendarSettings({ calendar, log, timezone, connectFailed }: { c
         )}
       </Panel>
 
-      <Dialog open={confirming} onOpenChange={setConfirming}>
+      <Dialog
+        open={confirming}
+        onOpenChange={(open) => {
+          setConfirming(open);
+          if (!open) setRemoveEvents(false); // never carry a ticked "remove events" box into the next time
+        }}
+      >
         <DialogContent>
           <DialogTitle>Disconnect Google Calendar?</DialogTitle>
           <DialogDescription>Events already on your calendar stay there unless you choose to remove them.</DialogDescription>

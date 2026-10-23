@@ -70,8 +70,9 @@ export async function handleCalendarSync(deps: SyncDeps, auth: Auth, body: unkno
   const input = (body ?? {}) as Record<string, unknown>;
 
   if (input.action === "sweep") {
-    if (auth.mode !== "secret") return bad("forbidden", 403);
-    const rows = [...(await deps.store.claim("time_block", null, null, SWEEP_LIMIT)), ...(await deps.store.claim("task", null, null, SWEEP_LIMIT))];
+    // The cron job (secret key) sweeps everyone's due rows; a signed-in user sweeps only their own (Retry all, deadlines on).
+    const owner = auth.mode === "user" ? auth.userId : null;
+    const rows = [...(await deps.store.claim("time_block", null, owner, SWEEP_LIMIT)), ...(await deps.store.claim("task", null, owner, SWEEP_LIMIT))];
     return { status: 200, body: { results: await syncRows(deps, rows) } };
   }
 

@@ -36,6 +36,13 @@ export function useCalendarSync() {
     [router, toast],
   );
 
+  /** Pushes everything of the owner's that is due now (after Retry all, or deadlines switched on). */
+  const sweepMine = useCallback(async () => {
+    const { error } = await createClient().functions.invoke("calendar-sync", { body: { action: "sweep" } });
+    router.refresh();
+    if (error) toast.error("Couldn't reach Google Calendar sync. It will try again within 10 minutes.");
+  }, [router, toast]);
+
   /** The "Add to Google Calendar" button. */
   const add = useCallback(
     async (id: string) => {
@@ -61,12 +68,13 @@ export function useCalendarSync() {
         if (error) return void toast.error(errorMessage(error));
         router.refresh();
         if (id) await push(kind, id);
+        else await sweepMine();
       } finally {
         setBusy(null);
       }
     },
-    [push, router, toast],
+    [push, router, sweepMine, toast],
   );
 
-  return { push, add, retry, busy };
+  return { push, add, retry, sweepMine, busy };
 }

@@ -117,13 +117,19 @@ describe("calendar-sync: sync (GC-6)", () => {
 });
 
 describe("calendar-sync: sweep (GC-6 cron)", () => {
-  it("only the secret key may sweep, and it takes both kinds", async () => {
+  it("the secret key sweeps everyone's rows, both kinds", async () => {
     const { store, deps } = syncDeps();
     store.rows = [slot()];
-    expect((await handleCalendarSync(deps, { mode: "user", userId: "owner-1" }, { action: "sweep" })).status).toBe(403);
     const r = await handleCalendarSync(deps, { mode: "secret" }, { action: "sweep" });
     expect((r.body.results as unknown[]).length).toBe(1);
-    expect(store.claims.map((c) => c[0])).toEqual(["time_block", "task"]);
+    expect(store.claims).toEqual([["time_block", null, null, 25], ["task", null, null, 25]]);
+  });
+  it("a signed-in user's sweep covers only their own rows", async () => {
+    const { store, deps } = syncDeps();
+    store.rows = [slot({ owner_id: "someone-else" })];
+    const r = await handleCalendarSync(deps, { mode: "user", userId: "owner-1" }, { action: "sweep" });
+    expect(r).toEqual({ status: 200, body: { results: [] } });
+    expect(store.claims.every((c) => c[2] === "owner-1")).toBe(true);
   });
 });
 

@@ -66,6 +66,13 @@ describe("GoogleClient", () => {
     expect(await google.tokenInfo("at")).toEqual({ email: "me@gmail.test", scopes: ["openid", "https://www.googleapis.com/auth/calendar.events.owned"] });
   });
 
+  it("refuses an access token that was issued to a different OAuth client", async () => {
+    const { google } = client(() => json({ email: "me@gmail.test", scope: "openid", aud: "someone-elses-client" }));
+    await expect(google.tokenInfo("at")).rejects.toMatchObject({ status: 401 });
+    const { google: ours } = client(() => json({ email: "me@gmail.test", scope: "openid", aud: "cid" }));
+    await expect(ours.tokenInfo("at")).resolves.toMatchObject({ email: "me@gmail.test" });
+  });
+
   it("revoke never throws", async () => {
     const f = (async () => { throw new TypeError("offline"); }) as unknown as typeof fetch;
     await expect(new GoogleClient({ clientId: "a", clientSecret: "b", fetch: f }).revoke("rt")).resolves.toBeUndefined();

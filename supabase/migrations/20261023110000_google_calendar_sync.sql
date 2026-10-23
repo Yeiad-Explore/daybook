@@ -47,6 +47,16 @@ grant all on public.calendar_sync_log to service_role;
 ------------------------------------------------------------------------------------------------
 -- TB-4 / GC-4: a block's own auto_sync setting wins; otherwise the connection's default for new blocks.
 ------------------------------------------------------------------------------------------------
+-- A connection exists and has not been disconnected: it is either working or waiting for a reconnect (GC-10).
+-- Edits made while it waits are still flagged, so nothing is lost; claim_sync_rows only hands out rows of working ones.
+create function private.calendar_linked(p_owner uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$ select exists (select 1 from public.google_connections where owner_id = p_owner and status in ('connected', 'needs_reconnect')) $$;
+
 -- google_connections is closed to clients, so the trigger (which runs as the signed-in user) asks through this.
 create function private.calendar_auto_sync_default(p_owner uuid)
 returns boolean
@@ -69,6 +79,12 @@ begin
       new.sync_attempts := 0;
       new.sync_error := null;
       new.next_sync_at := now();
+    elsif new.sync_status in ('pending', 'failed', 'delete_pending') then
+      -- Never on Google: a waiting create must not run for a slot that is in the Trash.
+      new.sync_status := 'not_synced';
+      new.sync_attempts := 0;
+      new.sync_error := null;
+      new.next_sync_at := null;
     end if;
     return new;
   end if;
@@ -84,7 +100,7 @@ begin
     return new;
   end if;
 
-  if private.calendar_connected(new.owner_id)
+  if private.calendar_linked(new.owner_id)
      and (new.gcal_event_id is not null
           or coalesce((select (config ->> 'auto_sync')::boolean from public.blocks where id = new.block_id),
                       private.calendar_auto_sync_default(new.owner_id))) then
@@ -114,7 +130,7 @@ as $$
      and exists (select 1 from public.spaces s where s.id = p_task.space_id and s.status = 'active' and s.deleted_at is null)
      and not exists (select 1 from public.tasks c where c.parent_id = p_task.id and c.deleted_at is null)
      and exists (select 1 from public.google_connections g
-                 where g.owner_id = p_task.owner_id and g.status = 'connected' and g.push_deadlines)
+                 where g.owner_id = p_task.owner_id and g.status in ('connected', 'needs_reconnect') and g.push_deadlines)
 $$;
 
 -- Runs after protect_maintained_columns (trigger names sort that way), like time_block_sync_flag.
@@ -144,6 +160,12 @@ begin
     new.sync_attempts := 0;
     new.sync_error := null;
     new.next_sync_at := now();
+  elsif new.gcal_event_id is null and new.sync_status in ('pending', 'failed') then
+    -- Done, deleted or out of an active space before it ever reached Google: nothing to create.
+    new.sync_status := 'not_synced';
+    new.sync_attempts := 0;
+    new.sync_error := null;
+    new.next_sync_at := null;
   end if;
   return new;
 end;
@@ -197,9 +219,11 @@ begin
       select t.id from public.%1$I t
       join public.google_connections g on g.owner_id = t.owner_id and g.status = 'connected'
       where t.sync_status in ('pending', 'failed', 'delete_pending')
+        and (t.sync_status = 'delete_pending' or t.deleted_at is null)
         and ($1 is null or t.id = $1)
         and ($2 is null or t.owner_id = $2)
-        and ($1 is not null or (t.next_sync_at <= now() and t.sync_attempts < 5))
+        and (t.next_sync_at is null or t.next_sync_at <= now())
+        and ($1 is not null or (t.next_sync_at is not null and t.sync_attempts < 5))
       order by t.next_sync_at nulls first
       limit $3
       for update of t skip locked
@@ -214,7 +238,7 @@ begin
       'page_id', (select b.page_id from public.blocks b where b.id = u.block_id),
       'page_title', (select p.title from public.blocks b join public.pages p on p.id = b.page_id where b.id = u.block_id),
       'timezone', coalesce((select pr.timezone from public.profiles pr where pr.id = u.owner_id), 'Asia/Dhaka')
-    )), '[]'::jsonb) from u
+    )), '[]'::jsonb) from u where u.sync_status in ('pending', 'failed', 'delete_pending')
   $f$, v_table, p_kind) into v_rows using p_id, p_owner, p_limit;
   return v_rows;
 end;
@@ -254,6 +278,18 @@ begin
   $f$, v_table) into v_owner using p_id, p_lease, p_status, p_attempts, p_error, p_next;
   v_done := v_owner is not null;
 
+  -- The lease was lost and an event was just created: if the item was trashed or finished meanwhile, that
+  -- event must go (the triggers saw no event id at the time, so nothing queued its deletion).
+  if not v_done and p_event_id is not null then
+    if p_kind = 'time_block' then
+      update public.time_blocks set sync_status = 'delete_pending', sync_attempts = 0, sync_error = null, next_sync_at = now()
+        where id = p_id and deleted_at is not null;
+    else
+      update public.tasks t set sync_status = 'delete_pending', sync_attempts = 0, sync_error = null, next_sync_at = now()
+        where t.id = p_id and not private.task_wants_event(t);
+    end if;
+  end if;
+
   if v_done and p_status in ('synced', 'not_synced') then
     update public.google_connections set last_success_at = now(), last_error = null where owner_id = v_owner;
   end if;
@@ -274,7 +310,7 @@ as $$
   select d.decrypted_secret
   from public.google_connections g
   join vault.decrypted_secrets d on d.id = g.refresh_token_secret_id
-  where g.owner_id = p_owner and g.status = 'connected'
+  where g.owner_id = p_owner and g.status in ('connected', 'needs_reconnect')
 $$;
 
 create function private.connect_google(p_owner uuid, p_email text, p_scopes text[], p_token text)
@@ -373,13 +409,18 @@ declare
   v_slots integer;
   v_tasks integer;
 begin
+  -- A failed delete stays delete_pending (with its error), so Retry must not turn it into an update.
   update public.time_blocks
-    set sync_status = 'pending', sync_attempts = 0, sync_error = null, next_sync_at = now()
-    where owner_id = p_owner and sync_status = 'failed' and (p_id is null or id = p_id);
+    set sync_status = case when sync_status = 'failed' then 'pending'::public.sync_status else sync_status end,
+        sync_attempts = 0, sync_error = null, next_sync_at = now()
+    where owner_id = p_owner and (p_id is null or id = p_id)
+      and (sync_status = 'failed' or (sync_status = 'delete_pending' and sync_error is not null));
   get diagnostics v_slots = row_count;
   update public.tasks
-    set sync_status = 'pending', sync_attempts = 0, sync_error = null, next_sync_at = now()
-    where owner_id = p_owner and sync_status = 'failed' and (p_id is null or id = p_id);
+    set sync_status = case when sync_status = 'failed' then 'pending'::public.sync_status else sync_status end,
+        sync_attempts = 0, sync_error = null, next_sync_at = now()
+    where owner_id = p_owner and (p_id is null or id = p_id)
+      and (sync_status = 'failed' or (sync_status = 'delete_pending' and sync_error is not null));
   get diagnostics v_tasks = row_count;
   return v_slots + v_tasks;
 end;
@@ -415,9 +456,9 @@ as $$
               'last_success_at', g.last_success_at,
               'last_error', g.last_error,
               'failed_syncs', (select count(*) from public.time_blocks t
-                               where t.owner_id = p_owner and t.sync_status = 'failed' and t.deleted_at is null)
+                               where t.owner_id = p_owner and (t.sync_status = 'failed' or (t.sync_status = 'delete_pending' and t.sync_error is not null)))
                             + (select count(*) from public.tasks t
-                               where t.owner_id = p_owner and t.sync_status = 'failed' and t.deleted_at is null),
+                               where t.owner_id = p_owner and (t.sync_status = 'failed' or (t.sync_status = 'delete_pending' and t.sync_error is not null))),
               'waiting_syncs', (select count(*) from public.time_blocks t
                                 where t.owner_id = p_owner and t.sync_status in ('pending', 'delete_pending') and t.deleted_at is null))
      from public.google_connections g where g.owner_id = p_owner),

@@ -102,6 +102,8 @@ export class GoogleClient implements GooglePort {
     const res = await this.f(url);
     if (!res.ok) throw new GoogleError(res.status, await errorReason(res));
     const body = await res.json();
+    // A token issued to some other application proves nothing about our connection (Google always sends aud).
+    if (typeof body.aud === "string" && body.aud !== this.cfg.clientId) throw new GoogleError(401, "wrongClient");
     return { email: typeof body.email === "string" ? body.email : null, scopes: String(body.scope ?? "").split(" ").filter(Boolean) };
   }
 }

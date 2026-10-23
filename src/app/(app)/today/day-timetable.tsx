@@ -85,7 +85,7 @@ export function DayTimetable({ slots, timezone, today, calendar }: { slots: Toda
                   {local(s.starts_at)} to {local(s.ends_at)}
                 </span>
                 {overlapping.has(s.id) && <Tag>Overlaps</Tag>}
-                <SlotSync status={s.sync_status} day={today} connection={calendar.status} busy={sync.busy === s.id} showReason={false} onAdd={() => void sync.add(s.id)} onRetry={() => void sync.retry(s.id)} />
+                <SlotSync label={s.title} reconnectLink={false} status={s.sync_status} day={today} connection={calendar.status} busy={sync.busy === s.id} showReason={false} onAdd={() => void sync.add(s.id)} onRetry={() => void sync.retry(s.id)} />
               </div>
               <Link href={blockHref(s)} prefetch={false} className="type-body break-words underline-offset-4 hover:underline">
                 {s.title}
