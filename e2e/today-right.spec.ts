@@ -10,13 +10,14 @@ test("Day Timetable: today's slots on the ruler and in the list; overlapping slo
   const s = await seedSpace({ name: unique("Study"), kind: "area" });
   const block = await seedBlock(s, "timeblock", "Study sessions", 6);
   const [a, b, c] = [unique("Standup"), unique("Design review"), unique("Gym")];
-  await seedSlot(s, block, a, at(day(0), "09:00"), at(day(0), "09:30"));
+  // 06:15 is the quietest window on the ruler, so the owner's own slots on Today do not overlap "a".
+  await seedSlot(s, block, a, at(day(0), "06:15"), at(day(0), "06:45"));
   await seedSlot(s, block, b, at(day(0), "14:00"), at(day(0), "15:00"));
   await seedSlot(s, block, c, at(day(0), "14:30"), at(day(0), "15:30"));
   await seedSlot(s, block, "Tomorrow only", at(day(1), "09:00"), at(day(1), "10:00"));
   await page.goto("/today");
   const timetable = page.getByLabel("Day Timetable");
-  await expect(timetable.getByRole("listitem").filter({ hasText: a })).toContainText("09:00 to 09:30");
+  await expect(timetable.getByRole("listitem").filter({ hasText: a })).toContainText("06:15 to 06:45");
   await expect(timetable.getByRole("listitem").filter({ hasText: a })).toContainText("Not on calendar");
   await expect(timetable.getByRole("listitem").filter({ hasText: b })).toContainText("Overlaps");
   await expect(timetable.getByRole("listitem").filter({ hasText: c })).toContainText("Overlaps");
@@ -39,8 +40,10 @@ test("Routine card: today's routine with its steps and streak; checking the last
   await expect(card).toContainText(title);
   await card.getByRole("checkbox", { name: `Done: Cleanser (${title})` }).click();
   await expect.poll(async () => (await db().from("routine_checks").select("id").eq("block_id", block).eq("check_date", day(0))).data?.length).toBe(1);
+  // Other routines on the owner's Today may already show "Streak 1 day": count, don't assume one.
+  const streaks = await card.getByText("Streak 1 day").count();
   await card.getByRole("checkbox", { name: `Done: Sunscreen (${title})` }).click();
-  await expect(card.getByText("Streak 1 day")).toBeVisible();
+  await expect(card.getByText("Streak 1 day")).toHaveCount(streaks + 1);
   await expect(page.getByText("Streak 1 day. Every step is done.")).toBeVisible();
   await page.reload();
   await expect(page.getByRole("region", { name: "Routines" }).getByRole("checkbox", { name: `Done: Sunscreen (${title})` })).toBeChecked();

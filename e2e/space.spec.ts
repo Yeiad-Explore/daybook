@@ -148,6 +148,25 @@ test("Pages: add, rename, Trash with Undo; the last page stays (PG-1, PG-2, PG-6
   await expect(page.getByRole("region", { name: "Notifications" }).getByText("A space needs at least one page.")).toBeVisible();
 });
 
+test("PG-3: page tabs reorder from the menu (the keyboard route) and the order persists", async ({ page }) => {
+  const s = await seedSpace({ name: unique("Order"), kind: "area" });
+  await page.goto(`/s/${s.spaceId}/${s.pageId}`);
+  const tabs = page.getByRole("navigation", { name: "Pages" });
+  await hydrated(page, 'input[aria-label="Page title"]');
+  const order = () => tabs.getByRole("link").filter({ hasNotText: "Space settings" });
+  await tabs.getByRole("button", { name: "Page" }).click();
+  await expect(page.getByLabel("Page title")).toHaveValue("Untitled page");
+  await page.getByLabel("Page title").fill("Second");
+  await page.getByLabel("Page title").press("Enter");
+  await expect(order()).toHaveText(["Overview", "Second"]);
+
+  await tabs.getByRole("button", { name: "Second: more" }).click();
+  await page.getByRole("menuitem", { name: "Move left" }).click();
+  await expect(order()).toHaveText(["Second", "Overview"]);
+  await page.reload();
+  await expect(order()).toHaveText(["Second", "Overview"]);
+});
+
 test("Blocks: add, rename, collapse, width, Alt+arrow order and Trash persist (BLK-1..3, BLK-6..8)", async ({ page }) => {
   const s = await seedSpace({ name: unique("Personal"), kind: "area", mark: "graphite" });
   await page.goto(`/s/${s.spaceId}/${s.pageId}`);
