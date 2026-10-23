@@ -33,6 +33,11 @@ export async function connectCalendar(refreshToken = "good-refresh") {
 
 export async function disconnectCalendar() {
   const owner = await ownerId();
+  // Never wipe the owner's real connection: real Google refresh tokens start with "1//", the fake ones do not.
+  const { data: stored } = await db().rpc("read_google_refresh_token", { p_owner: owner });
+  if (typeof stored === "string" && stored.startsWith("1//")) {
+    throw new Error("The local owner is connected to REAL Google Calendar; the calendar e2e would delete that connection. Disconnect it in Settings first.");
+  }
   const { error } = await db().rpc("disconnect_google_account", { p_owner: owner });
   if (error) throw error;
   await db().from("google_connections").delete().eq("owner_id", owner);
