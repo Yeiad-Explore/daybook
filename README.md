@@ -1,8 +1,8 @@
 # Daybook
 
-Daybook is a private, single-user life-OS web app: goals with strict deadlines, ongoing life areas, pages built from seven block types, a Today screen, and one-way Google Calendar sync. "Daybook" is a working name (PRD §15 D1).
+Daybook is a private, single-user life-OS web app: goals with strict deadlines, ongoing life areas, pages built from seven block types, a Today screen, and one-way Google Calendar sync. "Daybook" is a working name.
 
-Read `PRD.md` (behaviour), `DESIGN.md` (visuals) and `CONSTRAINTS.md` (the quality bar) before changing anything. Decisions: `docs/adr/`. Plans: `tasks/`.
+`DESIGN.md` is the visual source and is in this repo. The behaviour spec, constraints and decision records stay on the owner's machine and are not published here.
 
 ---
 
@@ -48,7 +48,7 @@ Because everything is built from these seven blocks, a CRM, a food log, a financ
 ## Things you can do
 
 - **Set a goal with a hard end date** and break it down: goal, stage, step, daily task. A task cannot be due after its goal, and a sub-step cannot be due after its parent.
-- **See what to do right now** on Today, and what you missed in red with "2d late".
+- **See what to do right now** on Today. Late work stays listed, with how late it is ("2d late"), until it is done or rescheduled.
 - **Move a deadline only with a reason.** Quick picks (tomorrow, +3 days, next week) are offered, but a reason of 3+ characters is always required. Tasks show "moved 2x" and every move is logged.
 - **Track progress your way.** A goal's progress can be computed from tasks done, a tracker value (e.g. weight 78.4 towards 72), a count of table rows (e.g. 2 of 5 retainer clients), or entered by hand.
 - **Log numbers in seconds** from Today or the tracker block; one entry per field per day.
@@ -78,28 +78,13 @@ Daybook writes to your **primary** Google Calendar, one way (it never reads or c
 
 Built: sign-in (owner only), spaces, pages, all seven blocks, the deadline engine and history, Today, Trash, trackers, tables, routines, time blocks, quick capture, Google Calendar sync.
 
-**Not built yet (Phase 4, planned in `tasks/phase4.md`):** weekly review, command palette and search (`Ctrl+K`), table board view, CSV import/export, JSON export, repeating tasks, turning a note line into a task, duplicating and moving pages and blocks.
-
-## Atnos productivity
-
-Nothing in this repository mentions Atnos, so this README does not claim any link between the two. Daybook has no integration with Atnos today. Practical options, depending on what Atnos is:
-
-- Use Daybook as the **planning and deadline layer** (goals, roadmaps, Today) and keep Atnos for whatever it does best.
-- If Atnos reads Google Calendar, Daybook's time blocks and (optionally) deadlines already appear there through Google Calendar.
-- A direct integration would be new work and needs a new requirement ID in `PRD.md` first (for example, an export or an MCP server, which PRD §15 lists as a possible future item).
-
-Tell the maintainer what Atnos is and what you want from the link, and this section can be made specific.
+**Not built yet (Phase 4):** weekly review, command palette and search (`Ctrl+K`), table board view, CSV import/export, JSON export, repeating tasks, turning a note line into a task, duplicating and moving pages and blocks. `/review` is a placeholder until then.
 
 ---
 
 # Part 2: Running and deploying Daybook
 
 Stack: Next.js (App Router) + TypeScript on Vercel; Supabase (Postgres, Auth, RLS, Edge Functions, Cron, Vault, Storage) as the only backend; pnpm.
-
-## What is built
-
-Phases 0 to 3: sign-in (Google, owner only), spaces, pages, all seven block types, the deadline engine with reschedule history, Today, Trash, trackers, tables, routines, time blocks, quick capture, and Google Calendar sync.
-Phase 4 (weekly review, command palette and search, board view, CSV and JSON export, repeating tasks, note-to-task, duplicate and move for pages and blocks) is planned in `tasks/phase4.md` and **not built**.
 
 ## Setup (local)
 
@@ -127,7 +112,7 @@ Secrets (Google client secret, secret/service-role key) live only in Supabase an
 ### First sign-in and seed data
 
 Only the owner's email (set in `private.signup_allowlist`) can sign in. The database rejects every other address before a user exists (`private.before_user_created`).
-After the first sign-in, load the starting setup (PRD §12) into the **local** stack:
+After the first sign-in, load the starting setup into the **local** stack:
 
 ```bash
 pnpm seed             # with the demo examples
@@ -150,7 +135,7 @@ The script refuses non-local URLs. For the cloud project, call `seed_owner` your
 
 ## Migrations
 
-Schema changes only through versioned migrations in `supabase/migrations/` (NFR-10).
+Schema changes only through versioned migrations in `supabase/migrations/`.
 
 ```bash
 pnpm exec supabase migration new <name>   # write the SQL
@@ -175,7 +160,7 @@ Calendar cron (`calendar_retry`, every 10 minutes) reads two Vault entries, `cal
 
 ## Production (Supabase and Vercel)
 
-See `docs/launch-checklist.md`. The parts that matter most:
+Before a public URL:
 
 1. **Email sign-in must be off** in the cloud Auth settings. The allowlist checks the email address only, so with email sign-up on, anyone could register the owner's address with a password.
 2. Enable the **Before User Created** hook pointing at `private.before_user_created`.

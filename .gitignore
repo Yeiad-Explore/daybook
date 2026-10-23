@@ -27,6 +27,8 @@ supabase/.temp
 *.md
 # The design source stays tracked: tokens.css is generated from it and tests read it.
 !DESIGN.md
+# The repo home page. Other notes stay local.
+!README.md
 .claude/
 
 # misc
