@@ -158,6 +158,37 @@ test("GC-10: a revoked token needs a reconnect: nothing fails, the owner is told
   await expect(page.getByText("Connected.")).toBeVisible();
 });
 
+test("GC-10 (Testing mode): after the 7-day expiry, the real Reconnect hand-over clears the banner and the waiting slot syncs", async ({ page }) => {
+  // Google in Testing mode answers a refresh with invalid_grant after 7 days; the fake does the same for "revoked".
+  await connectCalendar("revoked");
+  await setup(page);
+  await addSlot(page, "Written during expiry", day(1), "14:00", "15:00");
+  await expect(row(page, "Written during expiry").getByRole("link", { name: "Reconnect Google Calendar" })).toBeVisible({ timeout: 10_000 });
+  await page.goto("/today");
+  await expect(page.getByRole("link", { name: "Reconnect Google Calendar" })).toHaveCount(1); // one banner, not one link per slot
+  await page.goto("/settings/calendar");
+  await expect(page.getByText("Needs a new sign-in.")).toBeVisible();
+  expect((await connectionRow())?.last_error).toContain("Reconnect Google Calendar");
+
+  // What /auth/callback does after the owner signs in with Google again: hand the new tokens to store-google-token.
+  const jwt = await ownerJwt();
+  const res = await fetch(`${functionsUrl()}/store-google-token`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${jwt}` }, body: JSON.stringify({ refresh_token: "fresh-refresh", access_token: "a" }) });
+  expect(res.status).toBe(200);
+  expect(await connectionRow()).toMatchObject({ status: "connected", last_error: null });
+  const { count } = await db().from("calendar_sync_log").select("*", { count: "exact", head: true }).eq("action", "connect");
+  expect(count).toBeGreaterThanOrEqual(1);
+  const { count: secrets } = await db().from("google_connections").select("*", { count: "exact", head: true }).not("refresh_token_secret_id", "is", null);
+  expect(secrets).toBe(1);
+
+  await page.goto("/today");
+  await expect(page.getByRole("link", { name: "Reconnect Google Calendar" })).toHaveCount(0); // the banner is gone
+  await sweep(); // the waiting slot goes out (the 10-minute job, or the next edit, does this in real use)
+  expect(await events()).toHaveLength(1);
+  await page.goto("/settings/calendar");
+  await expect(page.getByText("Connected.")).toBeVisible();
+  await expect(page.getByText("Needs a new sign-in.")).toHaveCount(0);
+});
+
 test("GC-2, GC-1: store-google-token verifies with Google and keeps the token only in Vault", async () => {
   const jwt = await ownerJwt();
   const call = (body: unknown, auth: string | null = `Bearer ${jwt}`) =>
