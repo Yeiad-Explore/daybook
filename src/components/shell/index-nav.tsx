@@ -26,7 +26,7 @@ export type IndexSpace = {
 const icon = { size: 16, strokeWidth: 1.5, "aria-hidden": true } as const;
 
 /**
- * DESIGN.md "Index" (PRD §5.2): Today with its count badge, Goals (days left), Life areas, closed and
+ * DESIGN.md "Index" (PRD §5.2): the name opens Profile, Today with its count badge, Goals (days left), Life areas, closed and
  * archived spaces folded away (SPC-4), Review, History, Settings and "+ New space". Spaces reorder by
  * drag or keyboard within their group (SPC-3). White text on dark glass (theme-fixed).
  */
@@ -159,12 +159,21 @@ export function IndexNav({
   return (
     <nav aria-label="Index" className="glass glass-dark flex h-full min-h-0 flex-col gap-6 overflow-hidden rounded-lg p-3">
       <div className="flex shrink-0 flex-col gap-6">
-        <div className="flex items-center gap-2.5 px-1 pt-1">
+        <Link
+          href="/settings"
+          onClick={onNavigate}
+          aria-current={pathname === "/settings" ? "page" : undefined}
+          className={cx(
+            "flex min-h-9 min-w-0 items-center gap-2.5 rounded-pill px-1 pt-1 hover:bg-on-dark-fixed/8 pointer-coarse:min-h-11",
+            pathname === "/settings" && "bg-on-dark-fixed/14",
+          )}
+        >
           <span aria-hidden className="type-heading grid size-8 place-items-center rounded-pill bg-on-dark-fixed/14">
             {name.slice(0, 1).toUpperCase()}
           </span>
           <span className="type-body-sm truncate font-medium">{name}</span>
-        </div>
+          <span className="sr-only">Profile</span>
+        </Link>
 
         <div className="flex flex-col gap-0.5">
           <div className="flex">{item("/today", "Today", { leading: <CalendarCheck {...icon} />, trailing: badge })}</div>
