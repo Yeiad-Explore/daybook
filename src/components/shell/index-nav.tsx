@@ -1,6 +1,7 @@
 "use client";
 
 import { CalendarCheck, GripVertical, History, NotebookPen, Plus, Settings, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -32,6 +33,7 @@ const icon = { size: 16, strokeWidth: 1.5, "aria-hidden": true } as const;
  */
 export function IndexNav({
   name,
+  avatarUrl,
   spaces: serverSpaces,
   lateCount,
   dueTodayCount,
@@ -39,6 +41,7 @@ export function IndexNav({
   onNavigate,
 }: {
   name: string;
+  avatarUrl: string | null;
   spaces: IndexSpace[];
   lateCount: number;
   dueTodayCount: number;
@@ -164,14 +167,14 @@ export function IndexNav({
           onClick={onNavigate}
           aria-current={pathname === "/settings" ? "page" : undefined}
           className={cx(
-            "flex min-h-9 min-w-0 items-center gap-2.5 rounded-pill px-1 pt-1 hover:bg-on-dark-fixed/8 pointer-coarse:min-h-11",
-            pathname === "/settings" && "bg-on-dark-fixed/14",
+            "type-body-sm flex min-h-9 w-full items-center gap-2.5 rounded-pill px-3 py-1 pointer-coarse:min-h-11",
+            pathname === "/settings" ? "bg-on-dark-fixed/14" : "hover:bg-on-dark-fixed/8",
           )}
         >
-          <span aria-hidden className="type-heading grid size-8 place-items-center rounded-pill bg-on-dark-fixed/14">
-            {name.slice(0, 1).toUpperCase()}
+          <span aria-hidden className="type-heading grid size-7 shrink-0 place-items-center overflow-hidden rounded-pill bg-on-dark-fixed/14 leading-none">
+            {avatarUrl ? <Image src={avatarUrl} alt="" width={28} height={28} unoptimized className="size-full object-cover" /> : name.slice(0, 1).toUpperCase()}
           </span>
-          <span className="type-body-sm truncate font-medium">{name}</span>
+          <span className="min-w-0 flex-1 truncate font-medium">{name}</span>
           <span className="sr-only">Profile</span>
         </Link>
 

@@ -121,14 +121,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "created_at": string,"currency": string,"display_name": string | null,"id": string,"last_page_by_space": NonNullable<Json>,"theme": Database["public"]['Enums']["theme_pref"],"timezone": string,"updated_at": string,"week_starts_on": number
+                    "avatar_path": string | null,"created_at": string,"currency": string,"display_name": string | null,"id": string,"last_page_by_space": NonNullable<Json>,"theme": Database["public"]['Enums']["theme_pref"],"timezone": string,"updated_at": string,"week_starts_on": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"currency"?: string,"display_name"?: string | null,"id": string,"last_page_by_space"?: NonNullable<Json>,"theme"?: Database["public"]['Enums']["theme_pref"],"timezone"?: string,"updated_at"?: string,"week_starts_on"?: number
+                    "avatar_path"?: string | null,"created_at"?: string,"currency"?: string,"display_name"?: string | null,"id": string,"last_page_by_space"?: NonNullable<Json>,"theme"?: Database["public"]['Enums']["theme_pref"],"timezone"?: string,"updated_at"?: string,"week_starts_on"?: number
                   }
                   Update: {
-                    "created_at"?: string,"currency"?: string,"display_name"?: string | null,"id"?: string,"last_page_by_space"?: NonNullable<Json>,"theme"?: Database["public"]['Enums']["theme_pref"],"timezone"?: string,"updated_at"?: string,"week_starts_on"?: number
+                    "avatar_path"?: string | null,"created_at"?: string,"currency"?: string,"display_name"?: string | null,"id"?: string,"last_page_by_space"?: NonNullable<Json>,"theme"?: Database["public"]['Enums']["theme_pref"],"timezone"?: string,"updated_at"?: string,"week_starts_on"?: number
                   }
                   Relationships: [
                     

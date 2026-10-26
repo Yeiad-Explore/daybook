@@ -6,7 +6,7 @@ import { useState } from "react";
 import { IndexNav, type IndexSpace } from "./index-nav";
 
 // DESIGN.md "Responsive behavior": below 900px the Index is an overlay drawer.
-export function MobileIndex(props: { name: string; spaces: IndexSpace[]; lateCount: number; dueTodayCount: number; today: string }) {
+export function MobileIndex(props: { name: string; avatarUrl: string | null; spaces: IndexSpace[]; lateCount: number; dueTodayCount: number; today: string }) {
   const [open, setOpen] = useState(false);
   return (
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>

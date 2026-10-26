@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { AvatarField } from "./avatar-field";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
 import { Panel } from "@/components/ui/panel";
@@ -14,7 +15,7 @@ import type { Profile } from "@/lib/profile";
 import { profileFields, WEEK_STARTS, type ProfileFields } from "@/lib/profile-schema";
 import { createClient } from "@/lib/supabase/client";
 
-type ProfilePatch = Partial<Omit<Profile, "name">>; // name is derived, not a column
+type ProfilePatch = Partial<Omit<Profile, "name" | "avatarUrl">>; // name is derived, not a column
 
 const THEMES = [
   { value: "light", label: "Light" },
@@ -83,6 +84,8 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
 
   return (
     <Panel className="flex max-w-document flex-col gap-6">
+      <AvatarField ownerId={profile.id} name={profile.name} avatarPath={profile.avatar_path} avatarUrl={profile.avatarUrl} />
+
       <Field id="display_name" label="Display name" hint="Leave empty to use your Google account name." error={errors.display_name?.message}>
         <input
           id="display_name"

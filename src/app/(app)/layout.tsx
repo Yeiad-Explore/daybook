@@ -34,6 +34,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   // TODAY-4: the badge counts exactly the rows Today's Overdue shows (same get_today call).
   const index = {
     name: profile.name,
+    avatarUrl: profile.avatarUrl,
     spaces,
     lateCount: agenda.late_count,
     dueTodayCount: agenda.due_today.filter((t) => !t.done).length,
