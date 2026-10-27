@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { PageIntro } from "@/components/page-intro";
 import { Button } from "@/components/ui/button";
 import { inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import { Panel } from "@/components/ui/panel";
 import { cx } from "@/lib/cx";
 import { addDaysTo, longDate, shortDate } from "@/lib/dates";
@@ -75,14 +76,7 @@ export default async function HistoryPage({ searchParams }: PageProps<"/history"
         <form method="get" className="flex flex-wrap items-end gap-3">
           <label className="flex min-w-48 flex-col gap-1.5">
             <span className="type-caption text-ink-3-small">Space</span>
-            <select name="space" defaultValue={space} className={inputClass}>
-              <option value="">All spaces</option>
-              {(spaces ?? []).map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+            <Select name="space" defaultValue={space} options={[{ value: "", label: "All spaces" }, ...(spaces ?? []).map((s) => ({ value: s.id, label: s.name }))]} />
           </label>
           <label className="flex flex-col gap-1.5">
             <span className="type-caption text-ink-3-small">From</span>

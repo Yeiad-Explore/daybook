@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { AvatarField } from "./avatar-field";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import { Panel } from "@/components/ui/panel";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { useToast } from "@/components/ui/toast";
@@ -98,18 +99,16 @@ export function ProfileForm({ profile, zones }: { profile: Profile; zones: strin
       </Field>
 
       <Field id="timezone" label="Timezone" hint="Today and every deadline use this timezone.">
-        <select
+        <Select
           id="timezone"
-          className={inputClass}
-          aria-describedby="timezone-hint"
-          {...form.register("timezone", { onChange: () => commit("timezone") })}
-        >
-          {zones.map((z) => (
-            <option key={z} value={z}>
-              {z.replaceAll("_", " ")}
-            </option>
-          ))}
-        </select>
+          describedBy="timezone-hint"
+          value={saved.timezone}
+          onChange={(next) => {
+            form.setValue("timezone", next);
+            void commit("timezone");
+          }}
+          options={zones.map((z) => ({ value: z, label: z.replaceAll("_", " ") }))}
+        />
       </Field>
 
       <div className="flex flex-col gap-1.5">

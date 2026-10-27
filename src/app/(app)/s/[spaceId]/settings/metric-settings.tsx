@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import { Panel } from "@/components/ui/panel";
 import { useToast } from "@/components/ui/toast";
 import type { Json, Tables } from "@/lib/database.types";
@@ -87,13 +88,15 @@ export function MetricSettings({ space, progress, fields, columns }: { space: Sp
       )}
 
       <Field id="metric" label="Count progress by">
-        <select id="metric" value={metric} onChange={(e) => { setMetric(e.target.value as Metric); setProblem(null); }} className={inputClass}>
-          {(Object.keys(LABELS) as Metric[]).map((m) => (
-            <option key={m} value={m}>
-              {LABELS[m]}
-            </option>
-          ))}
-        </select>
+        <Select
+          id="metric"
+          value={metric}
+          onChange={(next) => {
+            setMetric(next as Metric);
+            setProblem(null);
+          }}
+          options={(Object.keys(LABELS) as Metric[]).map((m) => ({ value: m, label: LABELS[m] }))}
+        />
       </Field>
 
       {metric === "tasks" && <p className="type-body-sm text-ink-2">Finished tasks divided by all tasks (To-do items and Roadmap steps) in this goal.</p>}
@@ -104,14 +107,12 @@ export function MetricSettings({ space, progress, fields, columns }: { space: Sp
         ) : (
           <div className="grid gap-4 tablet:grid-cols-3">
             <Field id="metric-field" label="Tracker field">
-              <select id="metric-field" value={fieldId} onChange={(e) => setFieldId(e.target.value)} className={inputClass}>
-                <option value="">Choose a field</option>
-                {fields.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.label} · {f.place}
-                  </option>
-                ))}
-              </select>
+              <Select
+                id="metric-field"
+                value={fieldId}
+                onChange={setFieldId}
+                options={[{ value: "", label: "Choose a field" }, ...fields.map((f) => ({ value: f.id, label: `${f.label} · ${f.place}` }))]}
+              />
             </Field>
             <Field id="metric-start" label="Start value">
               <input id="metric-start" inputMode="decimal" value={start} onChange={(e) => setStart(e.target.value)} className={inputClass} />
@@ -128,24 +129,24 @@ export function MetricSettings({ space, progress, fields, columns }: { space: Sp
         ) : (
           <div className="grid gap-4 tablet:grid-cols-3">
             <Field id="metric-column" label="Table column">
-              <select id="metric-column" value={columnId} onChange={(e) => { setColumnId(e.target.value); setOptionId(""); }} className={inputClass}>
-                <option value="">Choose a column</option>
-                {columns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} · {c.place}
-                  </option>
-                ))}
-              </select>
+              <Select
+                id="metric-column"
+                value={columnId}
+                onChange={(next) => {
+                  setColumnId(next);
+                  setOptionId("");
+                }}
+                options={[{ value: "", label: "Choose a column" }, ...columns.map((c) => ({ value: c.id, label: `${c.name} · ${c.place}` }))]}
+              />
             </Field>
             <Field id="metric-option" label="Count rows that are">
-              <select id="metric-option" value={optionId} onChange={(e) => setOptionId(e.target.value)} className={inputClass} disabled={!column}>
-                <option value="">Choose an option</option>
-                {column?.options.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <Select
+                id="metric-option"
+                value={optionId}
+                disabled={!column}
+                onChange={setOptionId}
+                options={[{ value: "", label: "Choose an option" }, ...(column?.options.map((o) => ({ value: o.id, label: o.label })) ?? [])]}
+              />
             </Field>
             <Field id="metric-count" label="Target count">
               <input id="metric-count" inputMode="numeric" value={count} onChange={(e) => setCount(e.target.value)} className={inputClass} />

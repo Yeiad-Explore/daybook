@@ -3,6 +3,7 @@
 import { format, parseISO } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { Select } from "@/components/ui/select";
 import { cx } from "@/lib/cx";
 import type { Json } from "@/lib/database.types";
 import { currencySymbol, formatNumber } from "@/lib/money";
@@ -74,25 +75,16 @@ export function Cell({ column, value, onCommit, currency, label, disabled }: Cel
   if (column.kind === "select") {
     const current = column.options.find((o) => o.id === value);
     return (
-      <div className="relative flex min-h-11 items-center px-2">
-        <select
-          disabled={disabled}
-          aria-label={label}
-          value={typeof value === "string" ? value : ""}
-          onChange={(e) => onCommit(e.target.value || null)}
-          className="type-caption absolute inset-0 w-full cursor-pointer appearance-none rounded-sm bg-transparent px-3 text-transparent opacity-0 focus-visible:opacity-100 focus-visible:text-ink focus-visible:bg-surface"
-        >
-          <option value="">–</option>
-          {column.options.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-        <span aria-hidden className="pointer-events-none px-1">
-          {current ? <OptionTag option={current} /> : <span className="text-ink-3-small">–</span>}
-        </span>
-      </div>
+      <Select
+        label={label}
+        disabled={disabled}
+        value={typeof value === "string" ? value : ""}
+        onChange={(next) => onCommit(next || null)}
+        className="type-caption min-h-11 w-full justify-start bg-transparent px-3 py-1"
+        options={[{ value: "", label: "–" }, ...column.options.map((o) => ({ value: o.id, label: o.label }))]}
+      >
+        {current ? <OptionTag option={current} /> : <span className="text-ink-3-small">–</span>}
+      </Select>
     );
   }
 

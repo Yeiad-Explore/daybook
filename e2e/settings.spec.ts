@@ -2,6 +2,7 @@ import { TZDate } from "@date-fns/tz";
 import { format } from "date-fns";
 import { expect, test } from "@playwright/test";
 import { OWNER_STATE, SIGN_OUT_STATE } from "./global-setup";
+import { pickOption } from "./helpers/checks";
 
 // SET-1 and AUTH-3 AC3. These tests change the one shared profile, so they run in order and
 // each puts back what it changed.
@@ -37,7 +38,7 @@ test("SET-1: changing the timezone re-computes today (TODAY-1)", async ({ page }
   await hydrated(page);
   const pill = page.locator("header time");
   for (const tz of ["Pacific/Kiritimati", "Asia/Dhaka"]) {
-    await page.getByLabel("Timezone").selectOption(tz);
+    await pickOption(page.getByLabel("Timezone"), tz);
     await saved(page);
     await expect(pill).toHaveText(format(new TZDate(new Date(), tz), "EEE, d MMM"));
   }

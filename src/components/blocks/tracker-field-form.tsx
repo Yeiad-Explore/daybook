@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import type { TargetKind } from "@/lib/tracker-logic";
 
 export type FieldValues = { label: string; unit: string | null; decimals: number; target_value: number | null; target_kind: TargetKind | null };
@@ -78,24 +79,11 @@ export function FieldForm({
           <input id={`${idPrefix}-unit`} value={unit} maxLength={16} placeholder="kg" onChange={(e) => setUnit(e.target.value)} className={inputClass} />
         </Field>
         <Field id={`${idPrefix}-decimals`} label="Decimals">
-          <select id={`${idPrefix}-decimals`} value={decimals} onChange={(e) => setDecimals(e.target.value)} className={inputClass}>
-            {[0, 1, 2, 3].map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+          <Select id={`${idPrefix}-decimals`} value={decimals} onChange={setDecimals} options={[0, 1, 2, 3].map((d) => ({ value: String(d), label: String(d) }))} />
         </Field>
       </div>
       <Field id={`${idPrefix}-kind`} label="Target (optional)" hint={KINDS.find((k) => k.value === kind)?.hint}>
-        <select id={`${idPrefix}-kind`} value={kind} onChange={(e) => setKind(e.target.value as TargetKind | "")} className={inputClass}>
-          <option value="">No target</option>
-          {KINDS.map((k) => (
-            <option key={k.value} value={k.value}>
-              {k.label}
-            </option>
-          ))}
-        </select>
+        <Select id={`${idPrefix}-kind`} value={kind} onChange={(next) => setKind(next as TargetKind | "")} options={[{ value: "", label: "No target" }, ...KINDS.map((k) => ({ value: k.value, label: k.label }))]} />
       </Field>
       {kind && (
         <Field id={`${idPrefix}-target`} label="Target value" error={problems.target}>

@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import type { Json } from "@/lib/database.types";
 import { moveItem } from "@/lib/move-item";
 import { reorderRequest } from "@/lib/reorder";
@@ -165,20 +166,19 @@ export function TableColumnsDialog({ open, onOpenChange, blockId, columns, setCo
                   }}
                   className={`${inputClass} w-48 flex-1`}
                 />
-                <select aria-label={`Type of ${c.name}`} value={c.kind} onChange={(e) => askRetype(c, e.target.value as ColumnKind)} className={`${inputClass} w-32`}>
-                  {KINDS.map((k) => (
-                    <option key={k.value} value={k.value}>
-                      {k.label}
-                    </option>
-                  ))}
-                </select>
+                <Select label={`Type of ${c.name}`} value={c.kind} onChange={(next) => askRetype(c, next as ColumnKind)} className={`${inputClass} w-32`} options={KINDS} />
                 {(c.kind === "number" || c.kind === "money" || c.kind === "text" || c.kind === "select" || c.kind === "date" || c.kind === "url") && (
-                  <select aria-label={`Footer summary of ${c.name}`} value={c.summary} onChange={(e) => void patch(c.id, { summary: e.target.value as SummaryKind })} className={`${inputClass} w-36`}>
-                    <option value="none">No summary</option>
-                    {(c.kind === "number" || c.kind === "money") && <option value="sum">Sum</option>}
-                    {(c.kind === "number" || c.kind === "money") && <option value="avg">Average</option>}
-                    <option value="count">Count</option>
-                  </select>
+                  <Select
+                    label={`Footer summary of ${c.name}`}
+                    value={c.summary}
+                    onChange={(next) => void patch(c.id, { summary: next as SummaryKind })}
+                    className={`${inputClass} w-36`}
+                    options={[
+                      { value: "none", label: "No summary" },
+                      ...((c.kind === "number" || c.kind === "money") ? [{ value: "sum", label: "Sum" }, { value: "avg", label: "Average" }] : []),
+                      { value: "count", label: "Count" },
+                    ]}
+                  />
                 )}
                 <Button
                   variant="ghost"
@@ -253,13 +253,13 @@ function OptionsEditor({ column, onChange }: { column: Column; onChange: (option
             }}
             className={`${inputClass} w-44 flex-1 py-1.5`}
           />
-          <select aria-label={`Tone of ${o.label}`} value={o.tone} onChange={(e) => onChange(options.map((x) => (x.id === o.id ? { ...x, tone: e.target.value as Tone } : x)))} className={`${inputClass} w-32 py-1.5`}>
-            {TONES.map((t) => (
-              <option key={t.value} value={t.value}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+          <Select
+            label={`Tone of ${o.label}`}
+            value={o.tone}
+            onChange={(next) => onChange(options.map((x) => (x.id === o.id ? { ...x, tone: next as Tone } : x)))}
+            className={`${inputClass} w-32 py-1.5`}
+            options={TONES}
+          />
           <Button variant="ghost" aria-label={`Remove option ${o.label}`} onClick={() => onChange(options.filter((x) => x.id !== o.id), o.id)}>
             <Trash2 size={14} strokeWidth={1.5} aria-hidden />
           </Button>
@@ -277,13 +277,7 @@ function OptionsEditor({ column, onChange }: { column: Column; onChange: (option
         }}
       >
         <input aria-label={`New option for ${column.name}`} placeholder="New option" value={label} maxLength={40} onChange={(e) => setLabel(e.target.value)} className={`${inputClass} w-44 flex-1 py-1.5`} />
-        <select aria-label="Tone of the new option" value={tone} onChange={(e) => setTone(e.target.value as Tone)} className={`${inputClass} w-32 py-1.5`}>
-          {TONES.map((t) => (
-            <option key={t.value} value={t.value}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+        <Select label="Tone of the new option" value={tone} onChange={(next) => setTone(next as Tone)} className={`${inputClass} w-32 py-1.5`} options={TONES} />
         <Button type="submit" variant="secondary">
           Add option
         </Button>

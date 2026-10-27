@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { useSpace } from "@/components/space/space-context";
 import { Button } from "@/components/ui/button";
+import { Select } from "@/components/ui/select";
 import { Field, inputClass } from "@/components/ui/field";
 import { Sortable, type DragHandle } from "@/components/ui/sortable";
 import { useToast } from "@/components/ui/toast";
@@ -339,14 +340,13 @@ function AddRow({ columns, defaultDate, onAdd }: { columns: Column[]; defaultDat
                 <input type="checkbox" aria-label={`New row: ${c.name}`} checked={value(c) === true} onChange={(e) => setDraft((d) => ({ ...d, [c.id]: e.target.checked }))} className="size-5 accent-[var(--ink)]" />
               </div>
             ) : c.kind === "select" ? (
-              <select aria-label={`New row: ${c.name}`} value={String(value(c))} onChange={(e) => setDraft((d) => ({ ...d, [c.id]: e.target.value }))} className="type-body-sm min-h-9 w-full rounded-pill bg-surface px-3 ring-1 ring-inset ring-ink-3">
-                <option value="">{c.name}</option>
-                {c.options.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <Select
+                label={`New row: ${c.name}`}
+                value={String(value(c))}
+                onChange={(next) => setDraft((d) => ({ ...d, [c.id]: next }))}
+                className="type-body-sm min-h-9 w-full rounded-pill bg-surface px-3 ring-1 ring-inset ring-ink-3"
+                options={[{ value: "", label: c.name }, ...c.options.map((o) => ({ value: o.id, label: o.label }))]}
+              />
             ) : (
               <input
                 aria-label={`New row: ${c.name}`}

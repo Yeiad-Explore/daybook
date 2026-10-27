@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { OWNER_STATE } from "./global-setup";
-import { checkScreen, hydrated } from "./helpers/checks";
+import { checkScreen, hydrated, pickOption } from "./helpers/checks";
 import { day, db, seedBlock, seedEntry, seedField, seedSpace, unique } from "./helpers/seed";
 
 test.use({ storageState: OWNER_STATE });
@@ -15,7 +15,7 @@ test("TRK-1 AC1: a new tracker opens in setup mode and switches to logging once 
   await expect(page.getByText("What do you want to track?")).toBeVisible();
   await page.getByLabel("What do you track?").fill("Weight");
   await page.getByLabel("Unit (optional)").fill("kg");
-  await page.getByLabel("Target (optional)").selectOption("reach");
+  await pickOption(page.getByLabel("Target (optional)"), "Reach");
   await page.getByLabel("Target value").fill("72");
   await page.getByRole("button", { name: "Start tracking" }).click();
   await expect(page.getByRole("button", { name: "Log today" })).toBeVisible({ timeout: 15_000 });

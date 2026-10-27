@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useSpace } from "@/components/space/space-context";
 import { Button } from "@/components/ui/button";
 import { Field, inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { shortDate } from "@/lib/dates";
 import type { Column, Filter, TableConfig } from "@/lib/table-logic";
@@ -49,19 +50,13 @@ export function TableToolbar({ columns, config, onChange }: { columns: Column[];
         <label className="sr-only" htmlFor="table-sort">
           Sort by
         </label>
-        <select
+        <Select
           id="table-sort"
           value={config.sort?.column_id ?? ""}
-          onChange={(e) => onChange({ ...config, sort: e.target.value ? { column_id: e.target.value, dir: config.sort?.dir ?? "asc" } : null })}
+          onChange={(next) => onChange({ ...config, sort: next ? { column_id: next, dir: config.sort?.dir ?? "asc" } : null })}
           className="type-button min-h-9 rounded-pill bg-canvas-2 px-3 text-ink ring-1 ring-inset ring-control-edge pointer-coarse:min-h-11"
-        >
-          <option value="">Manual order</option>
-          {columns.map((c) => (
-            <option key={c.id} value={c.id}>
-              Sort: {c.name}
-            </option>
-          ))}
-        </select>
+          options={[{ value: "", label: "Manual order" }, ...columns.map((c) => ({ value: c.id, label: `Sort: ${c.name}` }))]}
+        />
         {config.sort && (
           <Button
             variant="secondary"
@@ -78,19 +73,13 @@ export function TableToolbar({ columns, config, onChange }: { columns: Column[];
           <label className="sr-only" htmlFor="table-group">
             Group by month
           </label>
-          <select
+          <Select
             id="table-group"
             value={config.group_by_month_column_id ?? ""}
-            onChange={(e) => onChange({ ...config, group_by_month_column_id: e.target.value || null })}
+            onChange={(next) => onChange({ ...config, group_by_month_column_id: next || null })}
             className="type-button min-h-9 rounded-pill bg-canvas-2 px-3 text-ink ring-1 ring-inset ring-control-edge pointer-coarse:min-h-11"
-          >
-            <option value="">No month groups</option>
-            {dateColumns.map((c) => (
-              <option key={c.id} value={c.id}>
-                Group by month: {c.name}
-              </option>
-            ))}
-          </select>
+            options={[{ value: "", label: "No month groups" }, ...dateColumns.map((c) => ({ value: c.id, label: `Group by month: ${c.name}` }))]}
+          />
         </>
       )}
 
@@ -157,35 +146,21 @@ function AddFilter({ columns, onAdd }: { columns: Column[]; onAdd: (filter: Filt
           }}
         >
           <Field id="filter-column" label="Column">
-            <select
+            <Select
               id="filter-column"
               value={columnId}
-              onChange={(e) => {
-                setColumnId(e.target.value);
+              onChange={(next) => {
+                setColumnId(next);
                 setOp("");
                 setValue("");
               }}
-              className={inputClass}
-            >
-              <option value="">Choose a column</option>
-              {filterable.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              options={[{ value: "", label: "Choose a column" }, ...filterable.map((c) => ({ value: c.id, label: c.name }))]}
+            />
           </Field>
           {column?.kind === "date" && (
             <>
               <Field id="filter-preset" label="Show">
-                <select id="filter-preset" value={op} onChange={(e) => setOp(e.target.value)} className={inputClass}>
-                  <option value="">Choose</option>
-                  {DATE_PRESETS.map((p) => (
-                    <option key={p.value} value={p.value}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
+                <Select id="filter-preset" value={op} onChange={setOp} options={[{ value: "", label: "Choose" }, ...DATE_PRESETS.map((p) => ({ value: p.value, label: p.label }))]} />
               </Field>
               {op === "range" && (
                 <div className="grid grid-cols-2 gap-2">
@@ -201,22 +176,20 @@ function AddFilter({ columns, onAdd }: { columns: Column[]; onAdd: (filter: Filt
           )}
           {column?.kind === "select" && (
             <Field id="filter-option" label="Is">
-              <select id="filter-option" value={value} onChange={(e) => setValue(e.target.value)} className={inputClass}>
-                <option value="">Choose an option</option>
-                {column.options.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
+              <Select id="filter-option" value={value} onChange={setValue} options={[{ value: "", label: "Choose an option" }, ...column.options.map((o) => ({ value: o.id, label: o.label }))]} />
             </Field>
           )}
           {column?.kind === "checkbox" && (
             <Field id="filter-checked" label="Is">
-              <select id="filter-checked" value={value || "checked"} onChange={(e) => setValue(e.target.value)} className={inputClass}>
-                <option value="checked">Checked</option>
-                <option value="unchecked">Unchecked</option>
-              </select>
+              <Select
+                id="filter-checked"
+                value={value || "checked"}
+                onChange={setValue}
+                options={[
+                  { value: "checked", label: "Checked" },
+                  { value: "unchecked", label: "Unchecked" },
+                ]}
+              />
             </Field>
           )}
           {(column?.kind === "text" || column?.kind === "url") && (

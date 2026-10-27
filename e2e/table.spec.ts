@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { OWNER_STATE } from "./global-setup";
-import { checkScreen, hydrated } from "./helpers/checks";
+import { checkScreen, hydrated, pickOption } from "./helpers/checks";
 import { day, db, seedBlock, seedColumns, seedRow, seedSpace, unique } from "./helpers/seed";
 
 test.use({ storageState: OWNER_STATE });
@@ -23,11 +23,11 @@ test("TBL-1 AC1: setup names text columns by commas, which can then be retyped",
 
   await page.getByRole("button", { name: "Columns" }).click();
   const dialog = page.getByRole("dialog", { name: "Columns" });
-  await dialog.getByLabel("Type of Amount").selectOption("money");
-  await dialog.getByLabel("Type of Date").selectOption("date");
+  await pickOption(dialog.getByLabel("Type of Amount"), "Money");
+  await pickOption(dialog.getByLabel("Type of Date"), "Date");
   await expect.poll(async () => (await db().from("table_columns").select("kind").eq("block_id", block).eq("name", "Amount")).data?.[0]?.kind).toBe("money");
   await dialog.getByLabel(/Signed: income is positive/).check();
-  await dialog.getByLabel("Footer summary of Amount").selectOption("sum");
+  await pickOption(dialog.getByLabel("Footer summary of Amount"), "Sum");
   await expect.poll(async () => (await db().from("table_columns").select("signed, summary").eq("block_id", block).eq("name", "Amount")).data?.[0]).toEqual({ signed: true, summary: "sum" });
 });
 
@@ -82,7 +82,7 @@ test("TBL-3, TBL-4, TBL-7: ledger strip, summary footer and month groups with th
   await expect(strip).toContainText("Tk 27,599.5");
   await expect(page.locator("tfoot")).toContainText("27,599.5");
 
-  await page.getByLabel("Group by month").selectOption({ label: "Group by month: Date" });
+  await pickOption(page.getByLabel("Group by month"), "Group by month: Date");
   await expect(page.getByRole("button", { name: /^October 2026/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /^September 2026/ })).toBeVisible();
   const rows = page.getByRole("row");
@@ -91,7 +91,7 @@ test("TBL-3, TBL-4, TBL-7: ledger strip, summary footer and month groups with th
   await page.getByRole("button", { name: /^October 2026/ }).click();
   await expect(page.getByRole("button", { name: /^Item, row 4/ })).toHaveCount(0); // October collapsed
   await page.reload();
-  await expect(page.getByLabel("Group by month")).toHaveValue(cols.Date); // saved per block
+  await expect(page.getByLabel("Group by month")).toHaveAttribute("data-value", cols.Date); // saved per block
 });
 
 test("TBL-5 AC: 'What I ate' filtered to Date = today shows only today's meals and their Calories sum", async ({ page }) => {
@@ -106,8 +106,8 @@ test("TBL-5 AC: 'What I ate' filtered to Date = today shows only today's meals a
   await expect(page.locator("tfoot")).toContainText("1,360");
 
   await page.getByRole("button", { name: "Filter" }).click();
-  await page.getByLabel("Column").selectOption({ label: "Date" });
-  await page.getByLabel("Show").selectOption("is_today");
+  await pickOption(page.getByLabel("Column"), "Date");
+  await pickOption(page.getByLabel("Show"), "Today");
   await page.getByRole("button", { name: "Add filter" }).click();
   await expect(page.getByRole("button", { name: /^Food, row 2/ })).toHaveCount(1); // row numbers follow the stored order
   await expect(page.getByRole("button", { name: /^Food, row 3/ })).toHaveCount(0);

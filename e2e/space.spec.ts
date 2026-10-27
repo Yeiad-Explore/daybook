@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { format, parseISO } from "date-fns";
 import { OWNER_STATE } from "./global-setup";
-import { checkScreen, hydrated } from "./helpers/checks";
+import { checkScreen, hydrated, pickOption } from "./helpers/checks";
 import { day, db, seedBlock, seedSpace, seedTask, unique } from "./helpers/seed";
 
 test.use({ storageState: OWNER_STATE });
@@ -297,7 +297,7 @@ test("RM-3/RM-5/RM-6: stages complete through their steps, collapse persists, a 
   await openTaskMenu(page, step);
   await page.getByRole("menuitem", { name: "Move under…" }).click();
   const dialog = page.getByRole("dialog", { name: "Move under…" });
-  await dialog.getByLabel("New place").selectOption({ label: stageB });
+  await pickOption(dialog.getByLabel("New place"), stageB);
   await dialog.getByRole("button", { name: "Move" }).click();
   await expect(page.getByRole("region", { name: "Notifications" }).getByText(new RegExp(`Can't move '${step}': it is due after '${stageB}'`))).toBeVisible();
   await expect(row(page, step)).toBeVisible();

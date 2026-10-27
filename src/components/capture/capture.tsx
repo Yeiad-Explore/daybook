@@ -7,6 +7,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Field, inputClass } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
 import { afterGoalMessage, defaultSpaceId, firstTodoBlock, LAST_SPACE_KEY, type CaptureBlock, type CaptureSpace } from "@/lib/capture";
 import { shortDate } from "@/lib/dates";
@@ -178,23 +179,24 @@ function CaptureDialog({ timezone, onClose }: { timezone: string; onClose: () =>
           </Field>
           <div className="grid gap-3 tablet:grid-cols-2">
             <Field id="cap-space" label="Space">
-              <select id="cap-space" value={spaceId} onChange={(e) => { setPicked(e.target.value); setBlockChoice(null); }} className={inputClass}>
-                {spaces.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
+              <Select
+                id="cap-space"
+                value={spaceId}
+                onChange={(next) => {
+                  setPicked(next);
+                  setBlockChoice(null);
+                }}
+                options={spaces.map((s) => ({ value: s.id, label: s.name }))}
+              />
             </Field>
             <Field id="cap-block" label="To-do list">
-              <select id="cap-block" value={blockId ?? ""} onChange={(e) => setBlockChoice(e.target.value)} className={inputClass} disabled={blocks.length === 0}>
-                {blocks.length === 0 && <option value="">A new To-do list</option>}
-                {blocks.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.title}
-                  </option>
-                ))}
-              </select>
+              <Select
+                id="cap-block"
+                value={blockId ?? ""}
+                disabled={blocks.length === 0}
+                onChange={setBlockChoice}
+                options={blocks.length === 0 ? [{ value: "", label: "A new To-do list" }] : blocks.map((b) => ({ value: b.id, label: b.title }))}
+              />
             </Field>
           </div>
           <Field id="cap-due" label={space?.kind === "goal" ? "Deadline" : "Deadline (optional)"}>

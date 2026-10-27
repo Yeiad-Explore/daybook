@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 // DESIGN.md "Responsive behavior" + NFR-7/NFR-8: every screen is checked at these widths in both themes.
 export const widths = [400, 1440] as const;
@@ -72,6 +72,14 @@ export async function checkScreen(page: Page, url: string) {
       await expectNoSeriousA11yViolations(page, view);
     }
   }
+}
+
+/** Glass selects are menus. `name` is the visible option; `{ index }` matches the old selectOption index. */
+export async function pickOption(control: Locator, option: string | { index: number }) {
+  await control.click();
+  const menu = control.page().getByRole("menu");
+  const item = typeof option === "string" ? menu.getByRole("menuitem", { name: option, exact: true }) : menu.getByRole("menuitem").nth(option.index);
+  await item.click();
 }
 
 /** Interactions before React hydrates are lost; wait until the element has React's props attached. */

@@ -56,7 +56,7 @@ export function TodayCapture({ today }: { today: string }) {
             <span className="truncate">{space?.name ?? "Space"}</span>
             <ChevronDown size={14} strokeWidth={1.5} aria-hidden className="shrink-0 text-ink-3-small transition-transform duration-150" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent glass align="end" className="max-h-72 overflow-y-auto">
+          <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
             {spaces.map((s) => (
               <DropdownMenuItem key={s.id} onClick={() => setPicked(s.id)}>
                 <span className="min-w-0 flex-1 truncate">{s.name}</span>

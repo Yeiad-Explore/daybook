@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { OWNER_STATE } from "./global-setup";
-import { hydrated } from "./helpers/checks";
+import { hydrated, pickOption } from "./helpers/checks";
 import { day, db, seedBlock, seedSpace, unique } from "./helpers/seed";
 
 test.use({ storageState: OWNER_STATE });
@@ -22,8 +22,8 @@ test("CAP-1: N opens quick capture with today as the deadline; the task lands in
   const dialog = await openCapture(page);
   await expect(dialog.getByLabel("Deadline (optional)")).toHaveValue(day(0)); // default: today
   await dialog.getByLabel("Title").fill(title);
-  await dialog.getByLabel("Space").selectOption({ label: s.spaceId ? (await db().from("spaces").select("name").eq("id", s.spaceId).single()).data!.name : "" });
-  await expect(dialog.getByLabel("To-do list")).toHaveValue(first); // first To-do block of that space
+  await pickOption(dialog.getByLabel("Space"), s.spaceId ? (await db().from("spaces").select("name").eq("id", s.spaceId).single()).data!.name : "");
+  await expect(dialog.getByLabel("To-do list")).toHaveText("First list"); // first To-do block of that space
   await dialog.getByRole("button", { name: "Add task" }).click();
   await expect(dialog).toBeHidden();
   await expect.poll(async () => (await db().from("tasks").select("block_id, due_date").eq("title", title)).data).toEqual([{ block_id: first, due_date: day(0) }]);
@@ -45,7 +45,7 @@ test("CAP-2: the deadline rules apply: a goal needs a date inside it, and the da
   const name = (await db().from("spaces").select("name").eq("id", s.spaceId).single()).data!.name;
   const dialog = await openCapture(page);
   await dialog.getByLabel("Title").fill(unique("Buy shoes"));
-  await dialog.getByLabel("Space").selectOption({ label: name });
+  await pickOption(dialog.getByLabel("Space"), name);
   await expect(dialog.getByLabel("Deadline")).toHaveAttribute("max", day(10));
   await dialog.getByLabel("Deadline").fill("");
   await dialog.getByRole("button", { name: "Add task" }).click();
@@ -64,7 +64,7 @@ test("CAP-1: a space with no To-do list gets one", async ({ page }) => {
   const title = unique("Pick a book");
   const dialog = await openCapture(page);
   await dialog.getByLabel("Title").fill(title);
-  await dialog.getByLabel("Space").selectOption({ label: name });
+  await pickOption(dialog.getByLabel("Space"), name);
   await expect(dialog.getByLabel("To-do list")).toHaveText("A new To-do list");
   await dialog.getByRole("button", { name: "Add task" }).click();
   await expect(dialog).toBeHidden();

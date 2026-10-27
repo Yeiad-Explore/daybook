@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { Field, inputClass } from "@/components/ui/field";
+import { Field } from "@/components/ui/field";
+import { Select } from "@/components/ui/select";
 import type { Task } from "@/lib/space-page";
 import { childrenMap, possibleParents } from "./roadmap-tree";
 
@@ -50,15 +51,15 @@ export function MoveUnderDialog({
           }}
         >
           <Field id="move-under" label="New place">
-            <select id="move-under" value={target} onChange={(e) => setTarget(e.target.value)} className={inputClass}>
-              {task.parent_id && <option value={STAGE}>Its own stage</option>}
-              {options.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.depth > 0 && `${"  ".repeat(t.depth)}↳ `}
-                  {t.title}
-                </option>
-              ))}
-            </select>
+            <Select
+              id="move-under"
+              value={target}
+              onChange={setTarget}
+              options={[
+                ...(task.parent_id ? [{ value: STAGE, label: "Its own stage" }] : []),
+                ...options.map((t) => ({ value: t.id, label: `${t.depth > 0 ? `${"  ".repeat(t.depth)}↳ ` : ""}${t.title}` })),
+              ]}
+            />
           </Field>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={onClose}>
