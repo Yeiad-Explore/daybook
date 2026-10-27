@@ -79,7 +79,8 @@ test("Today's input adds a task due today to the chosen space", async ({ page })
   await page.goto("/today");
   await hydrated(page, 'form[aria-label="Add a task for today"]');
   await page.getByLabel("Task title").fill(title);
-  await page.getByLabel("Space", { exact: true }).selectOption({ label: name });
+  await page.getByRole("button", { name: "Space", exact: true }).click();
+  await page.getByRole("menuitem", { name, exact: true }).click();
   await page.getByRole("button", { name: "Add task", exact: true }).click();
   await expect.poll(async () => (await db().from("tasks").select("block_id, due_date").eq("title", title)).data).toEqual([{ block_id: block, due_date: day(0) }]);
   await expect(page.getByRole("checkbox", { name: `Done: ${title}`, exact: true })).toBeVisible();

@@ -118,13 +118,25 @@
     background: linear-gradient(to bottom, transparent 0%, transparent 28%, var(--surface-dark-fixed) 62%);
   }
 
-  /* DESIGN.md glass (elevation level 2): only over auras or photos. */
+  /* DESIGN.md glass (elevation level 2): only over auras or photos.
+     Author only the unprefixed property. A hand-written -webkit-backdrop-filter
+     makes the compiler drop backdrop-filter, and Chrome ignores the prefixed
+     property when its value is a variable, so the frost never paints. */
   .glass {
     background: var(--surface-glass);
     border: 1px solid var(--hairline-glass);
     backdrop-filter: var(--glass-filter);
-    -webkit-backdrop-filter: var(--glass-filter);
     box-shadow: var(--shadow-glass-edge);
+  }
+
+  /* Glass on a Base UI menu positioner. The positioner is translated, which
+     makes it the backdrop root: a filter on the popup blurs nothing. The float
+     shadow lives here too, so it is not wiped by the shadow-float utility. */
+  .glass-float {
+    background: var(--surface-glass);
+    border: 1px solid var(--hairline-glass);
+    backdrop-filter: var(--glass-filter);
+    box-shadow: var(--shadow-glass-edge), var(--shadow-float);
   }
 
   /* Same in both themes: white text on dark glass (DESIGN.md v2.2). */

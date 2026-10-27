@@ -1,8 +1,9 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Check, ChevronDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { useAddTask, useCaptureTargets } from "@/components/capture/capture";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { defaultSpaceId, LAST_SPACE_KEY } from "@/lib/capture";
 
 /** PRD §5.3 item 7: "Add a task for today…" at the bottom of the agenda, with a space picker; the deadline is today. */
@@ -45,13 +46,25 @@ export function TodayCapture({ today }: { today: string }) {
     >
       <div className="flex flex-wrap items-center gap-1.5 rounded-pill bg-surface p-1 shadow-card ring-1 ring-inset ring-ink-3 focus-within:ring-ink max-tablet:rounded-md">
         <input aria-label="Task title" placeholder="Add a task for today…" value={title} maxLength={200} onChange={(e) => setTitle(e.target.value)} className="type-body min-w-40 flex-1 rounded-pill bg-transparent px-3 py-1.5 placeholder:text-ink-3-small focus-visible:shadow-none focus-visible:outline-none" />
-        <select aria-label="Space" value={spaceId} onChange={(e) => setPicked(e.target.value)} className="type-button min-h-9 max-w-44 rounded-pill bg-canvas-2 px-3 text-ink ring-1 ring-inset ring-control-edge pointer-coarse:min-h-11">
-          {spaces.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            type="button"
+            aria-label="Space"
+            disabled={!data}
+            className="type-button inline-flex min-h-9 max-w-44 items-center gap-1 rounded-pill bg-canvas-2 py-1 pr-2 pl-3 text-ink ring-1 ring-inset ring-control-edge outline-none disabled:opacity-50 data-[popup-open]:[&_svg]:rotate-180 pointer-coarse:min-h-11"
+          >
+            <span className="truncate">{space?.name ?? "Space"}</span>
+            <ChevronDown size={14} strokeWidth={1.5} aria-hidden className="shrink-0 text-ink-3-small transition-transform duration-150" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent glass align="end" className="max-h-72 overflow-y-auto">
+            {spaces.map((s) => (
+              <DropdownMenuItem key={s.id} onClick={() => setPicked(s.id)}>
+                <span className="min-w-0 flex-1 truncate">{s.name}</span>
+                {s.id === spaceId && <Check size={14} strokeWidth={1.5} aria-hidden className="ml-auto shrink-0" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
         <button type="submit" disabled={busy || !data} aria-label="Add task" className="grid size-9 place-items-center rounded-pill bg-surface-dark text-on-dark disabled:opacity-50 pointer-coarse:size-11">
           <Plus size={16} strokeWidth={1.75} aria-hidden />
         </button>

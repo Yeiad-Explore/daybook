@@ -11,16 +11,17 @@ export const DropdownMenuTrigger = MenuPrimitive.Trigger;
 
 export function DropdownMenuContent({
   className,
+  glass = false,
   side = "bottom",
   align = "end",
   sideOffset = 6,
   ...props
-}: Omit<MenuPrimitive.Popup.Props, "className"> & { className?: string } & Pick<MenuPrimitive.Positioner.Props, "side" | "align" | "sideOffset">) {
+}: Omit<MenuPrimitive.Popup.Props, "className"> & { className?: string; glass?: boolean } & Pick<MenuPrimitive.Positioner.Props, "side" | "align" | "sideOffset">) {
   return (
     <MenuPrimitive.Portal>
-      <MenuPrimitive.Positioner side={side} align={align} sideOffset={sideOffset} className="z-50">
+      <MenuPrimitive.Positioner side={side} align={align} sideOffset={sideOffset} className={cx("z-50", glass && "glass-float rounded-md")}>
         <MenuPrimitive.Popup
-          className={cx("min-w-44 rounded-md bg-surface p-1.5 text-ink shadow-float outline-none", POP, className)}
+          className={cx("min-w-44 p-1.5 text-ink outline-none", glass ? "bg-transparent" : "rounded-md bg-surface shadow-float", POP, className)}
           {...props}
         />
       </MenuPrimitive.Positioner>
