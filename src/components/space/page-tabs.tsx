@@ -68,6 +68,8 @@ export function PageTabs({ pages: serverPages }: { pages: PageRow[] }) {
   }, []);
 
   useLayoutEffect(() => {
+    // The pill's place is measured from the tabs, so it is written here, before paint.
+    /* eslint-disable react-hooks/set-state-in-effect -- DOM measurement, not derived state */
     const next = measure();
     if (!next) return;
     const pageChanged = placed.current && prevPage.current !== pageId;
@@ -102,6 +104,7 @@ export function PageTabs({ pages: serverPages }: { pages: PageRow[] }) {
       sliding.current = false;
       setSlide(false);
     }, reduce ? 0 : PILL_MS + 40);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [pageId, pages, dragId, measure]);
 
   useLayoutEffect(() => {

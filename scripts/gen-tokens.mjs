@@ -45,6 +45,7 @@ export function generateTokensCss(design) {
     `--spacing: ${spacing[1]};`,
     ...Object.entries(rounded).map(([k, v]) => `--radius-${k}: ${v};`),
     `--shadow-card: ${elevation.card};`,
+    `--shadow-card-hover: ${elevation["card-hover"]};`,
     `--shadow-float: ${elevation.float};`,
     `--shadow-glass-edge: ${elevation["glass-edge"]};`,
     `--container-content: ${layout["content-max"]};`,

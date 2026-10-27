@@ -160,6 +160,7 @@ spacing:
 
 elevation:
   card: "0 1px 1px rgba(15,16,16,.03), 0 6px 20px rgba(15,16,16,.05)"
+  card-hover: "0 2px 4px rgba(15,16,16,.05), 0 12px 28px rgba(15,16,16,.08)"  # slightly stronger than card (Motion: card hover)
   float: "0 2px 6px rgba(15,16,16,.06), 0 24px 48px rgba(15,16,16,.14)"
   glass-edge: "inset 0 1px 0 rgba(255,255,255,.55)"
   blur-glass: "backdrop-filter: blur(24px) saturate(140%)"

@@ -2,6 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import { LinkButton } from "@/components/ui/button";
 import { FloatingCard } from "@/components/ui/floating-card";
+import { NumberRoll } from "@/components/ui/number-roll";
 import { cx } from "@/lib/cx";
 import { longDate, shortDate } from "@/lib/dates";
 import type { SpaceSummary } from "@/lib/deadlines";
@@ -19,7 +20,12 @@ export function SpaceHero({ space, summary, coverUrl }: { space: Space; summary:
     <section
       aria-label={goal ? "Goal" : "Life area"}
       data-mark={space.mark}
-      className={cx("aura relative rounded-xl text-on-dark-fixed", goal ? "min-h-70 max-tablet:min-h-55" : "min-h-40", goal && "mb-6 tablet:mb-10")}
+      className={cx(
+        "aura hero-timeline relative rounded-xl text-on-dark-fixed",
+        !coverUrl && "aura-drift",
+        goal ? "min-h-70 max-tablet:min-h-55" : "min-h-40",
+        goal && "mb-6 tablet:mb-10",
+      )}
     >
       {coverUrl && (
         // A cover photo shows blurred 40px behind the same scrims (DESIGN.md "Aura recipe"); decorative, so no alt text.
@@ -31,8 +37,8 @@ export function SpaceHero({ space, summary, coverUrl }: { space: Space; summary:
       <div aria-hidden className="absolute inset-0 rounded-xl bg-linear-to-r from-surface-dark-fixed/60 via-surface-dark-fixed/30 to-surface-dark-fixed/5" />
       <div className="relative flex flex-col gap-6 p-6 tablet:flex-row tablet:items-start tablet:justify-between tablet:p-7">
         <div className="flex min-w-0 flex-col gap-3">
-          <p className="type-eyebrow">{goal ? `Goal · ${space.name}` : "Life area"}</p>
-          <h1 className="type-display max-w-[22ch] text-balance max-tablet:text-[30px]">
+          <p className="type-eyebrow motion-blur-in">{goal ? `Goal · ${space.name}` : "Life area"}</p>
+          <h1 className="type-display motion-blur-in max-w-[22ch] text-balance max-tablet:text-[30px]" style={{ animationDelay: "60ms" }}>
             {goal ? (
               <>
                 <span className="text-on-dark-2-fixed">{space.name}.</span> {space.end_goal}
@@ -47,35 +53,39 @@ export function SpaceHero({ space, summary, coverUrl }: { space: Space; summary:
       </div>
 
       {goal && summary.progress && (
-        <FloatingCard className="relative mx-6 mb-6 flex flex-col gap-3 text-ink tablet:absolute tablet:right-7 tablet:-bottom-8 tablet:mx-0 tablet:mb-0 tablet:w-80">
-          <div className="flex items-baseline gap-2">
-            <p className="type-number-lg">
-              {summary.progress.percent}
-              <span className="type-body-sm">%</span>
-            </p>
-            <p className="type-caption">{summary.progress.label}</p>
-          </div>
-          <div
-            role="progressbar"
-            aria-label="Progress"
-            aria-valuenow={summary.progress.percent}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            className="h-1.5 overflow-hidden rounded-pill bg-canvas-2"
-          >
-            <div className="h-full rounded-pill bg-ink" style={{ width: `${summary.progress.percent}%` }} />
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {summary.progress.metric === "tracker" && summary.progress.block_id && summary.progress.page_id && (
-              <LinkButton href={`/s/${space.id}/${summary.progress.page_id}#block-${summary.progress.block_id}`} variant="primary" icon={<ArrowUpRight size={12} strokeWidth={2} />}>
-                Log {summary.progress.field_label?.toLowerCase()}
+        // The wrapper takes the 4px scroll drift so the card can still lift on hover (its own transform).
+        // On a phone the card stays in flow; from tablet up the wrapper fills the hero and the card overlaps its edge.
+        <div className="hero-float tablet:pointer-events-none tablet:absolute tablet:inset-0">
+          <FloatingCard className="pointer-events-auto relative mx-6 mb-6 flex flex-col gap-3 text-ink tablet:absolute tablet:right-7 tablet:-bottom-8 tablet:mx-0 tablet:mb-0 tablet:w-80">
+            <div className="flex items-baseline gap-2">
+              <p className="type-number-lg motion-blur-in" style={{ animationDelay: "180ms" }}>
+                <NumberRoll value={summary.progress.percent} />
+                <span className="type-body-sm">%</span>
+              </p>
+              <p className="type-caption">{summary.progress.label}</p>
+            </div>
+            <div
+              role="progressbar"
+              aria-label="Progress"
+              aria-valuenow={summary.progress.percent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              className="h-1.5 overflow-hidden rounded-pill bg-canvas-2"
+            >
+              <div className="h-full rounded-pill bg-ink" style={{ width: `${summary.progress.percent}%` }} />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {summary.progress.metric === "tracker" && summary.progress.block_id && summary.progress.page_id && (
+                <LinkButton href={`/s/${space.id}/${summary.progress.page_id}#block-${summary.progress.block_id}`} variant="primary" icon={<ArrowUpRight size={12} strokeWidth={2} />}>
+                  Log {summary.progress.field_label?.toLowerCase()}
+                </LinkButton>
+              )}
+              <LinkButton href={`/history?space=${space.id}`} variant={summary.progress.metric === "tracker" ? "secondary" : "primary"} icon={summary.progress.metric === "tracker" ? undefined : <ArrowUpRight size={12} strokeWidth={2} />}>
+                Deadline history
               </LinkButton>
-            )}
-            <LinkButton href={`/history?space=${space.id}`} variant={summary.progress.metric === "tracker" ? "secondary" : "primary"} icon={summary.progress.metric === "tracker" ? undefined : <ArrowUpRight size={12} strokeWidth={2} />}>
-              Deadline history
-            </LinkButton>
-          </div>
-        </FloatingCard>
+            </div>
+          </FloatingCard>
+        </div>
       )}
     </section>
   );
@@ -86,7 +96,9 @@ function Countdown({ days, deadline, today }: { days: number; deadline: string; 
   const past = days < 0;
   return (
     <div className="glass shrink-0 self-start rounded-lg px-5 py-4 text-ink">
-      <p className={cx("type-number-xl", past && "text-signal-ink")}>{Math.abs(days)}</p>
+      <p className={cx("type-number-xl motion-blur-in", past && "text-signal-ink")} style={{ animationDelay: "120ms" }}>
+        <NumberRoll value={Math.abs(days)} />
+      </p>
       <p className="type-caption mt-1">
         {past ? "days past deadline" : days === 0 ? "due today" : days === 1 ? "day left" : "days left"} ·{" "}
         <time dateTime={deadline} title={longDate(deadline)}>

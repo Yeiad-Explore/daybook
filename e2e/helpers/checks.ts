@@ -10,8 +10,14 @@ export async function applyTheme(page: Page, theme: "light" | "dark" | "system")
   await page.evaluate(async (t) => {
     document.documentElement.dataset.theme = t;
     // Let the colour transitions this starts finish, so checks read the final colours, not a mid-fade.
+    // The space hero's aura drift loops forever; waiting on that promise would never return.
     await new Promise(requestAnimationFrame);
-    await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
+    // Infinite loops (aura drift) and scroll-linked timelines never settle.
+    const finite = document.getAnimations().filter((a) => {
+      if (a.effect?.getComputedTiming().iterations === Infinity) return false;
+      return a.timeline == null || a.timeline === document.timeline;
+    });
+    await Promise.all(finite.map((a) => a.finished.catch(() => {})));
   }, theme);
 }
 
